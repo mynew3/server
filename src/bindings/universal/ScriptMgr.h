@@ -1,132 +1,127 @@
-/*
- * Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+/* Copyright (C) 2006 - 2012 ScriptDev2 <http://www.scriptdev2.com/>
+ * This program is free software licensed under GPL version 2
+ * Please see the included DOCS/LICENSE.TXT for more information */
 
-#ifndef SCRIPTMGR_H
-#define SCRIPTMGR_H
+#ifndef SC_SCRIPTMGR_H
+#define SC_SCRIPTMGR_H
 
-//Only required includes
-#include "../../game/CreatureAI.h"
-#include "../../game/Creature.h"
-#include "../../game/InstanceData.h"
+#include "Common.h"
+#include "DBCStructure.h"
 
 class Player;
 class Creature;
+class CreatureAI;
+class InstanceData;
 class Quest;
 class Item;
 class GameObject;
 class SpellCastTargets;
 class Map;
+class Unit;
+class WorldObject;
 class Aura;
+class Object;
+class ObjectGuid;
 
-#define MAX_SCRIPTS 1000
-#define MAX_INSTANCE_SCRIPTS 1000
+// *********************************************************
+// ************** Some defines used globally ***************
+
+// Basic defines
+#define VISIBLE_RANGE       (166.0f)                        // MAX visible range (size of grid)
+#define DEFAULT_TEXT        "<ScriptDev2 Text Entry Missing!>"
+
+// Some typedefs for storing Guids
+typedef std::list<ObjectGuid> GUIDList;
+typedef std::set<ObjectGuid> GUIDSet;
+typedef std::vector<ObjectGuid> GUIDVector;
+typedef std::map<uint32, ObjectGuid> EntryGuidMap;
+
+/* Escort Factions
+ * TODO: find better namings and definitions.
+ * N=Neutral, A=Alliance, H=Horde.
+ * NEUTRAL or FRIEND = Hostility to player surroundings (not a good definition)
+ * ACTIVE or PASSIVE = Hostility to environment surroundings.
+ */
+enum EscortFaction
+{
+    FACTION_ESCORT_A_NEUTRAL_PASSIVE    = 10,
+    FACTION_ESCORT_H_NEUTRAL_PASSIVE    = 33,
+    FACTION_ESCORT_N_NEUTRAL_PASSIVE    = 113,
+
+    FACTION_ESCORT_A_NEUTRAL_ACTIVE     = 231,
+    FACTION_ESCORT_H_NEUTRAL_ACTIVE     = 232,
+    FACTION_ESCORT_N_NEUTRAL_ACTIVE     = 250,
+
+    FACTION_ESCORT_N_FRIEND_PASSIVE     = 290,
+    FACTION_ESCORT_N_FRIEND_ACTIVE      = 495,
+
+    FACTION_ESCORT_A_PASSIVE            = 774,
+    FACTION_ESCORT_H_PASSIVE            = 775,
+
+    FACTION_ESCORT_N_ACTIVE             = 1986,
+    FACTION_ESCORT_H_ACTIVE             = 2046
+};
+
+// *********************************************************
+// ************* Some structures used globally *************
 
 struct Script
 {
     Script() :
-        pGossipHello(NULL), pGOGossipHello(NULL), pQuestAccept(NULL), pGossipSelect(NULL), pGOGossipSelect(NULL),
-        pGossipSelectWithCode(NULL), pGOGossipSelectWithCode(NULL),
-        pQuestSelect(NULL), pQuestComplete(NULL), pNPCDialogStatus(NULL), pGODialogStatus(NULL), pChooseReward(NULL),
-        pItemHello(NULL), pGOHello(NULL), pProcessEventId(NULL), pAreaTrigger(NULL), pItemQuestAccept(NULL), pGOQuestAccept(NULL),
-        pGOChooseReward(NULL), pItemUse(NULL), pEffectDummyGameObj(NULL), pEffectDummyCreature(NULL),
-        pEffectDummyItem(NULL), pEffectAuraDummy(NULL), GetAI(NULL)
+        pGossipHello(NULL), pGossipHelloGO(NULL), pGossipSelect(NULL), pGossipSelectGO(NULL),
+        pGossipSelectWithCode(NULL), pGossipSelectGOWithCode(NULL),
+        pDialogStatusNPC(NULL), pDialogStatusGO(NULL),
+        pQuestAcceptNPC(NULL), pQuestAcceptGO(NULL), pQuestAcceptItem(NULL),
+        pQuestRewardedNPC(NULL), pQuestRewardedGO(NULL),
+        pGOUse(NULL), pItemUse(NULL), pAreaTrigger(NULL), pProcessEventId(NULL),
+        pEffectDummyNPC(NULL), pEffectDummyGO(NULL), pEffectDummyItem(NULL), pEffectAuraDummy(NULL),
+        GetAI(NULL), GetInstanceData(NULL)
     {}
 
     std::string Name;
 
-    // -- Quest/gossip Methods to be scripted --
-    bool (*pGossipHello         )(Player *player, Creature *_Creature);
-    bool (*pGOGossipHello       )(Player *player, GameObject *_GO);
-    bool (*pQuestAccept         )(Player *player, Creature *_Creature, Quest const*_Quest );
-    bool (*pGossipSelect        )(Player *player, Creature *_Creature, uint32 sender, uint32 action );
-    bool (*pGOGossipSelect      )(Player *player, GameObject *_GO, uint32 sender, uint32 action );
-    bool (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, const char* sCode );
-    bool (*pGOGossipSelectWithCode)(Player *player, GameObject *_GO, uint32 sender, uint32 action, const char* sCode );
-    bool (*pQuestSelect         )(Player *player, Creature *_Creature, Quest const*_Quest );
-    bool (*pQuestComplete       )(Player *player, Creature *_Creature, Quest const*_Quest );
-    uint32 (*pNPCDialogStatus   )(Player *player, Creature *_Creature );
-    uint32 (*pGODialogStatus    )(Player *player, GameObject * _GO );
-    bool (*pChooseReward        )(Player *player, Creature *_Creature, Quest const*_Quest, uint32 opt );
-    bool (*pItemHello           )(Player *player, Item *_Item, Quest const*_Quest );
-    bool (*pGOHello             )(Player *player, GameObject *_GO );
-    bool (*pAreaTrigger         )(Player *player, AreaTriggerEntry const* at);
-    bool (*pProcessEventId      )(uint32 eventId, Object* source, Object* target, bool isStart);
-    bool (*pItemQuestAccept     )(Player *player, Item *_Item, Quest const*_Quest );
-    bool (*pGOQuestAccept       )(Player *player, GameObject *_GO, Quest const*_Quest );
-    bool (*pGOChooseReward      )(Player *player, GameObject *_GO, Quest const*_Quest, uint32 opt );
-    bool (*pItemUse             )(Player *player, Item* _Item, SpellCastTargets const& targets);
-    bool (*pEffectDummyGameObj  )(Unit*, uint32, SpellEffectIndex, GameObject* );
-    bool (*pEffectDummyCreature )(Unit*, uint32, SpellEffectIndex, Creature* );
-    bool (*pEffectDummyItem     )(Unit*, uint32, SpellEffectIndex, Item* );
-    bool (*pEffectAuraDummy     )(const Aura*, bool);
+    bool (*pGossipHello             )(Player*, Creature*);
+    bool (*pGossipHelloGO           )(Player*, GameObject*);
+    bool (*pGossipSelect            )(Player*, Creature*, uint32, uint32);
+    bool (*pGossipSelectGO          )(Player*, GameObject*, uint32, uint32);
+    bool (*pGossipSelectWithCode    )(Player*, Creature*, uint32, uint32, const char*);
+    bool (*pGossipSelectGOWithCode  )(Player*, GameObject*, uint32, uint32, const char*);
+    uint32 (*pDialogStatusNPC       )(Player*, Creature*);
+    uint32 (*pDialogStatusGO        )(Player*, GameObject*);
+    bool (*pQuestAcceptNPC          )(Player*, Creature*, Quest const*);
+    bool (*pQuestAcceptGO           )(Player*, GameObject*, Quest const*);
+    bool (*pQuestAcceptItem         )(Player*, Item*, Quest const*);
+    bool (*pQuestRewardedNPC        )(Player*, Creature*, Quest const*);
+    bool (*pQuestRewardedGO         )(Player*, GameObject*, Quest const*);
+    bool (*pGOUse                   )(Player*, GameObject*);
+    bool (*pItemUse                 )(Player*, Item*, SpellCastTargets const&);
+    bool (*pAreaTrigger             )(Player*, AreaTriggerEntry const*);
+    bool (*pProcessEventId          )(uint32, Object*, Object*, bool);
+    bool (*pEffectDummyNPC          )(Unit*, uint32, SpellEffectIndex, Creature*);
+    bool (*pEffectDummyGO           )(Unit*, uint32, SpellEffectIndex, GameObject*);
+    bool (*pEffectDummyItem         )(Unit*, uint32, SpellEffectIndex, Item*);
+    bool (*pEffectAuraDummy         )(const Aura*, bool);
 
-    CreatureAI* (*GetAI)(Creature *_Creature);
-    InstanceData* (*GetInstanceData)(Map*);
-    // -----------------------------------------
+    CreatureAI* (*GetAI             )(Creature*);
+    InstanceData* (*GetInstanceData )(Map*);
 
-    void registerSelf();
+    void RegisterSelf(bool bReportError = true);
 };
 
-#define VISIBLE_RANGE (50.0f)
+// *********************************************************
+// ************* Some functions used globally **************
 
-// Read function descriptions in CreatureAI
-struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
-{
-    explicit ScriptedAI(Creature* creature) : CreatureAI(creature) {}
-    ~ScriptedAI() {}
+// Generic scripting text function
+void DoScriptText(int32 iTextEntry, WorldObject* pSource, Unit* pTarget = NULL);
+void DoOrSimulateScriptTextForMap(int32 iTextEntry, uint32 uiCreatureEntry, Map* pMap, Creature* pCreatureSource = NULL, Unit* pTarget = NULL);
 
-    // Called at stopping attack by any attacker
-    void EnterEvadeMode();
+// *********************************************************
+// **************** Internal hook mechanics ****************
 
-    // Is unit visible for MoveInLineOfSight
-    bool IsVisible(Unit* who) const
-    {
-        return !who->HasStealthAura() && m_creature->IsWithinDist(who,VISIBLE_RANGE);
-    }
-
-    // Called at World update tick
-    void UpdateAI(const uint32);
-
-    //= Some useful helpers =========================
-
-    // Start attack of victim and go to him
-    void DoStartAttack(Unit* victim);
-
-    // Stop attack of current victim
-    void DoStopAttack();
-
-    // Cast spell
-    void DoCast(Unit* victim, uint32 spelId)
-    {
-        m_creature->CastSpell(victim,spelId,true);
-    }
-
-    void DoCastSpell(Unit* who,SpellEntry *spellInfo)
-    {
-        m_creature->CastSpell(who,spellInfo,true);
-    }
-
-    void DoSay(int32 text_id, uint32 language)
-    {
-        m_creature->MonsterSay(text_id, language);
-    }
-
-    void DoGoHome();
-};
+#if COMPILER == COMPILER_GNU
+#define FUNC_PTR(name,callconvention,returntype,parameters)    typedef returntype(*name)parameters __attribute__ ((callconvention));
+#else
+#define FUNC_PTR(name, callconvention, returntype, parameters)    typedef returntype(callconvention *name)parameters;
+#endif
 
 #endif

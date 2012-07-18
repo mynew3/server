@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2005-2012 MaNGOS project <http://getmangos.com/>
+# Copyright (C) 2005-2012 MaNGOS <http://getmangos.com/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,40 +16,60 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 
+## magic to include revision data in SD2 version string
+# revision.h: FORCE
+#   $(top_builddir)/src/tools/genrevision/genrevision $(srcdir)
+
 file(GLOB_RECURSE mangosscript_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
 
+source_group("Other"
+  REGULAR_EXPRESSION .*
+)
+
+foreach(SRC ${mangosscript_SRCS})
+  get_filename_component(PTH ${SRC} PATH)
+  if(PTH)
+    if(NOT XCODE) # FIXME: Xcode Generator has bug with nested dirs
+      string(REPLACE "/" "\\\\" PTH ${PTH})
+    endif()
+    source_group(${PTH} FILES ${SRC})
+  endif()
+endforeach(SRC)
+
 include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}/base
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/src/shared
   ${CMAKE_SOURCE_DIR}/src/framework
+  ${CMAKE_SOURCE_DIR}/src/game
+  ${CMAKE_SOURCE_DIR}/dep/include
   ${CMAKE_BINARY_DIR}
   ${ACE_INCLUDE_DIR}
   ${MYSQL_INCLUDE_DIR}
 )
 
-add_library(mangosscript SHARED
-  ${mangosscript_SRCS}
-)
-
-add_dependencies(mangosscript revision.h)
-if(NOT ACE_USE_EXTERNAL)
-  add_dependencies(mangosscript ACE_Project)
-# add_dependencies(mangosscript ace)
+if(PCH)
+  include_directories(
+    ${CMAKE_CURRENT_BINARY_DIR}
+  )
 endif()
 
-target_link_libraries(mangosscript
-  ${ZLIB_LIBRARIES}
-  ${ACE_LIBRARIES}
+add_library(mangosscript SHARED
+  ${mangosscript_SRCS}
 )
 
 if(WIN32)
   target_link_libraries(mangosscript
     mangosd # FIXME: could this be done for unix? because unix won't generate exe.libs
+    ${ACE_LIBRARIES}
+    debug ${WIN_DEBUGLIBS}
   )
-  if(WIN32 AND PLATFORM MATCHES X86)
-    target_link_libraries(mangosscript
-      debug ${WIN_DEBUGLIBS}
-    )
-  endif()
+endif()
+
+add_dependencies(mangosscript revision.h)
+if(NOT ACE_USE_EXTERNAL)
+  add_dependencies(mangosscript ACE_Project)
+# add_dependencies(mangosscript ace)
 endif()
 
 if(UNIX)
@@ -78,8 +98,46 @@ if(UNIX)
   )
 endif()
 
+# Because size for linker is to big - seriously ?!
+if(WIN32)
+  set_target_properties(mangosscript PROPERTIES
+      LINK_FLAGS_DEBUG "/DEBUG /INCREMENTAL:NO"
+  )
+endif()
+
+## libtool settings
+#  API versioning
+#  Link against dependencies
+#  How to increase version info:
+#  - only bug fixes implemented:
+#    bump the version to LTMANGOS_CURRENT:LTMANGOS_REVISION+1:LTMANGOS_AGE
+#  - augmented the interface:
+#    bump the version to LTMANGOS_CURRENT+1:0:LTMANGOS_AGE+1
+#  - broken old interface:
+#    bump the version to LTMANGOS_CURRENT+1:0:0
+# set(LTMANGOS_CURRENT 0)
+# set(LTMANGOS_REVISION 0)
+# set(LTMANGOS_AGE 0)
+# set_target_properties(script PROPERTIES LINK_FLAGS
+#   "-version-info ${LTMANGOS_CURRENT}:${LTMANGOS_REVISION}:${LTMANGOS_AGE}"
+# )
+
+# Generate precompiled header
+if(PCH)
+  if(MSVC OR XCODE)
+    if(MSVC)
+      set(mangosscript_pch "${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.cpp")
+    endif()
+    add_native_precompiled_header(mangosscript ${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.h)
+  elseif(CMAKE_COMPILER_IS_GNUCXX)
+    add_precompiled_header(mangosscript ${CMAKE_CURRENT_SOURCE_DIR}/include/precompiled.h)
+  endif()
+endif()
+
 # LIBRARY = dyld / so, RUNTIME = dll
 install(TARGETS mangosscript
   LIBRARY DESTINATION ${LIBS_DIR}
   RUNTIME DESTINATION ${LIBS_DIR}
 )
+
+install(FILES scriptdev2.conf.dist.in DESTINATION ${CONF_DIR} RENAME scriptdev2.conf.dist)
