@@ -527,6 +527,8 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
+        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), damage, 0);
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
         pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -5569,6 +5571,9 @@ void Unit::UnsummonAllTotems()
 int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical)
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
+
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
+        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), 0, gain);
 
     Unit* unit = this;
 
