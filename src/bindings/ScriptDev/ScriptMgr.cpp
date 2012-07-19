@@ -11,6 +11,7 @@
 #include "ProgressBar.h"
 #include "../system/ScriptLoader.h"
 #include "../../../game/ScriptMgr.h"
+#include "revision_nr.h"
 
 typedef std::vector<Script*> ScriptVec;
 int num_sc_scripts;
@@ -22,6 +23,13 @@ struct TSpellSummary {
     uint8 Targets;                                          // set of enum SelectTarget
     uint8 Effects;                                          // set of enum SelectEffect
 }extern *SpellSummary;
+
+
+MANGOS_DLL_EXPORT
+char const* GetMangosRevStr()
+{
+    return REVISION_NR;
+}
 
 MANGOS_DLL_EXPORT
 void FreeScriptLibrary()
