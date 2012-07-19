@@ -41,7 +41,7 @@ enum SCEquip
 };
 
 /// Documentation of CreatureAI functions can be found in MaNGOS source
-// Only list them here again to ensure that the interface between SD2 and the core is not changed unnoticed
+// Only list them here again to ensure that the interface between ScriptLib and the core is not changed unnoticed
 struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 {
     public:
@@ -148,7 +148,7 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
         // *************
 
         /**
-         * This is a SD2 internal function, that every AI must implement
+         * This is a ScriptLib internal function, that every AI must implement
          * Usally used to reset combat variables
          * Called by default on creature evade and respawn
          * In most scripts also called in the constructor of the AI
@@ -157,7 +157,7 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 
         /// Called at creature EnterCombat with an enemy
         /**
-         * This is a SD2 internal function
+         * This is a ScriptLib internal function
          * Called by default on creature EnterCombat with an enemy
          */
         virtual void Aggro(Unit*) {}

@@ -51,7 +51,7 @@ void InitScriptLibrary()
 {
     outstring_log("");
 
-    outstring_log("SD2: Loading C++ scripts");
+    outstring_log("ScriptLib: Loading C++ scripts");
     BarGoLink bar(1);
     bar.step();
     outstring_log("");
@@ -67,7 +67,7 @@ void InitScriptLibrary()
     for (uint32 i = 1; i < GetScriptIdsCount(); ++i)
     {
         if (!m_scripts[i])
-            error_log("SD2: No script found for ScriptName '%s'.", GetScriptName(i));
+            error_log("ScriptLib: No script found for ScriptName '%s'.", GetScriptName(i));
     }
 
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
@@ -86,7 +86,7 @@ void Script::RegisterSelf(bool bReportError)
     else
     {
         if (bReportError)
-            error_log("SD2: Script registering but ScriptName %s is not assigned in database. Script will not be used.", Name.c_str());
+            error_log("ScriptLib: Script registering but ScriptName %s is not assigned in database. Script will not be used.", Name.c_str());
 
         delete this;
     }
@@ -130,7 +130,7 @@ bool GOGossipHello(Player* pPlayer, GameObject* pGo)
 MANGOS_DLL_EXPORT
 bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
 {
-    debug_log("SD2: Gossip selection, sender: %u, action: %u", uiSender, uiAction);
+    debug_log("ScriptLib: Gossip selection, sender: %u, action: %u", uiSender, uiAction);
 
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
@@ -145,7 +145,7 @@ bool GossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 
 MANGOS_DLL_EXPORT
 bool GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
 {
-    debug_log("SD2: GO Gossip selection, sender: %u, action: %u", uiSender, uiAction);
+    debug_log("ScriptLib: GO Gossip selection, sender: %u, action: %u", uiSender, uiAction);
 
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
@@ -160,7 +160,7 @@ bool GOGossipSelect(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 ui
 MANGOS_DLL_EXPORT
 bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
-    debug_log("SD2: Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
+    debug_log("ScriptLib: Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
 
     Script* pTempScript = m_scripts[pCreature->GetScriptId()];
 
@@ -175,7 +175,7 @@ bool GossipSelectWithCode(Player* pPlayer, Creature* pCreature, uint32 uiSender,
 MANGOS_DLL_EXPORT
 bool GOGossipSelectWithCode(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
-    debug_log("SD2: GO Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
+    debug_log("ScriptLib: GO Gossip selection with code, sender: %u, action: %u", uiSender, uiAction);
 
     Script* pTempScript = m_scripts[pGo->GetGOInfo()->ScriptId];
 
