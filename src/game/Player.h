@@ -54,6 +54,27 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 
+struct DamageHealData
+{
+    DamageHealData() : damage(0), healing(0) { }
+    uint32 damage;
+    uint32 healing;
+};
+
+enum TransmogrificationResult
+{
+    ERR_FAKE_NEW_BAD_QUALITY,
+    ERR_FAKE_OLD_BAD_QUALITY,
+    ERR_FAKE_SAME_DISPLAY,
+    ERR_FAKE_SAME_DISPLAY_FAKE,
+    ERR_FAKE_CANT_USE,
+    ERR_FAKE_NOT_SAME_CLASS,
+    ERR_FAKE_BAD_CLASS,
+    ERR_FAKE_BAD_SUBLCASS,
+    ERR_FAKE_BAD_INVENTORYTYPE,
+    ERR_FAKE_OK
+};
+
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           127
@@ -938,6 +959,39 @@ class MANGOS_DLL_SPEC Player : public Unit
         explicit Player (WorldSession *session);
         ~Player ( );
 
+
+        bool BuyEnabled;
+        bool Hardcore;
+        uint32 ItemInsurance;
+        uint32 ItemInsuranceCharges;
+        /* PvP System Begin */
+        uint32 KillStreak;
+        uint32 ALastGuid;
+        uint32 ALastGuidCount;
+        uint32 VLastGuid;
+        uint32 VLastGuidCount;
+        uint32 KillBounty;
+        /* PvP System End */
+
+        void HandlePvPKill();
+        void HandleHardcoreKill(Player* attacker);
+        bool HandlePvPAntifarm(Player* victim);
+        std::map<uint64, DamageHealData*> m_DamagersAndHealers;
+        void DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal);
+        uint32 SuitableForTransmogrification(Item* pOld, Item* pNew);
+
+        bool AddAura(uint32 spellID);
+
+        std::string GetNameLink()
+        {
+            std::string name = GetName();
+            return "|Hplayer:"+name+"|h["+name+"]|h";
+        }
+
+        void InGamemasterGossip(Creature *pCreature);
+
+        void CreatePet(uint32 cEntry);
+
         void CleanupsBeforeDelete();
 
         static UpdateMask updateVisualBits;
@@ -1077,6 +1131,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* GetItemByGuid(ObjectGuid guid) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
+        Bag*  GetBagByPos(uint8 slot) const;
         uint32 GetItemDisplayIdInSlot(uint8 bag, uint8 slot) const;
         Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType,false,false); }
         Item* GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const;

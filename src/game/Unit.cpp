@@ -9694,3 +9694,68 @@ void Unit::DisableSpline()
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED|MOVEFLAG_FORWARD));
     movespline->_Interrupt();
 }
+
+float Unit::GetPathLength(float destX, float destY, float destZ, bool forceDest) const
+{
+    PathFinder path(&*this);
+    path.calculate(destX, destY, destZ, forceDest);
+
+    Movement::PointsArray pathArray = path.getPath();
+    float dist = 0.f;
+    if (pathArray.size() > 1)
+    {
+        for (uint32 i = 1; i < pathArray.size(); ++i)
+            dist += (pathArray[i] - pathArray[i - 1]).length();
+    }
+
+    return dist;
+}
+
+bool Unit::IsReachable(float destX, float destY, float destZ, bool forceDest) const
+{
+    PathFinder path(&*this);
+    path.calculate(destX, destY, destZ, forceDest);
+    if (path.getPathType() && path.getPathType() & PATHFIND_NORMAL)
+        return true;
+    else
+        return false;
+}
+
+void Unit::SetStunned(bool apply)
+{
+    if (apply)
+    {
+        SetUInt64Value(UNIT_FIELD_TARGET, 0);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+        CastStop();
+
+        // Creature specific
+        if (GetTypeId() != TYPEID_PLAYER)
+            ToCreature()->StopMoving();
+        else
+            SetStandState(UNIT_STAND_STATE_STAND);
+
+        /*WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
+        data << GetPackGUID();
+        data << uint32(0);
+        SendMessageToSet(&data,true);*/
+    }
+    else
+    {
+        if (isAlive() && getVictim())
+            SetUInt64Value(UNIT_FIELD_TARGET, getVictim()->GetObjectGuid());
+
+        // don't remove UNIT_FLAG_STUNNED for pet when owner is mounted (disabled pet's interface)
+        Unit *pOwner = GetOwner();
+        if (!pOwner || (pOwner->GetTypeId() == TYPEID_PLAYER && !pOwner->ToPlayer()->IsMounted()))
+            RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+
+        /*if (!hasUnitState(UNIT_STAT_ROOT))         // prevent allow move if have also root effect
+        {
+            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
+            data << GetPackGUID();
+            data << uint32(0);
+            SendMessageToSet(&data,true);
+        }*/
+    }
+}

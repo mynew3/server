@@ -20673,3 +20673,441 @@ void Player::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSp
     data << float(-verticalSpeed);                      // Z Movement speed (vertical)
     GetSession()->SendPacket(&data);
 }
+
+void Player::CreatePet(uint32 cEntry)
+{
+    //--------------------------------------------------
+
+    CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(cEntry);
+    if (!cinfo)
+    {
+        return;
+    }
+
+    CreatureCreatePos pos(GetSession()->GetPlayer(), GetOrientation());
+
+    Creature* pCreature = new Creature;
+
+    // used guids from specially reserved range (can be 0 if no free values)
+    uint32 lowguid = sObjectMgr.GenerateStaticCreatureLowGuid();
+    if (!lowguid)
+    {
+        return;
+    }
+
+    if (!pCreature->Create(lowguid, pos, cinfo))
+    {
+        delete pCreature;
+        return;
+    }
+
+    //--------------------------------------------------
+
+    if (GetPetGuid())
+        UnsummonPetTemporaryIfAny();
+
+    Pet* pet = new Pet(HUNTER_PET);
+
+    if(!pet->CreateBaseAtCreature(pCreature))
+    {
+        delete pet;
+        PlayerTalkClass->CloseGossip();
+        return;
+    }
+
+    pet->SetOwnerGuid(GetObjectGuid());
+    pet->SetCreatorGuid(GetObjectGuid());
+    pet->setFaction(getFaction());
+    pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, 13481);
+
+    if (IsPvP())
+        pet->SetPvP(true);
+
+    if (!pet->InitStatsForLevel(pCreature->getLevel()))
+    {
+        sLog.outError("Pet::InitStatsForLevel() failed for creature (Entry: %u)!",pCreature->GetEntry());
+        delete pet;
+        return;
+    }
+
+    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+    // this enables pet details window (Shift+P)
+    pet->AIM_Initialize();
+    pet->InitPetCreateSpells();
+    pet->SetHealth(pet->GetMaxHealth());
+
+    // add to world
+    pet->GetMap()->Add((Creature*)pet);
+
+    // visual effect for levelup
+    pet->SetUInt32Value(UNIT_FIELD_LEVEL,70);
+    int x;
+    for (x = 0; x < 6; x++)
+    {
+        pet->SetPower(POWER_HAPPINESS,66600000);
+        pet->ModifyLoyalty(150000);
+        pet->TickLoyaltyChange();
+        pet->SetTP(10000);
+    }
+
+    // caster have pet now
+    SetPet(pet);
+
+    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+    PetSpellInitialize();
+    pet->learnSpell(27052);
+    pet->learnSpell(35698);
+    pet->learnSpell(25076);
+    pet->learnSpell(27048);
+    pet->learnSpell(27053);
+    pet->learnSpell(27054);
+    pet->learnSpell(27062);
+    pet->learnSpell(27047);
+    pet->learnSpell(24551);
+    delete pCreature;
+}
+
+void Player::DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal)
+{
+    Player *pPlayer = sObjectMgr.GetPlayer(guid);
+
+    DamageHealData *data = m_DamagersAndHealers[guid];
+
+    if(!data)
+    {
+        data = new DamageHealData();
+        m_DamagersAndHealers[guid] = data;
+    }
+    data->damage += damage;
+    data->healing += heal;
+}
+
+void Player::InGamemasterGossip(Creature * pCreature)
+{
+    bool result = false;
+    PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Logged in gamemasters:",1,1,"",0);
+    HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::MapType &m = sObjectAccessor.GetPlayers();
+    for (HashMapHolder<Player>::MapType::const_iterator itr = m.begin(); itr != m.end(); ++itr)
+    {
+        Player *pPlayer = itr->second;
+        if (pPlayer->isGameMaster())
+        {
+            std::string gossipstring(pPlayer->GetName());
+            if (pPlayer->isAcceptWhispers())
+            {
+                gossipstring += " - Accepting Whispers";
+            }
+            else
+            {
+                gossipstring += " - Not Accepting Whispers";
+            }
+            if (pPlayer->isAFK())
+            {
+                gossipstring += " <AFK>";
+            }
+            PlayerTalkClass->GetGossipMenu().AddMenuItem(5,gossipstring,1,1,"",0);
+            result = true;
+        }
+    }
+    if (result == false)
+    {
+        PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Sorry, there are no gamemasters active on the server at the moment. Please write a ticket instead.",1,1,"",0);
+    }
+    ChatHandler(GetSession()).PSendSysMessage("%s[Server Message]%s Tickets have a higher priority then whispers. If you want help, write a ticket. To write a ticket you just have to press the questionmark(?), then press either Talk to a GM or Report issue. A text window will show. Write as describing as possible, badly written tickets will be ignored.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+
+    PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
+}
+
+template<template <typename> class P = std::less >
+struct compare_pair_second {
+    template<class T1, class T2> bool operator()(const std::pair<T1, T2>& left, const std::pair<T1, T2>& right) {
+        return P<T2>()(left.second, right.second);
+    }
+};
+
+void Player::HandlePvPKill()
+{
+    uint32 uStartTime = WorldTimer::getMSTime();
+    KillStreak = 0;
+    uint32 loopCount = 0;
+    uint32 victimHealth = 0;
+    uint32 rewardgold = 10000;
+    uint64 maxdamagerGuid = 0;
+    uint64 maxdamagerDmg = 0;
+
+    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    {
+        if (itr->second->damage > 0)
+        {
+            ++loopCount;
+            victimHealth += itr->second->damage;
+
+            if (itr->second->damage > maxdamagerDmg)
+            {
+                maxdamagerDmg = itr->second->damage;
+                maxdamagerGuid = itr->first;
+            }
+        }
+    }
+
+    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    {
+        if (itr->second->damage > 0)
+        {
+            Player* pAttacker = sObjectMgr.GetPlayer(itr->first);
+            float killstreakMod = (float(pAttacker->KillStreak)/10)+1.0f;
+            ++pAttacker->KillStreak;
+
+            if (pAttacker->HandlePvPAntifarm(this))
+            {
+                uint32 attackerHealing = 0;
+                float damagePct = float(itr->second->damage) / float(victimHealth);
+                float attackerReward = (float(rewardgold) * damagePct)*killstreakMod;
+                pAttacker->ModifyMoney(+int32(attackerReward));
+
+                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward/10000.f,GetNameLink().c_str());
+
+                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
+                {
+                    if (itr->second->healing > 0)
+                    {
+                        ++loopCount;
+                        attackerHealing += itr->second->healing;
+                    }
+                }
+
+                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
+                {
+                    if (itr->second->healing > 0)
+                    {
+                        Player* pHealer = sObjectMgr.GetPlayer(itr->first);
+                        float killstreakMod = (float(pHealer->KillStreak)/10)+1.0f;
+                        ++pHealer->KillStreak;
+
+                        float healingPct = float(itr->second->healing) / float(attackerHealing);
+                        float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
+                        float healerReward = ((float(attackerReward) * healingPct)*maxhealingPct)*killstreakMod;
+
+                        pHealer->ModifyMoney(+int32(healerReward));
+
+                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward/10000.f,pAttacker->GetNameLink().c_str());
+                    }
+                }
+            }
+        }
+    }
+    if (loopCount > 1)
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s It took %u people to kill you",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,loopCount);
+
+    Player* pMostDamager = sObjectMgr.GetPlayer(maxdamagerGuid);
+
+    if (pMostDamager)
+    {
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
+        HandleHardcoreKill(pMostDamager);
+
+        if (KillBounty > 0)
+        {
+            ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(KillBounty)/10000.0f);
+            pMostDamager->ModifyMoney(int32(KillBounty));
+        }
+
+    }
+
+
+
+    uint32 uPvPRunTime = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
+    sLog.outDebug("Took %u MS to run PvP System",uPvPRunTime);
+}
+
+void Player::HandleHardcoreKill(Player* attacker)
+{
+
+    if (urand(1,3) == 1 && attacker->Hardcore && Hardcore)
+    {
+        if (ItemInsuranceCharges < 1)
+        {
+            std::vector<std::pair<uint32, uint32> > itemV;
+            uint8 equippedItemCount = 0;
+            for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+            {
+                Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                if (pItem && i != EQUIPMENT_SLOT_TABARD && i != EQUIPMENT_SLOT_BODY)
+                {
+                    itemV.push_back(std::make_pair(i,pItem->GetProto()->ItemLevel));
+                    ++equippedItemCount;
+                }
+
+            }
+            sort(itemV.begin(),itemV.end(),compare_pair_second<std::greater>());
+
+            if (equippedItemCount > ItemInsurance)
+            {
+                uint32 removeTime = urand(ItemInsurance,equippedItemCount);
+                uint32 iteration = 0;
+
+                for(std::vector <std::pair <uint32,uint32> >::iterator dx = itemV.begin(); dx != itemV.end(); dx++ )
+                {
+                    std::pair<int, int> result = (*dx);
+                    ++iteration;
+                    if (iteration == removeTime)
+                    {
+                        Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, result.first);
+
+                        DestroyItem(INVENTORY_SLOT_BAG_0,result.first,true);
+                        if(attacker->StoreNewItemInBestSlots(pItem->GetProto()->ItemId,1))
+                        {
+                            attacker->SendNewItem(pItem,1,true,false,true);
+                            ChatHandler(this).PSendSysMessage("%s[PvP System]%s %s took %s%s from you!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attacker->GetNameLink().c_str(),pItem->GetNameLink().c_str(),MSG_COLOR_WHITE);
+
+                        }
+                    }
+                }
+            }
+        }
+        else
+            --ItemInsuranceCharges;
+        if (ItemInsuranceCharges > 0 && ItemInsuranceCharges < 10)
+            ChatHandler(this).PSendSysMessage("%s[PvP System]%s You have only %u death charges left!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,ItemInsuranceCharges);
+    }
+}
+
+bool Player::HandlePvPAntifarm(Player* victim)
+{
+    bool sendInfo = true;
+    if (!isGameMaster() && !victim->isGameMaster())
+    {
+        if (this == victim)
+            return false;
+        else if (victim->HasAura(2479))
+        {
+            if (sendInfo)
+                ChatHandler(this).PSendSysMessage("%s[PvP System]%s Hes not worth money or honor yet!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+            return false;
+        }
+        else if (GetSession()->GetRemoteAddress() == victim->GetSession()->GetRemoteAddress())
+        {
+            if (sendInfo)
+            {
+                ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You have same ip as your victim", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                ChatHandler(this).PSendSysMessage("%sthis means you are on same network and could farm money together.", MSG_COLOR_WHITE);
+            }
+            return false;
+        }
+        else if (victim->GetObjectGuid() == ALastGuid)
+        {
+            ++ALastGuidCount;
+            if (ALastGuidCount >= 6)
+            {
+                if (sendInfo)
+                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                return false;
+            }
+        }
+        else if (GetObjectGuid() == victim->VLastGuid)
+        {
+            ++victim->VLastGuidCount;
+            if (victim->VLastGuidCount >= 6)
+            {
+                if (sendInfo)
+                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                return false;
+            }
+        }
+        else
+        {
+            ALastGuidCount = 0;
+            victim->VLastGuidCount = 0;
+        }
+    }
+    ALastGuid = victim->GetObjectGuid();    // Set attackers last kill guid to victim's guid
+    victim->VLastGuid = GetObjectGuid();    // Set victims last killed guid to attacker's guid
+    return true;
+}
+
+bool Player::AddAura(uint32 spellID)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
+    if (!spellInfo)
+        return false;
+
+    if (!IsSpellAppliesAura(spellInfo, (1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)) &&
+        !IsSpellHaveEffect(spellInfo, SPELL_EFFECT_PERSISTENT_AREA_AURA))
+    {
+        return false;
+    }
+
+    SpellAuraHolder *holder = CreateSpellAuraHolder(spellInfo, this, m_session->GetPlayer());
+
+    for(uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        uint8 eff = spellInfo->Effect[i];
+        if (eff>=TOTAL_SPELL_EFFECTS)
+            continue;
+        if (IsAreaAuraEffect(eff)           ||
+            eff == SPELL_EFFECT_APPLY_AURA  ||
+            eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            Aura *aur = CreateAura(spellInfo, SpellEffectIndex(i), NULL, holder, this);
+            holder->AddAura(aur, SpellEffectIndex(i));
+        }
+    }
+    AddSpellAuraHolder(holder);
+
+    return true;
+}
+
+uint32 Player::SuitableForTransmogrification(Item* pOld, Item* pNew) // custom
+{
+    // not possibly the best structure here, but atleast I got my head around this
+    if(!pNew->HasGoodFakeQuality())
+        return ERR_FAKE_NEW_BAD_QUALITY;
+    if(!pOld->HasGoodFakeQuality())
+        return ERR_FAKE_OLD_BAD_QUALITY;
+
+    if(pOld->GetProto()->DisplayInfoID == pNew->GetProto()->DisplayInfoID)
+        return ERR_FAKE_SAME_DISPLAY;
+    if(pOld->GetFakeEntry())
+        if(const ItemPrototype* FakeItemTemplate = sObjectMgr.GetItemPrototype(pOld->GetFakeEntry()))
+            if(FakeItemTemplate->DisplayInfoID == pNew->GetProto()->DisplayInfoID)
+                return ERR_FAKE_SAME_DISPLAY_FAKE;
+    if(CanUseItem(pNew, false) != EQUIP_ERR_OK)
+        return ERR_FAKE_CANT_USE;
+    uint32 NClass = pNew->GetProto()->Class;
+    uint32 OClass = pOld->GetProto()->Class;
+    uint32 NSubClass = pNew->GetProto()->SubClass;
+    uint32 OSubClass = pOld->GetProto()->SubClass;
+    uint32 NEWinv = pNew->GetProto()->InventoryType;
+    uint32 OLDinv = pOld->GetProto()->InventoryType;
+    if(NClass != OClass)
+        return ERR_FAKE_NOT_SAME_CLASS;
+    if(NClass == ITEM_CLASS_WEAPON && NSubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE && OSubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+    {
+        if(NSubClass == OSubClass || ((NSubClass == ITEM_SUBCLASS_WEAPON_BOW || NSubClass == ITEM_SUBCLASS_WEAPON_GUN || NSubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW) && (OSubClass == ITEM_SUBCLASS_WEAPON_BOW || OSubClass == ITEM_SUBCLASS_WEAPON_GUN || OSubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW)))
+            if(NEWinv == OLDinv || (NEWinv == INVTYPE_WEAPON && (OLDinv == INVTYPE_WEAPONMAINHAND || OLDinv == INVTYPE_WEAPONOFFHAND)))
+                return ERR_FAKE_OK;
+            else
+                return ERR_FAKE_BAD_INVENTORYTYPE;
+        else
+            return ERR_FAKE_BAD_SUBLCASS;
+    }
+    else if(NClass == ITEM_CLASS_ARMOR)
+        if(NSubClass == OSubClass)
+            if(NEWinv == OLDinv || (NEWinv == INVTYPE_CHEST && OLDinv == INVTYPE_ROBE) || (NEWinv == INVTYPE_ROBE && OLDinv == INVTYPE_CHEST))
+                return ERR_FAKE_OK;
+            else
+                return ERR_FAKE_BAD_INVENTORYTYPE;
+        else
+            return ERR_FAKE_BAD_SUBLCASS;
+    return ERR_FAKE_BAD_CLASS;
+}
+
+Bag* Player::GetBagByPos(uint8 bag) const
+{
+    if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
+        || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
+        if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, bag))
+            return item->ToBag();
+    return NULL;
+}

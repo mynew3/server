@@ -418,6 +418,8 @@ class ObjectMgr
         ObjectMgr();
         ~ObjectMgr();
 
+        ItemFakeEntryContainer _itemFakeEntryStore;
+
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
         typedef UNORDERED_MAP<uint32, Group*> GroupMap;
@@ -440,6 +442,12 @@ class ObjectMgr
 
         static Player* GetPlayer(const char* name) { return ObjectAccessor::FindPlayerByName(name);}
         static Player* GetPlayer(ObjectGuid guid, bool inWorld = true) { return ObjectAccessor::FindPlayer(guid, inWorld); }
+        static Player* GetPlayer(uint64 guid)
+        {
+            ObjectGuid oGuid;
+            oGuid.Set(guid);
+            return GetPlayer(oGuid);
+        }
 
         static GameObjectInfo const *GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
 

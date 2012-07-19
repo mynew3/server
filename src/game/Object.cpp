@@ -1819,6 +1819,14 @@ bool WorldObject::IsControlledByPlayer() const
     }
 }
 
+void WorldObject::ForceValuesUpdateAtIndex(uint16 index)
+{
+    MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
+
+    m_uint32Values_mirror[index] = m_uint32Values[index] + 1; // makes server think the field changed
+    MarkForClientUpdate();
+}
+
 bool WorldObject::PrintCoordinatesError(float x, float y, float z, char const* descr) const
 {
     sLog.outError("%s with invalid %s coordinates: mapid = %uu, x = %f, y = %f, z = %f", GetGuidStr().c_str(), descr, GetMapId(), x, y, z);

@@ -950,6 +950,16 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
     delete [] buf;
 }
 
+void ChatHandler::PSendGlobalSysMessage(const char *format, ...)
+{
+    va_list ap;
+    char str [2048];
+    va_start(ap, format);
+    vsnprintf(str, 2048, format, ap);
+    va_end(ap);
+    SendGlobalSysMessage(str);
+}
+
 void ChatHandler::SendSysMessage(int32 entry)
 {
     SendSysMessage(GetMangosString(entry));

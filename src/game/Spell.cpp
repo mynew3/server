@@ -4747,6 +4747,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (m_caster->hasUnitState(UNIT_STAT_ROOT))
                     return SPELL_FAILED_ROOTED;
+                if (Unit* target = m_targets.getUnitTarget())
+                {
+                    if (m_caster->GetPathLength(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),true) > m_spellInfo->rangeIndex && m_caster->IsReachable(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ(),false))
+                        return SPELL_FAILED_OUT_OF_RANGE;
+                    ChatHandler(m_caster->ToPlayer()).PSendGlobalSysMessage("Range: %u",m_spellInfo->rangeIndex);
+                }
 
                 break;
             }

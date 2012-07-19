@@ -23,6 +23,8 @@
 #include "Object.h"
 #include "LootMgr.h"
 #include "ItemPrototype.h"
+#include "Chat.h"
+#include <sstream>
 
 struct SpellEntry;
 class Bag;
@@ -260,6 +262,37 @@ bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto
 class MANGOS_DLL_SPEC Item : public Object
 {
     public:
+        std::string GetNameLink(bool applyColor = true)
+        {
+            std::string name = GetProto()->Name1;
+            std::stringstream ss;
+            ss << GetProto()->ItemId;
+            std::string id = ss.str();
+            ss.str("");
+            std::string color = "";
+            if (applyColor)
+            {
+                switch(GetProto()->Quality)
+                {
+                case 0:     color = MSG_COLOR_GREY;     break;
+                case 1:     color = MSG_COLOR_WHITE;    break;
+                case 2:     color = MSG_COLOR_GREEN;    break;
+                case 3:     color = MSG_COLOR_BLUE;     break;
+                case 4:     color = MSG_COLOR_PURPLE;   break;
+                case 5:     color = MSG_COLOR_ORANGE;   break;
+                default:    color = MSG_COLOR_WHITE;    break;
+                }
+            }
+            return ""+color+"|Hitem:"+id+":0:0:0:0:0:0:0|h["+name+"]|h";
+        }
+        uint32 GetFakeEntry();
+        bool DeleteFakeEntry();
+        static void DeleteFakeFromDB(uint32 GUIDLow);
+        void SetFakeEntry(uint32 Entry);
+        bool HasGoodFakeQuality();
+        Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return NULL; }
+        const Bag* ToBag() const { if (IsBag()) return reinterpret_cast<const Bag*>(this); else return NULL; }
+
         static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL, uint32 randomPropertyId = 0);
         Item* CloneItem( uint32 count, Player const* player = NULL ) const;
 

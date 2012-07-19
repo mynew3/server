@@ -1196,3 +1196,36 @@ void Item::SetLootState(ItemLootUpdateState state)
     if (m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_UNCHANGED && m_lootState != ITEM_LOOT_TEMPORARY)
         SetState(ITEM_CHANGED);
 }
+
+uint32 Item::GetFakeEntry()
+{
+    ItemFakeEntryContainer::const_iterator itr = sObjectMgr._itemFakeEntryStore.find(GetGUIDLow());
+    if (itr == sObjectMgr._itemFakeEntryStore.end()) return NULL;
+    return itr->second;
+}
+bool Item::DeleteFakeEntry()
+{
+    if(!GetFakeEntry())
+        return false;
+    GetOwner()->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_0 + (GetSlot() * MAX_VISIBLE_ITEM_OFFSET), GetEntry());
+    DeleteFakeFromDB(GetGUIDLow());
+    return true;
+}
+void Item::DeleteFakeFromDB(uint32 GUIDLow) // custom
+{
+    sObjectMgr._itemFakeEntryStore.erase(GUIDLow);
+    CharacterDatabase.PExecute("DELETE FROM custom_transmogrification WHERE GUID = %u", GUIDLow);
+}
+void Item::SetFakeEntry(uint32 Entry) // custom
+{
+    GetOwner()->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_0 + (GetSlot() * MAX_VISIBLE_ITEM_OFFSET), Entry);
+    sObjectMgr._itemFakeEntryStore[GetGUIDLow()] = Entry;
+    CharacterDatabase.PExecute("REPLACE INTO custom_transmogrification (GUID, FakeEntry) VALUES (%u, %u)", GetGUIDLow(), Entry);
+}
+bool Item::HasGoodFakeQuality() // custom
+{
+    uint32 Quality = GetProto()->Quality;
+    if(Quality == ITEM_QUALITY_UNCOMMON || Quality == ITEM_QUALITY_RARE || Quality == ITEM_QUALITY_EPIC || ITEM_QUALITY_LEGENDARY)
+        return true;
+    return false;
+}
