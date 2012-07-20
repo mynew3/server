@@ -156,7 +156,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeaderOutputFile>.\mangosd__$(Platform)_$(Configuration)\mangosd.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\mangosd__$(Platform)_$(Configuration)\</AssemblerListingLocation>

@@ -156,7 +156,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeaderOutputFile>.\realmd__$(Platform)_$(Configuration)\realmd.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\realmd__$(Platform)_$(Configuration)\</AssemblerListingLocation>
