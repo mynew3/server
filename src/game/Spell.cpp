@@ -1118,7 +1118,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, uint32 effectMask, bool isReflected)
 
         if (!realCaster->IsFriendlyTo(unit))
         {
-            bool isVisibleForHit = ((unit->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, UI64LIT(0x0000000000000800))) && !unit->isVisibleForOrDetect(m_caster, m_caster, true)) ? false : true;
+            bool isVisibleForHit = ((unit->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) || unit->GetAura(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, UI64LIT(0x0000000000000800))) && !unit->isVisibleForOrDetect(m_caster, m_caster, true)) ? false : true;
 
             // for delayed spells ignore not visible explicit target
             if (m_spellInfo->speed > 0.0f && unit == m_targets.getUnitTarget() &&
