@@ -768,6 +768,36 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             // FORM_SPIRITOFREDEMPTION and related auras
             pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedemtionTalentReady);
         }
+        else if (GetMapId() == 0 && GetZoneId() == 33 && (GetAreaId() == 1741 || GetAreaId() == 2177)) // Gurubashi Arena respawn
+        {
+            Player *pPlayer = pVictim->ToPlayer();
+            if(pPlayer)
+            {
+                pPlayer->ResurrectPlayer(1);
+                pPlayer->RemoveArenaSpellCooldowns();
+                pPlayer->AddAura(29921); // Invisibility
+                pPlayer->AddAura(13874); // Divine Shield
+                pPlayer->AddAura(30225); // Silence
+                pPlayer->AddAura(30013); // Disarm
+
+                uint32 rand = urand(1,6);
+                if (pPlayer->isGameMaster())
+                    ChatHandler(pPlayer->GetSession()).PSendSysMessage("You are being teleported to %u",rand);
+
+                if (rand == 1)
+                    pPlayer->TeleportTo(0,-13257.1f, 223.449f,   42.9766f,   0.681904f);
+                else if (rand == 2)
+                    pPlayer->TeleportTo(0,-13275.8f, 273.544f,   42.9771f,   6.28179f);
+                else if (rand == 3)
+                    pPlayer->TeleportTo(0,-13172.3f, 334.561f,   42.9781f,   4.21775f);
+                else if (rand == 4)
+                    pPlayer->TeleportTo(0,-13164.9f, 214.171f,   42.9779f,   2.16786f);
+                else if (rand == 5)
+                    pPlayer->TeleportTo(0,-13215.6f, 202.368f,   42.975f,    1.461f);
+                else if (rand == 6) // Inside the arena
+                    pPlayer->TeleportTo(0,-13222.7f, 239.171f,   21.8581f,   1.09186f);
+            }
+        }
         else
             pVictim->SetHealth(0);
 
