@@ -376,6 +376,20 @@ UpdateMask Player::updateVisualBits;
 
 Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m_reputationMgr(this)
 {
+    BuyEnabled        = false;
+    Hardcore          = false;
+    ItemInsurance     = 0;
+    ItemInsuranceCharges = 0;
+    /* PvP System Begin */
+    KillStreak        = 0;
+    ALastGuid         = 0;
+    ALastGuidCount    = 0;
+    VLastGuid         = 0;
+    VLastGuidCount    = 0;
+    KillBounty        = 0;
+    /* PvP System End */
+
+
     m_transport = 0;
 
     m_speakTime = 0;
@@ -15034,6 +15048,15 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder *holder )
 
     _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
+    QueryResult* c_result = CharacterDatabase.PQuery("SELECT insurance, insurancecount, bounty FROM character_custom WHERE guid = '%u'",GetGUIDLow());
+    if (c_result)
+    {
+        Field* c_fields = c_result->Fetch();
+        ItemInsurance           = c_fields[0].GetUInt32();
+        ItemInsuranceCharges    = c_fields[1].GetUInt32();
+        KillBounty              = c_fields[2].GetUInt32();
+    }
+
     return true;
 }
 
@@ -20840,7 +20863,6 @@ void Player::HandlePvPKill()
     {
         if (itr->second->damage > 0)
         {
-            ++loopCount;
             victimHealth += itr->second->damage;
 
             if (itr->second->damage > maxdamagerDmg)
@@ -20855,6 +20877,7 @@ void Player::HandlePvPKill()
     {
         if (itr->second->damage > 0)
         {
+            ++loopCount;
             Player* pAttacker = sObjectMgr.GetPlayer(itr->first);
             float killstreakMod = (float(pAttacker->KillStreak)/10)+1.0f;
             ++pAttacker->KillStreak;
@@ -20872,7 +20895,6 @@ void Player::HandlePvPKill()
                 {
                     if (itr->second->healing > 0)
                     {
-                        ++loopCount;
                         attackerHealing += itr->second->healing;
                     }
                 }
@@ -20881,12 +20903,15 @@ void Player::HandlePvPKill()
                 {
                     if (itr->second->healing > 0)
                     {
+                        ++loopCount;
                         Player* pHealer = sObjectMgr.GetPlayer(itr->first);
                         float killstreakMod = (float(pHealer->KillStreak)/10)+1.0f;
                         ++pHealer->KillStreak;
 
                         float healingPct = float(itr->second->healing) / float(attackerHealing);
                         float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
+                        if (maxhealingPct > 1)
+                            maxhealingPct = 1.0f;
                         float healerReward = ((float(attackerReward) * healingPct)*maxhealingPct)*killstreakMod;
 
                         pHealer->ModifyMoney(+int32(healerReward));
