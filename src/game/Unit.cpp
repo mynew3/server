@@ -4471,6 +4471,20 @@ Aura* Unit::GetAura(AuraType type, SpellFamily family, uint64 familyFlag, Object
     return NULL;
 }
 
+bool Unit::HasAuraTypeWithFamilyFlags(AuraType auraType, uint32 familyName, uint64 familyFlags) const
+{
+    if (!HasAuraType(auraType))
+        return false;
+
+    AuraList const &auras = GetAurasByType(auraType);
+    for (AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        if (SpellEntry const *iterSpellProto = (*itr)->GetSpellProto())
+            if (iterSpellProto->SpellFamilyName == familyName && iterSpellProto->SpellFamilyFlags & familyFlags)
+                return true;
+
+    return false;
+}
+
 bool Unit::HasAura(uint32 spellId, SpellEffectIndex effIndex) const
 {
     SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
