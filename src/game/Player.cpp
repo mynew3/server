@@ -389,7 +389,6 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     KillBounty        = 0;
     /* PvP System End */
 
-
     m_transport = 0;
 
     m_speakTime = 0;

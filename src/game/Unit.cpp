@@ -672,6 +672,10 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     if (health <= damage)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"DealDamage: victim just died");
+        /***********************************PVP SYSTEM BEGIN***********************************/
+        if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
+            pVictim->ToPlayer()->HandlePvPKill();
+        /***********************************PVP SYSTEM END***********************************/
 
         // find player: owner of controlled `this` or `this` itself maybe
         // for loot will be sued only if group_tap==NULL
