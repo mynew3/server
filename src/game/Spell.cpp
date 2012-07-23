@@ -2742,6 +2742,17 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
     m_casttime = GetSpellCastTime(m_spellInfo, this);
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
+    // don't allow channeled spells / spells with cast time to be casted while moving
+    // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
+    if ((IsChanneledSpell(m_spellInfo) || m_casttime)
+        && m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->isMoving()
+        && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
+    {
+        SendCastResult(SPELL_FAILED_MOVING);
+        finish(false);
+        return;
+    }
+
     // set timer base at cast time
     ReSetTimer();
 
