@@ -6873,6 +6873,15 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
 void Unit::ClearInCombat()
 {
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        Player *p = ((Player*)this);
+
+        for (std::map<uint64, DamageHealData*>::iterator itr = p->m_DamagersAndHealers.begin(); itr != p->m_DamagersAndHealers.end(); ++itr)
+            delete itr->second;
+        p->m_DamagersAndHealers.clear();
+    }
+
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
