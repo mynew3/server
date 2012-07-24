@@ -263,6 +263,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (!VerifyMovementInfo(movementInfo))
         return;
 
+    // set stand state when moving while are seated
+    if (plMover->IsSitState() && plMover->isMovingOrTurning())
+        plMover->SetStandState(UNIT_STAND_STATE_STAND);
+
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
     if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
         plMover->HandleFall(movementInfo);
