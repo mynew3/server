@@ -18474,6 +18474,9 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
     {
         bg->RemovePlayerAtLeave(GetObjectGuid(), teleportToEntryPoint, true);
 
+        // take combo points from target
+        ClearComboPoints();
+
         // call after remove to be sure that player resurrected for correct cast
         if( bg->isBattleGround() && !isGameMaster() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER) )
         {
