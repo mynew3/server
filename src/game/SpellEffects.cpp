@@ -2330,12 +2330,15 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)
             else if(unitTarget->GetTypeId() == TYPEID_PLAYER)
                 pTarget = unitTarget->GetMap()->GetUnit(((Player*)unitTarget)->GetSelectionGuid());
 
-            // Init dest coordinates
-            float x = m_targets.m_destX;
-            float y = m_targets.m_destY;
-            float z = m_targets.m_destZ;
+            WorldLocation destLoc;
+            destLoc.coord_x = m_targets.m_destX;
+            destLoc.coord_y = m_targets.m_destY;
+            destLoc.coord_z = m_targets.m_destZ;
+
             float orientation = pTarget ? pTarget->GetOrientation() : unitTarget->GetOrientation();
-            unitTarget->NearTeleportTo(x,y,z,orientation,unitTarget==m_caster);
+            unitTarget->MovePositionToFirstCollision(destLoc, unitTarget->GetObjectScale(), orientation);
+
+            unitTarget->NearTeleportTo(destLoc.coord_x, destLoc.coord_y, (destLoc.coord_z + unitTarget->GetObjectScale()),orientation,unitTarget==m_caster);
             return;
         }
         default:
