@@ -5831,18 +5831,12 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
 
     if (m_spellInfo->rangeIndex == 1)                       // self range
     {
-        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
+        float spellDist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
 
-        // before caster
-        float fx, fy, fz;
-        unitTarget->GetClosePoint(fx, fy, fz, unitTarget->GetObjectBoundingRadius(), dis);
-        float ox, oy, oz;
-        unitTarget->GetPosition(ox, oy, oz);
+        WorldLocation destLoc;    
+        unitTarget->GetFirstCollisionPosition(destLoc, spellDist, 0.0f);
 
-        if (unitTarget->GetMap()->GetObjectHitPos(ox,oy,oz+0.5f, fx,fy,oz+0.5f,fx,fy,fz, -0.5f))
-            unitTarget->UpdateAllowedPositionZ(fx, fy, fz);
-
-        unitTarget->NearTeleportTo(fx, fy, fz, unitTarget->GetOrientation(), unitTarget == m_caster);
+        unitTarget->NearTeleportTo(destLoc.coord_x, destLoc.coord_y, (destLoc.coord_z + unitTarget->GetObjectScale()), unitTarget->GetOrientation(), unitTarget == m_caster);
     }
 }
 
