@@ -1737,6 +1737,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     break;
 
                 if(!prev->IsWithinLOSInMap(*next))
+                    || ((m_spellInfo->AttributesEx6 & SPELL_ATTR_EX6_IGNORE_CC_TARGETS) && !(*next)->CanFreeMove()))
                 {
                     ++next;
                     continue;
