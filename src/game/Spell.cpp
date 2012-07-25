@@ -1736,7 +1736,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if(!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
                     break;
 
-                if(!prev->IsWithinLOSInMap(*next))
+                if(!prev->IsWithinLOSInMap(*next)
                     || ((m_spellInfo->AttributesEx6 & SPELL_ATTR_EX6_IGNORE_CC_TARGETS) && !(*next)->CanFreeMove()))
                 {
                     ++next;
@@ -2776,8 +2776,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 
         TriggerGlobalCooldown();
     }
-    // execute triggered without cast time explicitly in call point
-    else if(m_timer == 0)
+    // execute without cast time explicitly in call point
+    if (m_timer == 0 && (!IsChanneledSpell(m_spellInfo) || m_IsTriggeredSpell))
         cast(true);
     // else triggered with cast time will execute execute at next tick or later
     // without adding to cast type slot
