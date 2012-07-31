@@ -2542,6 +2542,9 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         if (minfo)
             display_id = minfo->modelid;
 
+        // Remove stealth before mounting
+        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
         target->Mount(display_id, GetId());
     }
     else
