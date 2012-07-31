@@ -1842,6 +1842,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if (Unit* pVictim = m_caster->getVictim())
                     targetUnitMap.remove(pVictim);
             }
+            else if (m_spellInfo->Id == 5246)               // Intimidating Shout (do not target current victim with AOE fear)
+            {
+                if (Unit* pVictim = m_caster->getVictim())
+                    targetUnitMap.remove(pVictim);
+            }
             break;
         case TARGET_AREAEFFECT_INSTANT:
         {
