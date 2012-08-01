@@ -61,6 +61,7 @@
 #include "Mail.h"
 
 #include <cmath>
+#include <numeric>
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -20789,21 +20790,6 @@ void Player::CreatePet(uint32 cEntry)
     delete pCreature;
 }
 
-void Player::DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal)
-{
-    Player *pPlayer = sObjectMgr.GetPlayer(guid);
-
-    DamageHealData *data = m_DamagersAndHealers[guid];
-
-    if(!data)
-    {
-        data = new DamageHealData();
-        m_DamagersAndHealers[guid] = data;
-    }
-    data->damage += damage;
-    data->healing += heal;
-}
-
 void Player::InGamemasterGossip(Creature * pCreature)
 {
     bool result = false;
@@ -20848,109 +20834,93 @@ struct compare_pair_second {
     }
 };
 
+uint32 pair_adder(uint32 n, const std::map<uint64, uint32>::value_type & p) { return n + p.second; }
+
+// Player is victim, attackers are fetched inside system.
 void Player::HandlePvPKill()
 {
-    uint32 uStartTime = WorldTimer::getMSTime();
-    KillStreak = 0;
-    uint32 loopCount = 0;
-    uint32 victimHealth = 0;
-    uint32 rewardgold = 10000;
-    uint64 maxdamagerGuid = 0;
-    uint64 maxdamagerDmg = 0;
+    const uint32 uStartTime = WorldTimer::getMSTime();
 
-    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    const int16 RewardGold = 10000;
+    uint32 InCombatPlayers = 0;
+    uint64 MaxDmgGUID = 0;
+    uint64 MaxDmgDmg  = 0;
+
+    // Damage Code Begin
+    float TotalHealth = std::accumulate(m_Damagers.begin(), m_Damagers.end(),0,pair_adder);
+    for (std::map<uint64, uint32>::const_iterator itr = m_Damagers.begin(); itr != m_Damagers.end(); ++itr)
     {
-        if (itr->second->damage > 0)
-        {
-            victimHealth += itr->second->damage;
+        uint64  GUID    = itr->first;
+        float   Damage  = itr->second;
 
-            if (itr->second->damage > maxdamagerDmg)
+        if (Damage > MaxDmgDmg)
+        {
+            MaxDmgGUID  = GUID;
+            MaxDmgDmg   = Damage;
+        }
+
+        ++InCombatPlayers;
+        Player* pAttacker = sObjectMgr.GetPlayer(GUID);
+
+        if (pAttacker->HandlePvPAntifarm(this))
+        {
+            int32 Reward = (RewardGold * (Damage / TotalHealth)*((pAttacker->GetKillStreak()/10)+1.0f));
+            pAttacker->ModifyMoney(+Reward);
+            pAttacker->IncreaseKillStreak();
+
+            ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,GetNameLink().c_str());
+
+            // Damage Code End
+            // Healing Code Begin
+            float TotalHealing = std::accumulate(m_Healers.begin(), m_Healers.end(),0,pair_adder);
+            for (std::map<uint64, uint32>::const_iterator itr = pAttacker->m_Healers.begin(); itr != pAttacker->m_Healers.end(); ++itr)
             {
-                maxdamagerDmg = itr->second->damage;
-                maxdamagerGuid = itr->first;
+                uint64  GUID        = itr->first;
+                float   Healing     = itr->second;
+                float   MaxHealth   = pAttacker->GetMaxHealth();
+
+                ++InCombatPlayers;
+                Player* pHealer = sObjectMgr.GetPlayer(GUID);
+
+                float maxhealingPct = (Healing/MaxHealth);
+                if (maxhealingPct > 1) maxhealingPct = 1.0f;
+
+                Reward = (Reward * ((Healing / TotalHealing)*((pHealer->GetKillStreak()/10)+1.0f)*maxhealingPct));
+                pHealer->ModifyMoney(+Reward);
+                pHealer->IncreaseKillStreak();
+
+                ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,pAttacker->GetNameLink().c_str());
             }
+            // Healing Code End
         }
     }
 
-    for (std::map<uint64, DamageHealData*>::iterator itr = m_DamagersAndHealers.begin(); itr != m_DamagersAndHealers.end(); ++itr)
+    if (Player* pMostDamager = sObjectMgr.GetPlayer(MaxDmgGUID))
     {
-        if (itr->second->damage > 0)
-        {
-            ++loopCount;
-            Player* pAttacker = sObjectMgr.GetPlayer(itr->first);
-            float killstreakMod = (float(pAttacker->KillStreak)/10)+1.0f;
-            ++pAttacker->KillStreak;
-
-            if (pAttacker->HandlePvPAntifarm(this))
-            {
-                uint32 attackerHealing = 0;
-                float damagePct = float(itr->second->damage) / float(victimHealth);
-                float attackerReward = (float(rewardgold) * damagePct)*killstreakMod;
-                pAttacker->ModifyMoney(+int32(attackerReward));
-
-                ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attackerReward/10000.f,GetNameLink().c_str());
-
-                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
-                {
-                    if (itr->second->healing > 0)
-                    {
-                        attackerHealing += itr->second->healing;
-                    }
-                }
-
-                for (std::map<uint64, DamageHealData*>::iterator itr = pAttacker->m_DamagersAndHealers.begin(); itr != pAttacker->m_DamagersAndHealers.end(); ++itr)
-                {
-                    if (itr->second->healing > 0)
-                    {
-                        ++loopCount;
-                        Player* pHealer = sObjectMgr.GetPlayer(itr->first);
-                        float killstreakMod = (float(pHealer->KillStreak)/10)+1.0f;
-                        ++pHealer->KillStreak;
-
-                        float healingPct = float(itr->second->healing) / float(attackerHealing);
-                        float maxhealingPct = (float(itr->second->healing)/float(pAttacker->GetMaxHealth()));
-                        if (maxhealingPct > 1)
-                            maxhealingPct = 1.0f;
-                        float healerReward = ((float(attackerReward) * healingPct)*maxhealingPct)*killstreakMod;
-
-                        pHealer->ModifyMoney(+int32(healerReward));
-
-                        ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,healerReward/10000.f,pAttacker->GetNameLink().c_str());
-                    }
-                }
-            }
-        }
-    }
-    if (loopCount > 1)
-        ChatHandler(this).PSendSysMessage("%s[PvP System]%s It took %u people to kill you",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,loopCount);
-
-    Player* pMostDamager = sObjectMgr.GetPlayer(maxdamagerGuid);
-
-    if (pMostDamager)
-    {
-        ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,maxdamagerDmg);
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
         HandleHardcoreKill(pMostDamager);
 
-        if (KillBounty > 0)
+        if (GetBounty() > 0)
         {
-            ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(KillBounty)/10000.0f);
-            pMostDamager->ModifyMoney(int32(KillBounty));
+            ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(GetBounty())/10000.0f);
+            pMostDamager->ModifyMoney(+GetBounty());
         }
-
     }
 
+    ClearKillStreak();
 
+    if (InCombatPlayers > 1)
+        ChatHandler(this).PSendSysMessage("%s[PvP System]%s There were %u players involved in the combat to your death.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,InCombatPlayers);
 
-    uint32 uPvPRunTime = WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime());
-    sLog.outDebug("Took %u MS to run PvP System",uPvPRunTime);
+    sLog.outDebug("Took %u MS to run PvP System",WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime()));
 }
 
 void Player::HandleHardcoreKill(Player* attacker)
 {
 
-    if (urand(1,3) == 1 && attacker->Hardcore && Hardcore)
+    if (urand(1,3) == 1 && attacker->GetHardcore() && GetHardcore())
     {
-        if (ItemInsuranceCharges < 1)
+        if (GetInsuranceCharges() == 0)
         {
             std::vector<std::pair<uint32, uint32> > itemV;
             uint8 equippedItemCount = 0;
@@ -20966,9 +20936,9 @@ void Player::HandleHardcoreKill(Player* attacker)
             }
             sort(itemV.begin(),itemV.end(),compare_pair_second<std::greater>());
 
-            if (equippedItemCount > ItemInsurance)
+            if (equippedItemCount > GetInsurance())
             {
-                uint32 removeTime = urand(ItemInsurance,equippedItemCount);
+                uint32 removeTime = urand(GetInsurance(),equippedItemCount);
                 uint32 iteration = 0;
 
                 for(std::vector <std::pair <uint32,uint32> >::iterator dx = itemV.begin(); dx != itemV.end(); dx++ )
@@ -20983,7 +20953,7 @@ void Player::HandleHardcoreKill(Player* attacker)
                         if(attacker->StoreNewItemInBestSlots(pItem->GetProto()->ItemId,1))
                         {
                             attacker->SendNewItem(pItem,1,true,false,true);
-                            ChatHandler(this).PSendSysMessage("%s[PvP System]%s %s took %s%s from you!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attacker->GetNameLink().c_str(),pItem->GetNameLink().c_str(),MSG_COLOR_WHITE);
+                            ChatHandler(this).PSendSysMessage("%s[PvP System]%s %s took %s%s from you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attacker->GetNameLink().c_str(),pItem->GetNameLink().c_str(),MSG_COLOR_WHITE);
 
                         }
                     }
@@ -20991,9 +20961,9 @@ void Player::HandleHardcoreKill(Player* attacker)
             }
         }
         else
-            --ItemInsuranceCharges;
-        if (ItemInsuranceCharges > 0 && ItemInsuranceCharges < 10)
-            ChatHandler(this).PSendSysMessage("%s[PvP System]%s You have only %u death charges left!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,ItemInsuranceCharges);
+            SetInsuranceCharges(GetInsuranceCharges()-1);
+        if (GetInsuranceCharges() > 0 && GetInsuranceCharges() < 10)
+            ChatHandler(this).PSendSysMessage("%s[PvP System]%s You only have %u insurance tickets left.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetInsuranceCharges());
     }
 }
 
@@ -21019,34 +20989,34 @@ bool Player::HandlePvPAntifarm(Player* victim)
             }
             return false;
         }
-        else if (victim->GetObjectGuid() == ALastGuid)
+        else if (victim->GetObjectGuid() == GetLastAttackerGUID())
         {
-            ++ALastGuidCount;
-            if (ALastGuidCount >= 6)
+            if (GetLastAttackerGUIDCount() >= 5)
             {
                 if (sendInfo)
                     ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
                 return false;
             }
+            IncreaseAttackerLastGUIDCount();
         }
-        else if (GetObjectGuid() == victim->VLastGuid)
+        else if (GetObjectGuid() == victim->GetLastVictimGUID())
         {
-            ++victim->VLastGuidCount;
-            if (victim->VLastGuidCount >= 6)
+            if (victim->GetLastVictimGUIDCount() >= 5)
             {
                 if (sendInfo)
                     ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
                 return false;
             }
+            IncreaseVictimLastGUIDCount();
         }
         else
         {
-            ALastGuidCount = 0;
-            victim->VLastGuidCount = 0;
+            ClearAttackerGUID();
+            victim->ClearVictimGUID();
         }
     }
-    ALastGuid = victim->GetObjectGuid();    // Set attackers last kill guid to victim's guid
-    victim->VLastGuid = GetObjectGuid();    // Set victims last killed guid to attacker's guid
+    SetAttackerLastGUID(victim->GetObjectGuid());
+    victim->SetVictimLastGUID(GetObjectGuid());
     return true;
 }
 

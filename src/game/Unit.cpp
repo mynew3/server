@@ -527,8 +527,8 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
-        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), damage, 0);
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim && damage > 0)
+        pVictim->ToPlayer()->Damaged(GetObjectGuid(), damage);
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
         pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -5606,8 +5606,8 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
 
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim)
-        pVictim->ToPlayer()->DamagedOrHealed(GetObjectGuid(), 0, gain);
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim && addhealth > 0)
+        pVictim->ToPlayer()->Healed(GetObjectGuid(), gain);
 
     Unit* unit = this;
 
@@ -6875,11 +6875,9 @@ void Unit::ClearInCombat()
 {
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        Player *p = ((Player*)this);
-
-        for (std::map<uint64, DamageHealData*>::iterator itr = p->m_DamagersAndHealers.begin(); itr != p->m_DamagersAndHealers.end(); ++itr)
-            delete itr->second;
-        p->m_DamagersAndHealers.clear();
+        Player* pPlayer = ToPlayer();
+        pPlayer->m_Damagers.clear();
+        pPlayer->m_Healers.clear();
     }
 
     m_CombatTimer = 0;

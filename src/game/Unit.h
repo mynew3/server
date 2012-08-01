@@ -1514,9 +1514,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void  SetShapeshiftForm(ShapeshiftForm form)
         {
             SetByteValue(UNIT_FIELD_BYTES_2, 3, form);
-            // always update this field to prevent problems with shapeshifting
-            if (GetTypeId() == TYPEID_PLAYER)
-                ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
         }
 
         bool IsInFeralForm() const

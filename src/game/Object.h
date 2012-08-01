@@ -575,8 +575,6 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool isActiveObject() const { return m_isActiveObject || m_viewPoint.hasViewers(); }
         void SetActiveObjectState(bool active);
 
-        void ForceValuesUpdateAtIndex(uint16);
-
         ViewPoint& GetViewPoint() { return m_viewPoint; }
 
         // ASSERT print helper

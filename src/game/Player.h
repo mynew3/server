@@ -54,13 +54,6 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 
-struct DamageHealData
-{
-    DamageHealData() : damage(0), healing(0) { }
-    uint32 damage;
-    uint32 healing;
-};
-
 enum TransmogrificationResult
 {
     ERR_FAKE_NEW_BAD_QUALITY,
@@ -960,27 +953,74 @@ class MANGOS_DLL_SPEC Player : public Unit
         ~Player ( );
 
 
-        bool BuyEnabled;
-        bool Hardcore;
-        uint32 ItemInsurance;
-        uint32 ItemInsuranceCharges;
-        /* PvP System Begin */
-        uint32 KillStreak;
-        uint32 ALastGuid;
-        uint32 ALastGuidCount;
-        uint32 VLastGuid;
-        uint32 VLastGuidCount;
-        uint32 KillBounty;
-        /* PvP System End */
+        /* - Custom */
+    private:
+        uint8  ItemInsurance;
+        uint32  ItemInsuranceCharges;
+        int32   KillBounty;
 
-        void HandlePvPKill();
-        void HandleHardcoreKill(Player* attacker);
-        bool HandlePvPAntifarm(Player* victim);
-        std::map<uint64, DamageHealData*> m_DamagersAndHealers;
-        void DamagedOrHealed(uint64 guid, uint32 damage, uint32 heal);
-        uint32 SuitableForTransmogrification(Item* pOld, Item* pNew);
+        bool    Hardcore;
+        bool    BuyEnabled;
+        uint32  KillStreak;
 
-        bool AddAura(uint32 spellID);
+        uint32  ALastGuid;
+        uint32  ALastGuidCount;
+        uint32  VLastGuid;
+        uint32  VLastGuidCount;
+    public:
+        void    HandlePvPKill();
+        void    HandleHardcoreKill(Player* attacker);
+        bool    HandlePvPAntifarm(Player* victim);
+
+        void    SetBounty(int32 Bounty)             { KillBounty = Bounty;  }
+        void    SetInsuranceLevel(uint8 Level)      { ItemInsurance = Level;}
+        void    SetInsuranceCharges(uint32 Charges) { ItemInsuranceCharges = Charges;}
+        void    SetAttackerLastGUID(uint64 GUID)    { ALastGuid = GUID; }
+        void    SetVictimLastGUID(uint64 GUID)      { VLastGuid = GUID; }
+        void    IncreaseKillStreak()                { ++KillStreak; }
+        void    IncreaseAttackerLastGUIDCount()     { ++ALastGuidCount; }
+        void    IncreaseVictimLastGUIDCount()       { ++VLastGuidCount; }
+        void    ToggleBuyEnabled()
+        {
+            if(BuyEnabled)
+                BuyEnabled = false;
+            else
+                BuyEnabled = true;
+        }
+
+        void    ToggleHardcore()
+        {
+            if(Hardcore)
+                Hardcore = false;
+            else
+                Hardcore = true;
+        }
+
+        void    ClearKillStreak()   { KillStreak = 0;   }
+        void    ClearAttackerGUID() { ALastGuid = 0; ALastGuidCount = 0;}
+        void    ClearVictimGUID()   { VLastGuid = 0; VLastGuidCount = 0;}
+        void    ClearBounty()       { KillBounty = 0;   }
+
+        float   GetKillStreak()             { return KillStreak;    }
+        uint32  GetLastAttackerGUID()       { return ALastGuid;     }
+        uint32  GetLastAttackerGUIDCount()  { return ALastGuidCount;}
+        uint32  GetLastVictimGUID()         { return VLastGuid;     }
+        uint32  GetLastVictimGUIDCount()    { return VLastGuidCount;}
+        uint32  GetBounty()                 { return KillBounty;    }
+        uint32  GetInsurance()              { return ItemInsurance; }
+        uint32  GetInsuranceCharges()       { return ItemInsuranceCharges;}
+        bool    GetBuyEnabled()             { return BuyEnabled;    }
+        bool    GetHardcore()               { return Hardcore;      }
+
+        std::map<uint64, uint32> m_Damagers;
+        void    Damaged(uint64 guid, uint32 damage) { m_Damagers[guid] += damage; }
+
+        std::map<uint64, uint32> m_Healers;
+        void    Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
+
+        uint32  SuitableForTransmogrification(Item* pOld, Item* pNew);
+
+        bool    AddAura(uint32 spellID);
 
         std::string GetNameLink()
         {
@@ -988,9 +1028,10 @@ class MANGOS_DLL_SPEC Player : public Unit
             return "|Hplayer:"+name+"|h["+name+"]|h";
         }
 
-        void InGamemasterGossip(Creature *pCreature);
+        void    InGamemasterGossip(Creature *pCreature);
 
-        void CreatePet(uint32 cEntry);
+        void    CreatePet(uint32 cEntry);
+        /* Custom - */
 
         void CleanupsBeforeDelete();
 

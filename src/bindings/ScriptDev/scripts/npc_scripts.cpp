@@ -172,53 +172,13 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
         else
             ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s You must %s.togglebuy%s or you do not have enough money to refresh your insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
     }
-/*    else if (action == 121)
-    {
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"1  Gold            ",GOSSIP_SENDER_MAIN,122,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"5  Gold            ",GOSSIP_SENDER_MAIN,123,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"10 Gold            ",GOSSIP_SENDER_MAIN,124,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"25 Gold            ",GOSSIP_SENDER_MAIN,125,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"50 Gold            ",GOSSIP_SENDER_MAIN,126,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Back to Main Menu  ",GOSSIP_SENDER_MAIN,1  ,"",0);
-        pPlayer->PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
-    }
-    else if (action == 122 || action == 123 || action == 124 || action == 125 || action == 126)
-    {
-        uint32 addgold = 0;
-        switch(action)
-        {
-            case 122:addgold=10000;break;
-            case 123:addgold=50000;break;
-            case 124:addgold=100000;break;
-            case 125:addgold=250000;break;
-            case 126:addgold=500000;break;
-        }
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"",addgold,127,"Type in the victims name.",addgold,true);
-        pPlayer->PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
-    }*/
 
     return true;
 }
 
 bool GossipSelectWithCode_telenpc(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
 {
-    /*if (uiAction == 127)
-    {
-        std::string recvname = sCode;
-        Player* pTarget = sObjectMgr.GetPlayer(sCode);
-        std::string sendname = pTarget->GetName();
-        strToLower(sendname);
-        strToLower(recvname);
-
-        if (sendname == recvname && pPlayer->GetMoney() > uiSender)
-        {
-            pPlayer->ModifyMoney(-int32(uiSender));
-            pTarget->KillBounty += uiSender;
-            ChatHandler(pPlayer).PSendGlobalSysMessage("%s[PvP System]%s %s set %u bounty on %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pPlayer->GetNameLink(),uiSender/10000,pTarget->GetNameLink());
-        }
-    }*/
-
-    return false;
+    return true;
 }
 
 bool GossipHello_beast_master(Player *pPlayer, Creature *pCreature)
