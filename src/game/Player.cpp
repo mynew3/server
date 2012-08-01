@@ -20847,7 +20847,7 @@ void Player::HandlePvPKill()
     uint64 MaxDmgDmg  = 0;
 
     // Damage Code Begin
-    float TotalHealth = std::accumulate(m_Damagers.begin(), m_Damagers.end(),0,pair_adder);
+    float TotalHealth = std::accumulate(m_Damagers.begin(), m_Damagers.end(),0,pair_adder); // Summary of all damage done to victim
     for (std::map<uint64, uint32>::const_iterator itr = m_Damagers.begin(); itr != m_Damagers.end(); ++itr)
     {
         uint64  GUID    = itr->first;
@@ -20870,9 +20870,8 @@ void Player::HandlePvPKill()
 
             ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,GetNameLink().c_str());
 
-            // Damage Code End
-            // Healing Code Begin
-            float TotalHealing = std::accumulate(m_Healers.begin(), m_Healers.end(),0,pair_adder);
+            // Damage Code End | Healing Code Begin
+            float TotalHealing = std::accumulate(pAttacker->m_Healers.begin(), pAttacker->m_Healers.end(),0,pair_adder); // Summary of all healing done to attacker
             for (std::map<uint64, uint32>::const_iterator itr = pAttacker->m_Healers.begin(); itr != pAttacker->m_Healers.end(); ++itr)
             {
                 uint64  GUID        = itr->first;
