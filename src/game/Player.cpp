@@ -20990,23 +20990,23 @@ bool Player::HandlePvPAntifarm(Player* victim)
         }
         else if (victim->GetObjectGuid() == GetLastAttackerGUID())
         {
-            if (GetLastAttackerGUIDCount() >= 5)
+            IncreaseAttackerLastGUIDCount();
+            if (GetLastAttackerGUIDCount() >= 6)
             {
                 if (sendInfo)
                     ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
                 return false;
             }
-            IncreaseAttackerLastGUIDCount();
         }
         else if (GetObjectGuid() == victim->GetLastVictimGUID())
         {
-            if (victim->GetLastVictimGUIDCount() >= 5)
+            IncreaseVictimLastGUIDCount();
+            if (victim->GetLastVictimGUIDCount() >= 6)
             {
                 if (sendInfo)
                     ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
                 return false;
             }
-            IncreaseVictimLastGUIDCount();
         }
         else
         {
