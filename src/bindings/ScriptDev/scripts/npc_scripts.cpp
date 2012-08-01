@@ -149,10 +149,10 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
             case 119: setinsurance = 10; break;
             default: setinsurance = 0; break;
         }
-        if (pPlayer->BuyEnabled && (pPlayer->GetMoney() >= uint32(setinsurance*1000000)))
+        if (pPlayer->GetBuyEnabled() && (pPlayer->GetMoney() >= uint32(setinsurance*1000000)))
         {
-            pPlayer->ItemInsurance = setinsurance;
-            pPlayer->ItemInsuranceCharges = 50;
+            pPlayer->SetInsuranceLevel(setinsurance);
+            pPlayer->SetInsuranceCharges(50);
             pPlayer->ModifyMoney(-setinsurance*1000000);
             ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s You bought 50 death charges of %u item insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,setinsurance);
         }
@@ -162,12 +162,12 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
     else if (action == 120)
     {
         pPlayer->PlayerTalkClass->CloseGossip();
-        int32 cost = pPlayer->ItemInsurance*500000;
-        if (pPlayer->BuyEnabled && pPlayer->GetMoney() >= uint32(cost))
+        int32 cost = pPlayer->GetInsurance()*500000;
+        if (pPlayer->GetBuyEnabled() && pPlayer->GetMoney() >= uint32(cost))
         {
             pPlayer->ModifyMoney(-cost);
-            pPlayer->ItemInsuranceCharges = 50;
-            ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s Refreshed your item insurance charges for %u gold.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pPlayer->ItemInsurance*50);
+            pPlayer->SetInsuranceCharges(50);
+            ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s Refreshed your item insurance charges for %u gold.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pPlayer->GetInsurance()*50);
         }
         else
             ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s You must %s.togglebuy%s or you do not have enough money to refresh your insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
@@ -591,10 +591,7 @@ struct MANGOS_DLL_DECL npc_training_dummyAI : public Scripted_NoMovementAI
 
     AttackerMap m_AttackerMap;
 
-    void Reset()
-    {
-        m_creature->SetStunned(true);
-    }
+    void Reset() {}
 
     void DamageTaken(Unit* pDealer, uint32& uiDamage)
     {
