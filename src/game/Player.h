@@ -972,14 +972,38 @@ class MANGOS_DLL_SPEC Player : public Unit
         void    HandleHardcoreKill(Player* attacker);
         bool    HandlePvPAntifarm(Player* victim);
 
-        void    SetBounty(int32 Bounty)             { KillBounty = Bounty;  }
-        void    SetInsuranceLevel(uint8 Level)      { ItemInsurance = Level;}
-        void    SetInsuranceCharges(uint32 Charges) { ItemInsuranceCharges = Charges;}
-        void    SetAttackerLastGUID(uint64 GUID)    { ALastGuid = GUID; }
-        void    SetVictimLastGUID(uint64 GUID)      { VLastGuid = GUID; }
-        void    IncreaseKillStreak()                { ++KillStreak; }
-        void    IncreaseAttackerLastGUIDCount()     { ++ALastGuidCount; }
-        void    IncreaseVictimLastGUIDCount()       { ++VLastGuidCount; }
+        float   GetKillStreak() { return KillStreak; }
+        void    IncreaseKillStreak() { ++KillStreak; }
+        void    ClearKillStreak() { KillStreak = 0; }
+
+        uint32  GetLastAttackerGUID() { return ALastGuid; }
+        uint32  GetLastAttackerGUIDCount() { return ALastGuidCount; }
+        void    SetAttackerLastGUID(uint64 GUID) { ALastGuid = GUID; }
+        void    IncreaseAttackerLastGUIDCount() { ++ALastGuidCount; }
+        void    ClearAttackerGUID() { ALastGuid = 0; ALastGuidCount = 0; }
+
+        uint32  GetLastVictimGUID() { return VLastGuid; }
+        uint32  GetLastVictimGUIDCount() { return VLastGuidCount; }
+        void    SetVictimLastGUID(uint64 GUID) { VLastGuid = GUID; }
+        void    IncreaseVictimLastGUIDCount() { ++VLastGuidCount; }
+        void    ClearVictimGUID() { VLastGuid = 0; VLastGuidCount = 0; }
+
+        uint32  GetBounty() { return KillBounty; }
+        void    SetBounty(int32 Bounty) { KillBounty = Bounty; }
+        void    ClearBounty() { KillBounty = 0; }
+
+        uint32  GetInsurance() { return ItemInsurance; }
+        uint32  GetInsuranceCharges() { return ItemInsuranceCharges; }
+        void    SetInsuranceLevel(uint8 Level) { ItemInsurance = Level; }
+        void    SetInsuranceCharges(uint32 Charges) { ItemInsuranceCharges = Charges; }
+
+        std::map<uint64, uint32> m_Damagers;
+        void    Damaged(uint64 guid, uint32 damage) { m_Damagers[guid] += damage; }
+
+        std::map<uint64, uint32> m_Healers;
+        void    Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
+
+        bool    GetBuyEnabled() { return BuyEnabled; }
         void    ToggleBuyEnabled()
         {
             if(BuyEnabled)
@@ -987,7 +1011,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             else
                 BuyEnabled = true;
         }
-
+        bool    GetHardcore() { return Hardcore; }
         void    ToggleHardcore()
         {
             if(Hardcore)
@@ -995,28 +1019,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             else
                 Hardcore = true;
         }
-
-        void    ClearKillStreak()   { KillStreak = 0;   }
-        void    ClearAttackerGUID() { ALastGuid = 0; ALastGuidCount = 0;}
-        void    ClearVictimGUID()   { VLastGuid = 0; VLastGuidCount = 0;}
-        void    ClearBounty()       { KillBounty = 0;   }
-
-        float   GetKillStreak()             { return KillStreak;    }
-        uint32  GetLastAttackerGUID()       { return ALastGuid;     }
-        uint32  GetLastAttackerGUIDCount()  { return ALastGuidCount;}
-        uint32  GetLastVictimGUID()         { return VLastGuid;     }
-        uint32  GetLastVictimGUIDCount()    { return VLastGuidCount;}
-        uint32  GetBounty()                 { return KillBounty;    }
-        uint32  GetInsurance()              { return ItemInsurance; }
-        uint32  GetInsuranceCharges()       { return ItemInsuranceCharges;}
-        bool    GetBuyEnabled()             { return BuyEnabled;    }
-        bool    GetHardcore()               { return Hardcore;      }
-
-        std::map<uint64, uint32> m_Damagers;
-        void    Damaged(uint64 guid, uint32 damage) { m_Damagers[guid] += damage; }
-
-        std::map<uint64, uint32> m_Healers;
-        void    Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
 
         uint32  SuitableForTransmogrification(Item* pOld, Item* pNew);
 
