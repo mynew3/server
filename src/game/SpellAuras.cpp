@@ -5565,6 +5565,9 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         {
             if (itr->second->IsRemovedOnShapeLost())
             {
+                if (form == FORM_SHADOW)
+                    return;
+
                 target->RemoveAurasDueToSpell(itr->second->GetId());
                 itr = tAuras.begin();
             }
