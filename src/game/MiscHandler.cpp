@@ -72,6 +72,12 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Recvd CMSG_WHO Message" );
     //recv_data.hexlike();
 
+    // prevent who command from being spammed and causing the server to lag
+    time_t now = time(NULL);
+    if (now - timeLastWhoCommand < 5)
+        return;
+    else timeLastWhoCommand = now;
+
     uint32 clientcount = 0;
 
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
