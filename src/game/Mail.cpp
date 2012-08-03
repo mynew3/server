@@ -407,5 +407,3 @@ void Mail::prepareTemplateItems( Player* receiver )
 
     CharacterDatabase.CommitTransaction();
 }
-
-/*! @} */
