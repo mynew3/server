@@ -539,6 +539,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleWhispersCommand(char* args);
         bool HandleModifyDrunkCommand(char* args);
         bool HandleSetViewCommand(char* args);
+        bool HandleWarpCommand(char* args);
 
         bool HandleLoadScriptsCommand(char* args);
 
