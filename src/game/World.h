@@ -250,6 +250,7 @@ enum eConfigFloatValues
     CONFIG_FLOAT_RATE_DURABILITY_LOSS_PARRY,
     CONFIG_FLOAT_RATE_DURABILITY_LOSS_ABSORB,
     CONFIG_FLOAT_RATE_DURABILITY_LOSS_BLOCK,
+    CONFIG_FLOAT_RATE_PVP_RANK_EXTRA_HONOR,
     CONFIG_FLOAT_SIGHT_GUARDER,
     CONFIG_FLOAT_SIGHT_MONSTER,
     CONFIG_FLOAT_LISTEN_RANGE_SAY,
@@ -319,6 +320,26 @@ enum eConfigBoolValues
     CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,
     CONFIG_BOOL_MMAP_ENABLED,
     CONFIG_BOOL_VALUE_COUNT
+};
+
+enum HonorKillPvPRank
+{
+    HKRANK00,
+    HKRANK01,
+    HKRANK02,
+    HKRANK03,
+    HKRANK04,
+    HKRANK05,
+    HKRANK06,
+    HKRANK07,
+    HKRANK08,
+    HKRANK09,
+    HKRANK10,
+    HKRANK11,
+    HKRANK12,
+    HKRANK13,
+    HKRANK14,
+    HKRANKMAX
 };
 
 /// Can be used in SMSG_AUTH_RESPONSE packet
@@ -495,6 +516,8 @@ class World
         void SendZoneMessage(uint32 zone, WorldPacket* packet, WorldSession* self = NULL, Team team = TEAM_NONE);
         void SendZoneText(uint32 zone, const char* text, WorldSession* self = NULL, Team team = TEAM_NONE);
         void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = NULL);
+
+        uint32 pvp_ranks[HKRANKMAX];
 
         /// Are we in the middle of a shutdown?
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
