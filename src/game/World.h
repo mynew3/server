@@ -124,6 +124,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_GM_INVISIBLE_AURA,
     CONFIG_UINT32_GROUP_VISIBILITY,
     CONFIG_UINT32_MAIL_DELIVERY_DELAY,
+    CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL,
     CONFIG_UINT32_MASS_MAILER_SEND_PER_TICK,
     CONFIG_UINT32_UPTIME_UPDATE,
     CONFIG_UINT32_AUCTION_DEPOSIT_MIN,
@@ -269,6 +270,7 @@ enum eConfigFloatValues
 enum eConfigBoolValues
 {
     CONFIG_BOOL_GRID_UNLOAD = 0,
+    CONFIG_BOOL_EXTERNAL_MAIL,
     CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY,
     CONFIG_BOOL_OFFHAND_CHECK_AT_TALENTS_RESET,
     CONFIG_BOOL_ALLOW_TWO_SIDE_ACCOUNTS,
@@ -621,6 +623,7 @@ class World
         time_t m_startTime;
         time_t m_gameTime;
         IntervalTimer m_timers[WUPDATE_COUNT];
+        IntervalTimer extmail_timer;
         uint32 mail_timer;
         uint32 mail_timer_expires;
 
