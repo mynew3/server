@@ -378,7 +378,7 @@ class MANGOS_DLL_SPEC Object
             float  *m_floatValues;
         };
 
-        bool* m_changedFields;
+        uint32 *m_uint32Values_mirror;
 
         uint16 m_valuesCount;
 

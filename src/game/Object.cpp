@@ -47,8 +47,8 @@ Object::Object( )
     m_objectTypeId      = TYPEID_OBJECT;
     m_objectType        = TYPEMASK_OBJECT;
 
-    m_uint32Values      = NULL;
-    m_changedFields     = NULL;
+    m_uint32Values      = 0;
+    m_uint32Values_mirror = 0;
     m_valuesCount       = 0;
 
     m_inWorld           = false;
@@ -74,18 +74,18 @@ Object::~Object( )
     {
         //DEBUG_LOG("Object desctr 1 check (%p)",(void*)this);
         delete [] m_uint32Values;
-        delete [] m_changedFields;
+        delete [] m_uint32Values_mirror;
         //DEBUG_LOG("Object desctr 2 check (%p)",(void*)this);
     }
 }
 
 void Object::_InitValues()
 {
-    m_uint32Values = new uint32[m_valuesCount];
+    m_uint32Values = new uint32[ m_valuesCount ];
     memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
 
-    m_changedFields = new bool[m_valuesCount];
-    memset(m_changedFields, 0, m_valuesCount * sizeof(bool));
+    m_uint32Values_mirror = new uint32[ m_valuesCount ];
+    memset(m_uint32Values_mirror, 0, m_valuesCount*sizeof(uint32));
 
     m_objectUpdated = false;
 }
@@ -546,7 +546,14 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *
 
 void Object::ClearUpdateMask(bool remove)
 {
-    memset(m_changedFields, 0, m_valuesCount * sizeof(bool));
+    if(m_uint32Values)
+    {
+        for( uint16 index = 0; index < m_valuesCount; ++index )
+        {
+            if(m_uint32Values_mirror[index]!= m_uint32Values[index])
+                m_uint32Values_mirror[index] = m_uint32Values[index];
+        }
+    }
 
     if(m_objectUpdated)
     {
@@ -570,7 +577,6 @@ bool Object::LoadValues(const char* data)
     for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
     {
         m_uint32Values[index] = atol((*iter).c_str());
-        m_changedFields[index] = true;
     }
 
     return true;
@@ -578,9 +584,9 @@ bool Object::LoadValues(const char* data)
 
 void Object::_SetUpdateBits(UpdateMask *updateMask, Player* /*target*/) const
 {
-    for (uint16 index = 0; index < m_valuesCount; ++index, ++m_changedFields[index])
+    for( uint16 index = 0; index < m_valuesCount; ++index )
     {
-        if (m_changedFields[index])
+        if(m_uint32Values_mirror[index]!= m_uint32Values[index])
             updateMask->SetBit(index);
     }
 }
@@ -598,10 +604,9 @@ void Object::SetInt32Value( uint16 index, int32 value )
 {
     MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
 
-    if (m_int32Values[index] != value)
+    if(m_int32Values[ index ] != value)
     {
-        m_int32Values[index] = value;
-        m_changedFields[index] = true;
+        m_int32Values[ index ] = value;
         MarkForClientUpdate();
     }
 }
@@ -610,10 +615,9 @@ void Object::SetUInt32Value( uint16 index, uint32 value )
 {
     MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
 
-    if (m_uint32Values[index] != value)
+    if(m_uint32Values[ index ] != value)
     {
-        m_uint32Values[index] = value;
-        m_changedFields[index] = true;
+        m_uint32Values[ index ] = value;
         MarkForClientUpdate();
     }
 }
@@ -621,12 +625,10 @@ void Object::SetUInt32Value( uint16 index, uint32 value )
 void Object::SetUInt64Value( uint16 index, const uint64 &value )
 {
     MANGOS_ASSERT( index + 1 < m_valuesCount || PrintIndexError( index, true ) );
-    if (*((uint64*) & (m_uint32Values[index])) != value)
+    if(*((uint64*)&(m_uint32Values[ index ])) != value)
     {
-        m_uint32Values[index] = *((uint32*)&value);
-        m_uint32Values[index + 1] = *(((uint32*)&value) + 1);
-        m_changedFields[index] = true;
-        m_changedFields[index + 1] = true;
+        m_uint32Values[ index ] = *((uint32*)&value);
+        m_uint32Values[ index + 1 ] = *(((uint32*)&value) + 1);
         MarkForClientUpdate();
     }
 }
@@ -635,10 +637,9 @@ void Object::SetFloatValue( uint16 index, float value )
 {
     MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
 
-    if (m_floatValues[index] != value)
+    if(m_floatValues[ index ] != value)
     {
-        m_floatValues[index] = value;
-        m_changedFields[index] = true;
+        m_floatValues[ index ] = value;
         MarkForClientUpdate();
     }
 }
@@ -653,11 +654,10 @@ void Object::SetByteValue( uint16 index, uint8 offset, uint8 value )
         return;
     }
 
-    if (uint8(m_uint32Values[index] >> (offset * 8)) != value)
+    if(uint8(m_uint32Values[ index ] >> (offset * 8)) != value)
     {
-        m_uint32Values[index] &= ~uint32(uint32(0xFF) << (offset * 8));
-        m_uint32Values[index] |= uint32(uint32(value) << (offset * 8));
-        m_changedFields[index] = true;
+        m_uint32Values[ index ] &= ~uint32(uint32(0xFF) << (offset * 8));
+        m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 8));
         MarkForClientUpdate();
     }
 }
@@ -672,11 +672,10 @@ void Object::SetUInt16Value( uint16 index, uint8 offset, uint16 value )
         return;
     }
 
-    if (uint16(m_uint32Values[index] >> (offset * 16)) != value)
+    if(uint16(m_uint32Values[ index ] >> (offset * 16)) != value)
     {
-        m_uint32Values[index] &= ~uint32(uint32(0xFFFF) << (offset * 16));
-        m_uint32Values[index] |= uint32(uint32(value) << (offset * 16));
-        m_changedFields[index] = true;
+        m_uint32Values[ index ] &= ~uint32(uint32(0xFFFF) << (offset * 16));
+        m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 16));
         MarkForClientUpdate();
     }
 }
@@ -732,13 +731,12 @@ void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
 void Object::SetFlag( uint16 index, uint32 newFlag )
 {
     MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
-    uint32 oldval = m_uint32Values[index];
+    uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval | newFlag;
 
     if(oldval != newval)
     {
-        m_uint32Values[index] = newval;
-        m_changedFields[index] = true;
+        m_uint32Values[ index ] = newval;
         MarkForClientUpdate();
     }
 }
@@ -746,13 +744,12 @@ void Object::SetFlag( uint16 index, uint32 newFlag )
 void Object::RemoveFlag( uint16 index, uint32 oldFlag )
 {
     MANGOS_ASSERT( index < m_valuesCount || PrintIndexError( index, true ) );
-    uint32 oldval = m_uint32Values[index];
+    uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval & ~oldFlag;
 
     if(oldval != newval)
     {
-        m_uint32Values[index] = newval;
-        m_changedFields[index] = true;
+        m_uint32Values[ index ] = newval;
         MarkForClientUpdate();
     }
 }
@@ -767,10 +764,9 @@ void Object::SetByteFlag( uint16 index, uint8 offset, uint8 newFlag )
         return;
     }
 
-    if (!(uint8(m_uint32Values[index] >> (offset * 8)) & newFlag))
+    if(!(uint8(m_uint32Values[ index ] >> (offset * 8)) & newFlag))
     {
-        m_uint32Values[index] |= uint32(uint32(newFlag) << (offset * 8));
-        m_changedFields[index] = true;
+        m_uint32Values[ index ] |= uint32(uint32(newFlag) << (offset * 8));
         MarkForClientUpdate();
     }
 }
@@ -785,10 +781,9 @@ void Object::RemoveByteFlag( uint16 index, uint8 offset, uint8 oldFlag )
         return;
     }
 
-    if (uint8(m_uint32Values[index] >> (offset * 8)) & oldFlag)
+    if(uint8(m_uint32Values[ index ] >> (offset * 8)) & oldFlag)
     {
-        m_uint32Values[index] &= ~uint32(uint32(oldFlag) << (offset * 8));
-        m_changedFields[index] = true;
+        m_uint32Values[ index ] &= ~uint32(uint32(oldFlag) << (offset * 8));
         MarkForClientUpdate();
     }
 }
@@ -800,7 +795,6 @@ void Object::SetShortFlag(uint16 index, bool highpart, uint16 newFlag)
     if (!(uint16(m_uint32Values[index] >> (highpart ? 16 : 0)) & newFlag))
     {
         m_uint32Values[index] |= uint32(uint32(newFlag) << (highpart ? 16 : 0));
-        m_changedFields[index] = true;
         MarkForClientUpdate();
     }
 }
@@ -812,7 +806,6 @@ void Object::RemoveShortFlag(uint16 index, bool highpart, uint16 oldFlag)
     if (uint16(m_uint32Values[index] >> (highpart ? 16 : 0)) & oldFlag)
     {
         m_uint32Values[index] &= ~uint32(uint32(oldFlag) << (highpart ? 16 : 0));
-        m_changedFields[index] = true;
         MarkForClientUpdate();
     }
 }
