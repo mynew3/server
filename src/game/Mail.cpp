@@ -430,14 +430,13 @@ void WorldSession::SendExternalMails()
             uint32 ItemID = fields[5].GetUInt32();
             uint32 ItemCount = fields[6].GetUInt32();
 
-
-            MailDraft draft;
-            draft.SetSubjectAndBody(subject, message);
-            MailSender sender(MAIL_NORMAL, pReceiver->GetObjectGuid().GetCounter(), MAIL_STATIONERY_GM);
-            MailReceiver reciever(pReceiver, pReceiver->GetObjectGuid());
-
-            if (pReceiver != 0)
+            if (pReceiver)
             {
+                MailDraft draft;
+                draft.SetSubjectAndBody(subject, message);
+                MailSender sender(MAIL_NORMAL, pReceiver ? pReceiver->GetObjectGuid().GetCounter() : 0, MAIL_STATIONERY_GM);
+                MailReceiver reciever(pReceiver, pReceiver->GetObjectGuid());
+
                 sLog.outDebug("External Mail - Sending mail to %u, Item:%u", pReceiver->GetObjectGuid().GetCounter(), ItemID);
                 uint32 itemTextId = !message.empty() ? sObjectMgr.CreateItemText(message) : 0;
                 if (ItemID != 0)
@@ -454,6 +453,8 @@ void WorldSession::SendExternalMails()
                 draft.SendMailTo(reciever,sender,MAIL_CHECK_MASK_RETURNED);
                 CharacterDatabase.PExecute("DELETE FROM mail_external WHERE id=%u", id);
             }
+            else
+                sLog.outDebug("External Mail - Mail with unknown player GUID %u in mail_external",fields[1].GetUInt32());
         }
         while(result->NextRow());
     }
