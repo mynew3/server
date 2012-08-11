@@ -719,7 +719,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { "trigger",        SEC_GAMEMASTER,     false, NULL,                                           "", triggerCommandTable  },
         { "wp",             SEC_GAMEMASTER,     false, NULL,                                           "", wpCommandTable       },
 
+        { "setextendedcost",SEC_ADMINISTRATOR,  false, &ChatHandler::HandleExtendedCostCommand,        "", NULL },
+        { "setreqtitle",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqTitleCommand,            "", NULL },
+        { "setreqrating",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqArenaRatingCommand,      "", NULL },
+        { "setreqpoints",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqArenaPointsCommand,      "", NULL },
+        { "setreqitem",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqItemCommand,             "", NULL },
         { "warp",           SEC_PLAYER,         false, &ChatHandler::HandleWarpCommand,                "", NULL },
+
         { "aura",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuraCommand,                "", NULL },
         { "unaura",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnAuraCommand,              "", NULL },
         { "announce",       SEC_MODERATOR,      true,  &ChatHandler::HandleAnnounceCommand,            "", NULL },

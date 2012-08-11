@@ -6611,3 +6611,102 @@ bool ChatHandler::HandleMmapTestArea(char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleExtendedCostCommand(char* args)
+{
+    uint32 extendedcost;
+    if (!ExtractUInt32(&args,extendedcost))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET extendedcost = %u WHERE item = %u",extendedcost,itemid);
+    PSendSysMessage("Updated extendedcost to %u on %s",extendedcost,pItem->GetNameLink(true).c_str());
+}
+
+bool ChatHandler::HandleReqTitleCommand(char* args)
+{
+    uint32 titleid;
+    if (!ExtractUInt32(&args,titleid))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE item_template SET requiredhonorrank = %u WHERE entry = %u",titleid,itemid);
+    PSendSysMessage("Updated required title to %u on %s",titleid,pItem->GetNameLink(true).c_str());
+    PSendSysMessage("Remember: Rank ranks are differing +4, so rank 14 should be entered as 18, rank one as 5 etc.");
+    return true;
+}
+
+bool ChatHandler::HandleReqArenaRatingCommand(char* args)
+{
+    uint32 rating;
+    if (!ExtractUInt32(&args,rating))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqArenaRating = %u WHERE item = %u",rating,itemid);
+    PSendSysMessage("Updated required arena rating to %u on %s",rating,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqArenaPointsCommand(char* args)
+{
+    uint32 points;
+    if (!ExtractUInt32(&args,points))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqArenaPoints = %u WHERE item = %u",points,itemid);
+    PSendSysMessage("Updated required arena points to %u on %s",points,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqItemCommand(char* args)
+{
+    uint32 reqitem;
+    if (!ExtractUInt32(&args,reqitem))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    Item* pReqItem = Item::CreateItem(reqitem, 1);
+    if (!pReqItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqItem = %u WHERE item = %u",reqitem,itemid);
+    PSendSysMessage("Updated required item to %s%s on %s",pReqItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+    return true;
+}

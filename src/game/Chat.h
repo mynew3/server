@@ -149,6 +149,13 @@ class MANGOS_DLL_SPEC ChatHandler
         void CheckIntegrity(ChatCommand *table, ChatCommand *parentCommand);
         ChatCommand* getCommandTable();
 
+        bool HandleUpdateGoldPriceCommand(char* args);
+        bool HandleExtendedCostCommand(char* args);
+        bool HandleReqTitleCommand(char* args);
+        bool HandleReqArenaRatingCommand(char* args);
+        bool HandleReqArenaPointsCommand(char* args);
+        bool HandleReqItemCommand(char* args);
+
         bool HandleAccountCommand(char* args);
         bool HandleAccountCharactersCommand(char* args);
         bool HandleAccountCreateCommand(char* args);
@@ -593,6 +600,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleMmapStatsCommand(char* args);
         bool HandleMmap(char* args);
         bool HandleMmapTestArea(char* args);
+
 
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
