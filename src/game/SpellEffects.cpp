@@ -2336,9 +2336,11 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)
             destLoc.coord_x = m_targets.m_destX;
             destLoc.coord_y = m_targets.m_destY;
             destLoc.coord_z = m_targets.m_destZ;
+
             float orientation = pTarget ? pTarget->GetOrientation() : unitTarget->GetOrientation();
             unitTarget->MovePositionToFirstCollision(destLoc, unitTarget->GetObjectScale(), orientation);
-            unitTarget->NearTeleportTo(destLoc.coord_x, destLoc.coord_y, (destLoc.coord_z + unitTarget->GetObjectScale()), orientation, unitTarget == m_caster);
+
+            unitTarget->NearTeleportTo(destLoc.coord_x, destLoc.coord_y, (destLoc.coord_z + unitTarget->GetObjectScale()),orientation,unitTarget==m_caster);
             return;
         }
         default:
@@ -6045,8 +6047,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
 
     float angle = unitTarget->GetAngle(m_caster) - unitTarget->GetOrientation();
     WorldLocation pos;
-    unitTarget->GetContactPoint(m_caster, pos.coord_x, pos.coord_y, pos.coord_z);
-    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectScale(), angle);
+
     unitTarget->GetContactPoint(m_caster, pos.coord_x, pos.coord_y, pos.coord_z);
     unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectScale(), angle);
 

@@ -2054,6 +2054,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if ((spellInfo_1->Id == 16864 && spellInfo_2->Id == 37311) ||
                     (spellInfo_2->Id == 16864 && spellInfo_1->Id == 37311))
                     return false;
+
+                // Moonfire and Lacerate
+                if ((spellInfo_1->SpellIconID == 225 && spellInfo_2->SpellIconID == 2246) ||
+                    (spellInfo_2->SpellIconID == 225 && spellInfo_1->SpellIconID == 2246))
+                    return false;
             }
 
             // Leader of the Pack and Scroll of Stamina (multi-family check)
