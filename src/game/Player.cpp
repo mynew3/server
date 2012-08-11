@@ -20886,6 +20886,10 @@ void Player::HandlePvPKill()
         uint64  GUID    = itr->first;
         float   Damage  = itr->second;
 
+        Player* pAttacker = sObjectMgr.GetPlayer(GUID);
+        if (!pAttacker)
+            continue;
+
         if (Damage > MaxDmgDmg)
         {
             MaxDmgGUID  = GUID;
@@ -20893,7 +20897,6 @@ void Player::HandlePvPKill()
         }
 
         ++InCombatPlayers;
-        Player* pAttacker = sObjectMgr.GetPlayer(GUID);
 
         if (pAttacker->HandlePvPAntifarm(this))
         {
@@ -20907,12 +20910,16 @@ void Player::HandlePvPKill()
             float TotalHealing = std::accumulate(pAttacker->m_Healers.begin(), pAttacker->m_Healers.end(),0,pair_adder); // Summary of all healing done to attacker
             for (std::map<uint64, uint32>::const_iterator itr = pAttacker->m_Healers.begin(); itr != pAttacker->m_Healers.end(); ++itr)
             {
+
                 uint64  GUID        = itr->first;
                 float   Healing     = itr->second;
                 float   MaxHealth   = pAttacker->GetMaxHealth();
 
-                ++InCombatPlayers;
                 Player* pHealer = sObjectMgr.GetPlayer(GUID);
+                if (!pHealer)
+                    continue;
+
+                ++InCombatPlayers;
 
                 float maxhealingPct = (Healing/MaxHealth);
                 if (maxhealingPct > 1) maxhealingPct = 1.0f;
