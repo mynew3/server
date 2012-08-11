@@ -59,6 +59,8 @@
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
 #include "Mail.h"
+#include "DBCStores.h"
+#include "SQLStorages.h"
 
 #include <cmath>
 #include <numeric>
@@ -1129,13 +1131,13 @@ void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 itemId)
     SendMessageToSet(&data, true);
 }
 
-void Player::Update( uint32 update_diff, uint32 p_time )
+void Player::Update(uint32 update_diff, uint32 p_time)
 {
-    if(!IsInWorld())
+    if (!IsInWorld())
         return;
 
-    // undelivered mail
-    if(m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
+    // Undelivered mail
+    if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
     {
         SendNewMail();
         ++unReadMails;
@@ -1144,23 +1146,16 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         m_nextMailDelivereTime = 0;
     }
 
-    //used to implement delayed far teleports
+    // Used to implement delayed far teleports
     SetCanDelayTeleport(true);
-    Unit::Update( update_diff, p_time );
+    Unit::Update(update_diff, p_time);
     SetCanDelayTeleport(false);
 
-    // update player only attacks
-    if(uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
-    {
-        setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff) );
-    }
+    // Update player only attacks
+    if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
+        setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff));
 
-    if(uint32 off_att = getAttackTimer(OFF_ATTACK))
-    {
-        setAttackTimer(OFF_ATTACK, (update_diff >= off_att ? 0 : off_att - update_diff) );
-    }
-
-    time_t now = time (NULL);
+    time_t now = time(NULL);
 
     UpdatePvPFlag(now);
 
@@ -1173,8 +1168,8 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     UpdateAfkReport(now);
 
     // Update items that have just a limited lifetime
-    if (now>m_Last_tick)
-        UpdateItemDuration(uint32(now- m_Last_tick));
+    if (now > m_Last_tick)
+        UpdateItemDuration(uint32(now - m_Last_tick));
 
     if (!m_timedquests.empty())
     {
@@ -1182,10 +1177,10 @@ void Player::Update( uint32 update_diff, uint32 p_time )
         while (iter != m_timedquests.end())
         {
             QuestStatusData& q_status = mQuestStatus[*iter];
-            if( q_status.m_timer <= update_diff )
+            if (q_status.m_timer <= update_diff)
             {
                 uint32 quest_id  = *iter;
-                ++iter;                                     // current iter will be removed in FailQuest
+                ++iter;                                     // Current iter will be removed in FailQuest
                 FailQuest(quest_id);
             }
             else
@@ -1201,10 +1196,10 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     {
         UpdateMeleeAttackingState();
 
-        Unit *pVictim = getVictim();
+        Unit* pVictim = getVictim();
         if (pVictim && !IsNonMeleeSpellCasted(false))
         {
-            Player *vOwner = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+            Player* vOwner = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
             if (vOwner && vOwner->IsPvP() && !IsInDuelWith(vOwner))
             {
                 UpdatePvP(true);
@@ -1215,14 +1210,14 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      //freeze update
+        if (roll_chance_i(3) && GetTimeInnEnter() > 0)      // Freeze update
         {
-            time_t time_inn = time(NULL)-GetTimeInnEnter();
-            if (time_inn >= 10)                             //freeze update
+            time_t time_inn = time(NULL) - GetTimeInnEnter();
+            if (time_inn >= 10)                             // Freeze update
             {
-                float bubble = 0.125f*sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);
-                //speed collect rest bonus (section/in hour)
-                SetRestBonus( float(GetRestBonus()+ time_inn*(GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble ));
+                float bubble = 0.125f * sWorld.getConfig(CONFIG_FLOAT_RATE_REST_INGAME);
+                // Speed collect rest bonus (section/in hour)
+                SetRestBonus(float(GetRestBonus() + time_inn * (GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 72000) * bubble));
                 UpdateInnerTime(time(NULL));
             }
         }
@@ -1230,7 +1225,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 
     if (m_regenTimer)
     {
-        if(update_diff >= m_regenTimer)
+        if (update_diff >= m_regenTimer)
             m_regenTimer = 0;
         else
             m_regenTimer -= update_diff;
@@ -1246,18 +1241,18 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 
     if (m_zoneUpdateTimer > 0)
     {
-        if(update_diff >= m_zoneUpdateTimer)
+        if (update_diff >= m_zoneUpdateTimer)
         {
             uint32 newzone, newarea;
-            GetZoneAndAreaId(newzone,newarea);
+            GetZoneAndAreaId(newzone, newarea);
 
-            if( m_zoneUpdateId != newzone )
-                UpdateZone(newzone,newarea);                // also update area
+            if (m_zoneUpdateId != newzone)
+                UpdateZone(newzone, newarea);               // Also update area
             else
             {
-                // use area updates as well
-                // needed for free far all arenas for example
-                if( m_areaUpdateId != newarea )
+                // Use area updates as well
+                // Needed for free for all arenas for example
+                if (m_areaUpdateId != newarea)
                     UpdateArea(newarea);
 
                 m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
@@ -1269,7 +1264,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
 
     if (m_timeSyncTimer > 0)
     {
-        if(update_diff >= m_timeSyncTimer)
+        if (update_diff >= m_timeSyncTimer)
             SendTimeSync();
         else
             m_timeSyncTimer -= update_diff;
@@ -1283,9 +1278,9 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     if (m_deathState == JUST_DIED)
         KillPlayer();
 
-    if(m_nextSave > 0)
+    if (m_nextSave > 0)
     {
-        if(update_diff >= m_nextSave)
+        if (update_diff >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
             SaveToDB();
@@ -1295,10 +1290,10 @@ void Player::Update( uint32 update_diff, uint32 p_time )
             m_nextSave -= update_diff;
     }
 
-    //Handle Water/drowning
+    // Handle Water/drowning
     HandleDrowning(update_diff);
 
-    //Handle detect stealth players
+    // Handle detect stealth players
     if (m_DetectInvTimer > 0)
     {
         if (update_diff >= m_DetectInvTimer)
@@ -1327,10 +1322,10 @@ void Player::Update( uint32 update_diff, uint32 p_time )
             HandleSobering();
     }
 
-    // not auto-free ghost from body in instances
-    if(m_deathTimer > 0  && !GetMap()->Instanceable())
+    // Not auto-free ghost from body in instances
+    if (m_deathTimer > 0  && !GetMap()->Instanceable())
     {
-        if(p_time >= m_deathTimer)
+        if (p_time >= m_deathTimer)
         {
             m_deathTimer = 0;
             BuildPlayerRepop();
@@ -1343,7 +1338,7 @@ void Player::Update( uint32 update_diff, uint32 p_time )
     UpdateEnchantTime(update_diff);
     UpdateHomebindTime(update_diff);
 
-    // group update
+    // Group update
     SendUpdateToOutOfRangeGroupMembers();
 
     Pet* pet = GetPet();
@@ -6387,6 +6382,15 @@ void Player::UpdateArea(uint32 newArea)
     UpdateAreaDependentAuras();
 }
 
+bool Player::CanUseOutdoorCapturePoint()
+{
+    return CanUseCapturePoint() &&
+        (IsPvP() || sWorld.IsPvPRealm()) &&
+        !HasMovementFlag(MOVEFLAG_FLYING) &&
+        !IsTaxiFlying() &&
+        !isGameMaster();
+}
+
 void Player::UpdateZone(uint32 newZone, uint32 newArea)
 {
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
@@ -6726,12 +6730,10 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
             case ITEM_MOD_HIT_RATING:
                 ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
                 ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_RATING:
                 ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
                 ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_RATING:
                 ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
@@ -6751,7 +6753,6 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
             case ITEM_MOD_HASTE_RATING:
                 ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
                 ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
-                ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_EXPERTISE_RATING:
                 ApplyRatingMod(CR_EXPERTISE, int32(val), apply);
@@ -11993,13 +11994,11 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         case ITEM_MOD_HIT_RATING:
                             ((Player*)this)->ApplyRatingMod(CR_HIT_MELEE, enchant_amount, apply);
                             ((Player*)this)->ApplyRatingMod(CR_HIT_RANGED, enchant_amount, apply);
-                            ((Player*)this)->ApplyRatingMod(CR_HIT_SPELL, enchant_amount, apply);
                             DEBUG_LOG("+ %u HIT", enchant_amount);
                             break;
                         case ITEM_MOD_CRIT_RATING:
                             ((Player*)this)->ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
                             ((Player*)this)->ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
-                            ((Player*)this)->ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
                             DEBUG_LOG("+ %u CRITICAL", enchant_amount);
                             break;
 //                        Values ITEM_MOD_HIT_TAKEN_RATING and ITEM_MOD_CRIT_TAKEN_RATING are never used in Enchantment
@@ -12022,7 +12021,6 @@ void Player::ApplyEnchantment(Item *item, EnchantmentSlot slot, bool apply, bool
                         case ITEM_MOD_HASTE_RATING:
                             ((Player*)this)->ApplyRatingMod(CR_HASTE_MELEE, enchant_amount, apply);
                             ((Player*)this)->ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
-                            ((Player*)this)->ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
                             DEBUG_LOG("+ %u HASTE", enchant_amount);
                             break;
                         case ITEM_MOD_EXPERTISE_RATING:
@@ -20032,24 +20030,19 @@ bool Player::CanUseBattleGroundObject()
 {
     // TODO : some spells gives player ForceReaction to one faction (ReputationMgr::ApplyForceReaction)
     // maybe gameobject code should handle that ForceReaction usage
-    return ( //InBattleGround() &&                          // in battleground - not need, check in other cases
-             //!IsMounted() && - not correct, player is dismounted when he clicks on flag
-             //player cannot use object when he is invulnerable (immune)
-             !isTotalImmune() &&                            // not totally immune
-             //i'm not sure if these two are correct, because invisible players should get visible when they click on flag
-             !HasStealthAura() &&                           // not stealthed
-             !HasInvisibilityAura() &&                      // not invisible
-             !HasAura(SPELL_RECENTLY_DROPPED_FLAG, EFFECT_INDEX_0) &&// can't pickup
-             isAlive()                                      // live player
-           );
+    return (isAlive() &&                                    // living
+            // the following two are incorrect, because invisible/stealthed players should get visible when they click on flag
+            !HasStealthAura() &&                            // not stealthed
+            !HasInvisibilityAura() &&                       // visible
+            !isTotalImmune() &&                             // vulnerable (not immune)
+            !HasAura(SPELL_RECENTLY_DROPPED_FLAG, EFFECT_INDEX_0));
 }
 
-bool Player::CanCaptureTowerPoint()
+bool Player::CanUseCapturePoint()
 {
-    return ( !HasStealthAura() &&                           // not stealthed
-             !HasInvisibilityAura() &&                      // not invisible
-             isAlive()                                      // live player
-           );
+    return (isAlive() &&                                    // living
+            !HasStealthAura() &&                            // not stealthed
+            !HasInvisibilityAura());                        // visible
 }
 
 bool Player::isTotalImmune()
