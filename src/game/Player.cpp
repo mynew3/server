@@ -1154,7 +1154,6 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     // Update player only attacks
     if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
         setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff));
-
     time_t now = time(NULL);
 
     UpdatePvPFlag(now);

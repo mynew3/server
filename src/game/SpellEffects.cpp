@@ -6047,6 +6047,8 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     WorldLocation pos;
     unitTarget->GetContactPoint(m_caster, pos.coord_x, pos.coord_y, pos.coord_z);
     unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectScale(), angle);
+    unitTarget->GetContactPoint(m_caster, pos.coord_x, pos.coord_y, pos.coord_z);
+    unitTarget->GetFirstCollisionPosition(pos, unitTarget->GetObjectScale(), angle);
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature *)unitTarget)->StopMoving();

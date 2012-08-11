@@ -75,7 +75,7 @@ bool ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
 
             WorldLocation destLoc;
             unit.GetFirstCollisionPosition(destLoc, 10.0f*(rand_norm_f() - 0.5f), unit.GetOrientation());
-
+            
             PathFinder path(&unit);
             path.setPathLengthLimit(30.0f);
             path.calculate(destLoc.coord_x, destLoc.coord_y, (destLoc.coord_z + unit.GetObjectScale()));
