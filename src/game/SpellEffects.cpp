@@ -3376,6 +3376,12 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
+    if (unitTarget->IsHostileTo(m_caster))
+    {
+        m_caster->SetInCombatWith(unitTarget);
+        unitTarget->SetInCombatWith(m_caster);
+    }
+
     // Fill possible dispel list
     std::list <std::pair<SpellAuraHolder* ,uint32> > dispel_list;
 
@@ -3404,6 +3410,11 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
             dispel_list.push_back(std::pair<SpellAuraHolder* ,uint32>(holder, holder->GetStackAmount()));
         }
     }
+
+    // don't allow dispeling more times than buff count
+    if (damage > dispel_list.size())
+        damage = dispel_list.size();
+
     // Ok if exist some buffs for dispel try dispel it
     if (!dispel_list.empty())
     {
@@ -4306,22 +4317,38 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             // Devastate
             if(m_spellInfo->SpellVisual == 671 && m_spellInfo->SpellIconID == 1508)
             {
-                customBonusDamagePercentMod = true;
-                bonusDamagePercentMod = 0.0f;               // only applied if auras found
-
                 // Sunder Armor
                 Aura* sunder = unitTarget->GetAura(SPELL_AURA_MOD_RESISTANCE, SPELLFAMILY_WARRIOR, UI64LIT(0x0000000000004000), m_caster->GetObjectGuid());
 
-                // Devastate bonus and sunder armor refresh, additional threat
+                // Devastate bonus and sunder armor refresh
                 if (sunder)
                 {
                     sunder->GetHolder()->RefreshHolder();
+                    spell_bonus += sunder->GetStackAmount() * CalculateDamage(EFFECT_INDEX_2, unitTarget);
+                }
 
-                    // 100% * stack
-                    bonusDamagePercentMod += 1.0f * sunder->GetStackAmount();
+                // Devastate causing Sunder Armor Effect
+                if (!sunder || sunder->GetStackAmount() < sunder->GetSpellProto()->StackAmount)
+                {
+                    // get highest rank of the Sunder Armor spell
+                    const PlayerSpellMap& sp_list = ((Player*)m_caster)->GetSpellMap();
+                    for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+                    {
+                        // only highest rank is shown in spell book, so simply check if shown in spell book
+                        if (!itr->second.active || itr->second.disabled || itr->second.state == PLAYERSPELL_REMOVED)
+                            continue;
 
-                    // 25 * stack
-                    unitTarget->AddThreat(m_caster, 25.0f * sunder->GetStackAmount(), false, GetSpellSchoolMask(m_spellInfo), m_spellInfo);
+                        SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                        if (!spellInfo)
+                            continue;
+
+                        if (spellInfo->IsFitToFamily(SPELLFAMILY_WARRIOR, UI64LIT(0x0000000000004000)) &&
+                            spellInfo->Id != m_spellInfo->Id)
+                        {
+                             m_caster->CastSpell(unitTarget, spellInfo->Id, true);
+                             break;
+                        }
+                    }
                 }
             }
             break;

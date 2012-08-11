@@ -1736,7 +1736,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if(!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
                     break;
 
-                if(!prev->IsWithinLOSInMap(*next))
+                if(!prev->IsWithinLOSInMap(*next)
+                    || ((m_spellInfo->AttributesEx6 & SPELL_ATTR_EX6_IGNORE_CC_TARGETS) && !(*next)->CanFreeMove()))
                 {
                     ++next;
                     continue;
@@ -1837,6 +1838,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
             }
             else if (m_spellInfo->Id == 30843)              // Enfeeble (do not target current victim)
+            {
+                if (Unit* pVictim = m_caster->getVictim())
+                    targetUnitMap.remove(pVictim);
+            }
+            else if (m_spellInfo->Id == 5246)               // Intimidating Shout (do not target current victim with AOE fear)
             {
                 if (Unit* pVictim = m_caster->getVictim())
                     targetUnitMap.remove(pVictim);
@@ -2742,6 +2748,17 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
     m_casttime = GetSpellCastTime(m_spellInfo, this);
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
+    // don't allow channeled spells / spells with cast time to be casted while moving
+    // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
+    if ((IsChanneledSpell(m_spellInfo) || m_casttime)
+        && m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->isMoving()
+        && m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT)
+    {
+        SendCastResult(SPELL_FAILED_MOVING);
+        finish(false);
+        return;
+    }
+
     // set timer base at cast time
     ReSetTimer();
 
@@ -2764,8 +2781,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 
         TriggerGlobalCooldown();
     }
-    // execute triggered without cast time explicitly in call point
-    else if(m_timer == 0)
+    // execute without cast time explicitly in call point
+    if (m_timer == 0 && (!IsChanneledSpell(m_spellInfo) || m_IsTriggeredSpell))
         cast(true);
     // else triggered with cast time will execute execute at next tick or later
     // without adding to cast type slot
@@ -2961,8 +2978,11 @@ void Spell::cast(bool skipCheck)
     // CAST SPELL
     SendSpellCooldown();
 
-    TakePower();
-    TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
+    if (!m_IsTriggeredSpell)
+    {
+        TakePower();
+        TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
+    }
 
     SendCastResult(castResult);
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
