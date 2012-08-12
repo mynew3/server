@@ -8062,18 +8062,21 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
         bar.step();
         Field* fields = result->Fetch();
 
-        uint32 entry        = fields[0].GetUInt32();
-        uint32 item_id      = fields[1].GetUInt32();
-        uint32 maxcount     = fields[2].GetUInt32();
-        uint32 incrtime     = fields[3].GetUInt32();
-        uint32 ExtendedCost = fields[4].GetUInt32();
+        uint32 entry            = fields[0].GetUInt32();
+        uint32 item_id          = fields[1].GetUInt32();
+        uint32 maxcount         = fields[2].GetUInt32();
+        uint32 incrtime         = fields[3].GetUInt32();
+        uint32 ExtendedCost     = fields[4].GetUInt32();
+        uint32 ReqArenaRating   = fields[5].GetUInt32();
+        uint32 ReqArenaPoints   = fields[6].GetUInt32();
+        uint32 ReqItem          = fields[7].GetUInt32();
 
         if (!IsVendorItemValid(isTemplates, tableName, entry, item_id, maxcount, incrtime, ExtendedCost, NULL, &skip_vendors))
             continue;
 
         VendorItemData& vList = vendorList[entry];
 
-        vList.AddItem(item_id, maxcount, incrtime, ExtendedCost);
+        vList.AddItem(item_id, maxcount, incrtime, ExtendedCost,ReqArenaRating,ReqArenaPoints,ReqItem);
         ++count;
 
     } while (result->NextRow());
@@ -8501,7 +8504,7 @@ void ObjectMgr::LoadGossipMenus()
 void ObjectMgr::AddVendorItem( uint32 entry,uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost )
 {
     VendorItemData& vList = m_mCacheVendorItemMap[entry];
-    vList.AddItem(item,maxcount,incrtime,extendedcost);
+    vList.AddItem(item,maxcount,incrtime,extendedcost,0,0,0);
 
     WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,extendedcost) VALUES('%u','%u','%u','%u','%u')",entry, item, maxcount,incrtime,extendedcost);
 }

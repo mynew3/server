@@ -17954,6 +17954,7 @@ void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
 // Return true is the bought item has a max count to force refresh of window by caller
 bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot)
 {
+    bool CanBuy = true;
     // cheating attempt
     if (count < 1) count = 1;
 
@@ -18062,6 +18063,48 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             return false;
         }
     }
+
+    if (crItem->ReqArenaRating > GetMaxPersonalArenaRatingRequirement())
+    {
+        if (crItem->ReqArenaRating > 0 )
+        {
+            // probably not the proper equip err
+            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+            ChatHandler(this).PSendSysMessage("You need %u arena rating to buy this item.",crItem->ReqArenaRating);
+            return false;
+        }
+    }
+    if (crItem->ReqArenaPoints > GetArenaPoints() || !GetBuyEnabled())
+    {
+        if (crItem->ReqArenaPoints > 0)
+        {
+            SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
+            ChatHandler(this).PSendSysMessage("You need %u arena points to buy this item.");
+            CanBuy = false;
+        }
+    }
+    if (!HasItemCount(crItem->ReqItem,1,false) || !GetBuyEnabled())
+    {
+        Item* pItem = Item::CreateItem(crItem->ReqItem,1);
+        if (pItem && crItem->ReqItem > 0)
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,pItem,NULL,crItem->ReqItem);
+            ChatHandler(this).PSendSysMessage("You need %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            CanBuy = false;
+        }
+    }
+    if (!GetBuyEnabled() && (crItem->ReqArenaPoints > 0 || crItem->ReqItem > 0))
+    {
+        Item* pItem = Item::CreateItem(pProto->ItemId,1);
+        if (pItem)
+        {
+            SendEquipError(EQUIP_ERR_ITEM_LOCKED, NULL, NULL);
+            ChatHandler(this).PSendSysMessage("You must type %s.togglebuy%s to buy %s",MSG_COLOR_RED,MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+        }
+    }
+
+    if (!CanBuy)
+        return false;
 
     uint32 price = pProto->BuyPrice * count;
 

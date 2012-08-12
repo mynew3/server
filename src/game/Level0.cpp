@@ -292,3 +292,19 @@ bool ChatHandler::HandleServerMotdCommand(char* /*args*/)
     PSendSysMessage(LANG_MOTD_CURRENT, sWorld.GetMotd());
     return true;
 }
+
+bool ChatHandler::HandleToggleBuyCommand(char* /*args*/)
+{
+    Player* pPlayer = m_session->GetPlayer();
+    if (!pPlayer)
+        return false;
+
+    pPlayer->ToggleBuyEnabled();
+
+    if (pPlayer->GetBuyEnabled())
+        PSendSysMessage("You can now buy customreq items.");
+    else
+        PSendSysMessage("You can no longer buy customreq items.");
+
+    return true;
+}

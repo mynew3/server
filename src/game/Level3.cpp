@@ -6627,6 +6627,7 @@ bool ChatHandler::HandleExtendedCostCommand(char* args)
 
     WorldDatabase.PExecute("UPDATE npc_vendor SET extendedcost = %u WHERE item = %u",extendedcost,itemid);
     PSendSysMessage("Updated extendedcost to %u on %s",extendedcost,pItem->GetNameLink(true).c_str());
+    return true;
 }
 
 bool ChatHandler::HandleReqTitleCommand(char* args)
@@ -6707,5 +6708,25 @@ bool ChatHandler::HandleReqItemCommand(char* args)
 
     WorldDatabase.PExecute("UPDATE npc_vendor SET ReqItem = %u WHERE item = %u",reqitem,itemid);
     PSendSysMessage("Updated required item to %s%s on %s",pReqItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqGoldCommand(char* args)
+{
+    uint32 copper;
+    if (!ExtractUInt32(&args,copper))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE item_template SET BuyPrice = %u, SellPrice = %u WHERE entry = %u",copper,copper/4,itemid);
+
+    PSendSysMessage("Updated required gold to %u on %s",copper,pItem->GetNameLink(true).c_str());
     return true;
 }
