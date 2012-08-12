@@ -305,11 +305,8 @@ enum SelectFlags
 // Vendors
 struct VendorItem
 {
-    VendorItem(uint32 _item, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost, 
-        uint32 _ReqArenaRating, uint32 _ReqArenaPoints, uint32 _ReqItem)
-
-        : item(_item), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost), 
-        ReqArenaRating(_ReqArenaRating), ReqArenaPoints(_ReqArenaPoints), ReqItem(_ReqItem){}
+    VendorItem(uint32 _item, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost, uint32 _ReqArenaRating, uint32 _ReqArenaPoints, uint32 _ReqItem)
+        : item(_item), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost), ReqArenaRating(_ReqArenaRating), ReqArenaPoints(_ReqArenaPoints), ReqItem(_ReqItem){}
 
     uint32 item;
     uint32 maxcount;                                        // 0 for infinity item amount
