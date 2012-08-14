@@ -926,7 +926,6 @@ enum Mechanics
     MECHANIC_FUMBLE           = 6,
     MECHANIC_ROOT             = 7,
     MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
-    MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
     MECHANIC_STUN             = 12,
@@ -2302,7 +2301,6 @@ enum DiminishingGroup
     // Shared Class Specific
     DIMINISHING_BLIND_CYCLONE,                              // From 2.3.0
     DIMINISHING_DISARM,                                     // From 2.3.0
-    DIMINISHING_SILENCE,                                    // From 2.3.0
     DIMINISHING_FREEZE,                                     // Hunter's Freezing Trap
     DIMINISHING_KNOCKOUT,                                   // Also with Sap, all Knockout mechanics are here
     DIMINISHING_BANISH,
