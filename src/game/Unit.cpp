@@ -6039,7 +6039,10 @@ bool Unit::IsSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
     switch(spellProto->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_NONE:
-            return false;
+            // Allow Lifebloom & Earth Shield crit.
+            // We need more spells to find a general way (if there is any)
+            if (spellProto->Id != 379 && spellProto->Id != 33778)
+                return false;
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
             if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
