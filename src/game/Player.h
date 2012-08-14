@@ -1099,7 +1099,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0);
         void SendInstanceResetWarning(uint32 mapid, uint32 time);
 
-        Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
+        Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask,bool is3D = true);
         GameObject* GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameobject_type = MAX_GAMEOBJECT_TYPE) const;
 
         void ToggleAFK();

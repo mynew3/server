@@ -2033,7 +2033,7 @@ void Player::RegenerateHealth()
     ModifyHealth(int32(addvalue));
 }
 
-Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
+Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask,bool is3D)
 {
     // some basic checks
     if (!guid || !IsInWorld() || IsTaxiFlying())
@@ -2074,7 +2074,7 @@ Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
         return NULL;
 
     // not too far
-    if (!unit->IsWithinDistInMap(this, INTERACTION_DISTANCE))
+    if (!unit->IsWithinDistInMap(this, INTERACTION_DISTANCE,is3D))
         return NULL;
 
     return unit;

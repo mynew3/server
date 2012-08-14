@@ -310,7 +310,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket & recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+    Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE,false);
     if (!pCreature)
     {
         DEBUG_LOG("WORLD: HandleGossipHelloOpcode - %s not found or you can't interact with him.", guid.GetString().c_str());
@@ -360,7 +360,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     if (guid.IsAnyTypeCreature())
     {
-        Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE);
+        Creature *pCreature = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_NONE,false);
 
         if (!pCreature)
         {
