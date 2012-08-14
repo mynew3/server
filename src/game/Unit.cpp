@@ -7492,7 +7492,9 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
         }
     }
 
-    CallForAllControlledUnits(SetSpeedRateHelper(mtype,forced), CONTROLLED_PET|CONTROLLED_GUARDIANS|CONTROLLED_CHARM|CONTROLLED_MINIPET);
+    // Don't sync speed with owner if owner has aura mod decrease speed.
+    if(GetTypeId() == TYPEID_PLAYER && !(GetOwner()->HasAuraType() == SPELL_AURA_MOD_DECREASE_SPEED))
+        CallForAllControlledUnits(SetSpeedRateHelper(mtype,forced), CONTROLLED_PET|CONTROLLED_GUARDIANS|CONTROLLED_CHARM|CONTROLLED_MINIPET);
 }
 
 void Unit::SetDeathState(DeathState s)
