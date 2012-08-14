@@ -3378,11 +3378,15 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
+    //Cause caster & hostile target to enter combat by dispelling it.
     if (unitTarget->IsHostileTo(m_caster))
     {
         m_caster->SetInCombatWith(unitTarget);
         unitTarget->SetInCombatWith(m_caster);
     }
+    //Caster enter combat if friendly target in combat.
+    else if (unitTarget->IsFriendlyTo(m_caster) && unitTarget->isInCombat())
+        m_caster->SetInCombatWith(unitTarget);
 
     // Fill possible dispel list
     std::list <std::pair<SpellAuraHolder* ,uint32> > dispel_list;
@@ -6547,6 +6551,7 @@ void Spell::EffectStealBeneficialBuff(SpellEffectIndex eff_idx)
 
     typedef std::vector<SpellAuraHolder*> StealList;
     StealList steal_list;
+
     // Create dispel mask by dispel type
     uint32 dispelMask  = GetDispellMask( DispelType(m_spellInfo->EffectMiscValue[eff_idx]) );
     Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
