@@ -3414,7 +3414,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
     }
 
     // don't allow dispeling more times than buff count
-    if (damage > dispel_list.size())
+    if (uint32(damage) > dispel_list.size())
         damage = dispel_list.size();
 
     // Ok if exist some buffs for dispel try dispel it
