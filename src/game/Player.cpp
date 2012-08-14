@@ -18001,25 +18001,26 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     if (!crItem || crItem->item != item)                    // store diff item (cheating)
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
-        return false;
+        CanBuy = false;
     }
 
-    uint32 totalCount = pProto->BuyCount * count;
+    if (pProto->BuyCount >= 1)
+        count = pProto->BuyCount * count;
 
     // check current item amount if it limited
     if (crItem->maxcount != 0)
     {
-        if (pCreature->GetVendorItemCurrentCount(crItem) < totalCount)
+        if (pCreature->GetVendorItemCurrentCount(crItem) < count)
         {
             SendBuyError(BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
-            return false;
+            CanBuy = false;
         }
     }
 
     if (uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank)
     {
         SendBuyError(BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
-        return false;
+        CanBuy = false;
     }
 
     if (uint32 extendedCostId = crItem->ExtendedCost)
@@ -18035,14 +18036,14 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         if (GetHonorPoints() < (iece->reqhonorpoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
-            return false;
+            CanBuy = false;
         }
 
         // arena points price
         if (GetArenaPoints() < (iece->reqarenapoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
-            return false;
+            CanBuy = false;
         }
 
         // item base price
@@ -18051,7 +18052,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i] * count))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                return false;
+                CanBuy = false;
             }
         }
 
@@ -18060,7 +18061,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
-            return false;
+            CanBuy = false;
         }
     }
 
@@ -18071,7 +18072,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
             ChatHandler(this).PSendSysMessage("You need %u arena rating to buy this item.",crItem->ReqArenaRating);
-            return false;
+            CanBuy = false;
         }
     }
     if (crItem->ReqArenaPoints > GetArenaPoints() || !GetBuyEnabled())
@@ -18122,7 +18123,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     if ((bag == NULL_BAG && slot == NULL_SLOT) || IsInventoryPos(bag, slot))
     {
         ItemPosCountVec dest;
-        InventoryResult msg = CanStoreNewItem(bag, slot, dest, item, totalCount);
+        InventoryResult msg = CanStoreNewItem(bag, slot, dest, item, count);
         if (msg != EQUIP_ERR_OK)
         {
             SendEquipError(msg, NULL, NULL, item);
@@ -18138,7 +18139,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     }
     else if (IsEquipmentPos(bag, slot))
     {
-        if (totalCount != 1)
+        if (count != 1)
         {
             SendEquipError(EQUIP_ERR_ITEM_CANT_BE_EQUIPPED, NULL, NULL);
             return false;
@@ -18171,7 +18172,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     if (!pItem)
         return false;
 
-    uint32 new_count = pCreature->UpdateVendorItemCurrentCount(crItem, totalCount);
+    uint32 new_count = pCreature->UpdateVendorItemCurrentCount(crItem, count);
 
     WorldPacket data(SMSG_BUY_ITEM, 8+4+4+4);
     data << pCreature->GetObjectGuid();
@@ -18180,7 +18181,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     data << uint32(count);
     GetSession()->SendPacket(&data);
 
-    SendNewItem(pItem, totalCount, true, false, false);
+    SendNewItem(pItem, count, true, false, false);
 
     return crItem->maxcount != 0;
 }
