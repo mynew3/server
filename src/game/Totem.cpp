@@ -187,12 +187,13 @@ void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
 
 bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex index) const
 {
-    // Check for Mana Spring & Healing Stream totems
     switch (spellInfo->SpellFamilyName)
     {
+        //Check for Shaman Mana Spring & Healing Stream totems
+        //They have periodic regenerate effect, but function close before it get
+        //that check. This check - better way to fix this problem.
         case SPELLFAMILY_SHAMAN:
-            if (spellInfo->IsFitToFamilyMask(UI64LIT(0x00000002000)) ||
-                spellInfo->IsFitToFamilyMask(UI64LIT(0x00000004000)))
+            if ( spellInfo->IsFitToFamilyMask(UI64LIT(0x000260CE000)))
                 return false;
             break;
         default:
