@@ -6767,6 +6767,11 @@ m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
                               !m_spellProto->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
                               !m_spellProto->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT));
 
+    //Do not allow remove WeakenedSoul when shifting out Shadowform &
+    //Berserker Rage when switching stances.
+    if (GetId() == 6788 || GetId() == 18499)
+        m_isRemovedOnShapeLost = false;
+
     Unit* unitCaster = caster && caster->isType(TYPEMASK_UNIT) ? (Unit*)caster : NULL;
 
     m_duration = m_maxDuration = CalculateSpellDuration(spellproto, unitCaster);
