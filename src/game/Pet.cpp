@@ -1280,8 +1280,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
             {
                 switch(owner->getClass())
                 {
-                case CLASS_DRUID:
-                    {
+                    case CLASS_DRUID:
                         PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
                         SetCreateHealth(30 + 30*petlevel);
 
@@ -1292,15 +1291,13 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
                         SetBonusDamage( int32(val) );
                         SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4) + GetBonusDamage()) );
                         SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4) + GetBonusDamage()) );
-                        break;
-                    }
-                case CLASS_SHAMAN:
-                    {
+                    break;
+                    case CLASS_SHAMAN:
                         SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
                         SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-                        break;
-                    }
+                    break;
                 }
+            }
 
             // Bonus damage getting from player
             SetBonusDamage( int32(0) );
