@@ -4207,8 +4207,6 @@ void Aura::HandleModMechanicImmunity(bool apply, bool /*Real*/)
                 {
                     if (apply)
                         owner->CastSpell(owner, 34471, true, NULL, this);
-                    else
-                        owner->RemoveAurasDueToSpell(34471);
                     break;
                 }
             }
