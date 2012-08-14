@@ -1281,20 +1281,24 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
                 switch(owner->getClass())
                 {
                     case CLASS_DRUID:
-                        PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
-                        SetCreateHealth(30 + 30*petlevel);
+                        {
+                            PetLevelInfo const* pInfo = sObjectMgr.GetPetLevelInfo(creature_ID, petlevel);
+                            SetCreateHealth(30 + 30*petlevel);
 
-                        //15% damage bonus of druids's nature damage
-                        float val = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE) * 0.15f;
-                        if(val < 0)
-                            val = 0;
-                        SetBonusDamage( int32(val) );
-                        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4) + GetBonusDamage()) );
-                        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4) + GetBonusDamage()) );
+                            //15% damage bonus of druids's nature damage
+                            float val = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE) * 0.15f;
+                            if(val < 0)
+                                val = 0;
+                            SetBonusDamage( int32(val) );
+                            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4) + GetBonusDamage()) );
+                            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4) + GetBonusDamage()) );
+                        }
                     break;
                     case CLASS_SHAMAN:
-                        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-                        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                        {
+                            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                        }
                     break;
                 }
             }
