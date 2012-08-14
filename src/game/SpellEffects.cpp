@@ -4386,6 +4386,36 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 
                 if(found)
                     totalDamagePercentMod *= 1.5f;          // 150% if poisoned
+
+                //Find Weakness for mutilate
+                Unit::SpellAuraHolderMap const& auras = m_caster->GetSpellAuraHolderMap();
+                for(Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr){
+                    if( itr->second->GetSpellProto()->Id == 31238 )
+                    {
+                        totalDamagePercentMod *= 1.1f;
+                        break;
+                    }
+                    if( itr->second->GetSpellProto()->Id == 31234 )
+                    {
+                        totalDamagePercentMod *= 1.02f;
+                        break;
+                    }
+                    if( itr->second->GetSpellProto()->Id == 31235 )
+                    {
+                        totalDamagePercentMod *= 1.04f;
+                        break;
+                    }
+                    if( itr->second->GetSpellProto()->Id == 31236 )
+                    {
+                        totalDamagePercentMod *= 1.06f;
+                        break;
+                    }
+                    if( itr->second->GetSpellProto()->Id == 31237 )
+                    {
+                        totalDamagePercentMod *= 1.08f;
+                        break;
+                    }
+                }
             }
             break;
         }
