@@ -7385,6 +7385,12 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
             break;
     }
 
+    // For Bestial Swiftness talent in Beast Mastery.
+    if(GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
+        if(Unit* owner = GetOwner())
+            if(owner->HasAura(19596))
+                speed *= 1.3f;
+
     // for creature case, we check explicit if mob searched for assistance
     if (GetTypeId() == TYPEID_UNIT)
     {
