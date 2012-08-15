@@ -8042,7 +8042,7 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
 
     std::set<uint32> skip_vendors;
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, maxcount, incrtime, ExtendedCost, ReqArenaRating, ReqArenaPoints, ReqItem FROM %s", tableName);
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, maxcount, incrtime, ExtendedCost, ReqArenaRating, ReqArenaPoints, ReqItem, ReqItem2 FROM %s", tableName);
     if (!result)
     {
         BarGoLink bar(1);
