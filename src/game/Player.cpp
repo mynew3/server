@@ -18096,7 +18096,6 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             CanBuy = false;
         }
     }
-    bool isReqItem1, isReqItem2 = false;
     if ((!HasItemCount(crItem->ReqItem,1,false) && !HasItemCount(crItem->ReqItem2,1,false)) || !GetBuyEnabled())
     {
         Item* pItem = Item::CreateItem(crItem->ReqItem,1);
@@ -18106,40 +18105,33 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
             ChatHandler(this).PSendSysMessage("You need %s%s or %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
             CanBuy = false;
-            isReqItem1 = true;
-            isReqItem2 = true;
         }
         else if (pItem && crItem->ReqItem > 0)
         {
             SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
             ChatHandler(this).PSendSysMessage("You need %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
             CanBuy = false;
-            isReqItem1 = true;
         }
         else if (pItem2 && crItem->ReqItem2 > 0)
         {
             SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
             ChatHandler(this).PSendSysMessage("You need %s%s to buy this item.",pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
             CanBuy = false;
-            isReqItem2 = true;
         }
     }
     if (!GetBuyEnabled() && (isReqItem1 || isReqItem2))
     {
         Item* pItem = Item::CreateItem(pProto->ItemId,1);
         if (pItem)
-        {
-            SendEquipError(EQUIP_ERR_ITEM_LOCKED, NULL, NULL);
             ChatHandler(this).PSendSysMessage("You must type %s.togglebuy%s to buy %s",MSG_COLOR_RED,MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
-        }
     }
 
     if (!CanBuy)
         return false;
 
-    if (isReqItem1 && crItem->ReqItem > 0)
+    if (crItem->ReqItem > 0)
         DestroyItemCount(crItem->ReqItem,1,true);
-    if (isReqItem2 && crItem->ReqItem2 > 0)
+    if (crItem->ReqItem2 > 0)
         DestroyItemCount(crItem->ReqItem2,1,true);
 
     Item* pItem = NULL;
