@@ -724,6 +724,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setreqrating",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqArenaRatingCommand,      "", NULL },
         { "setreqpoints",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqArenaPointsCommand,      "", NULL },
         { "setreqitem",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqItemCommand,             "", NULL },
+        { "setreqitem2",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqItem2Command,            "", NULL },
         { "setgoldprice",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqGoldCommand,             "", NULL },
         { "togglebuyenabled",SEC_PLAYER,        false, &ChatHandler::HandleToggleBuyCommand,           "", NULL },
         { "warp",           SEC_PLAYER,         false, &ChatHandler::HandleWarpCommand,                "", NULL },

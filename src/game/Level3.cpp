@@ -6711,6 +6711,29 @@ bool ChatHandler::HandleReqItemCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleReqItem2Command(char* args)
+{
+    uint32 reqitem;
+    if (!ExtractUInt32(&args,reqitem))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    Item* pReqItem = Item::CreateItem(reqitem, 1);
+    if (!pReqItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqItem2 = %u WHERE item = %u",reqitem,itemid);
+    PSendSysMessage("Updated required item to %s%s on %s",pReqItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
 bool ChatHandler::HandleReqGoldCommand(char* args)
 {
     uint32 copper;

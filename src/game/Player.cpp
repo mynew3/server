@@ -18065,6 +18065,18 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         }
     }
 
+    uint32 price = pProto->BuyPrice * count;
+
+    // reputation discount
+    price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
+
+    if (GetMoney() < price)
+    {
+        SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+        CanBuy = false;
+    }
+
+
     if (crItem->ReqArenaRating > GetMaxPersonalArenaRatingRequirement())
     {
         if (crItem->ReqArenaRating > 0 )
@@ -18084,17 +18096,35 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             CanBuy = false;
         }
     }
-    if (!HasItemCount(crItem->ReqItem,1,false) || !GetBuyEnabled())
+    bool isReqItem1, isReqItem2 = false;
+    if (!HasItemCount(crItem->ReqItem,1,false) && !HasItemCount(crItem->ReqItem2,1,false) || !GetBuyEnabled())
     {
         Item* pItem = Item::CreateItem(crItem->ReqItem,1);
-        if (pItem && crItem->ReqItem > 0)
+        Item* pItem2 = Item::CreateItem(crItem->ReqItem2,1);
+        if (pItem && crItem->ReqItem > 0 && pItem2 && crItem->ReqItem2 > 0)
         {
-            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,pItem,NULL,crItem->ReqItem);
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
+            ChatHandler(this).PSendSysMessage("You need %s%s or %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            CanBuy = false;
+            isReqItem1 = true;
+            isReqItem2 = true;
+        }
+        else if (pItem && crItem->ReqItem > 0)
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
             ChatHandler(this).PSendSysMessage("You need %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
             CanBuy = false;
+            isReqItem1 = true;
+        }
+        else if (pItem2 && crItem->ReqItem2 > 0)
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
+            ChatHandler(this).PSendSysMessage("You need %s%s to buy this item.",pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            CanBuy = false;
+            isReqItem2 = true;
         }
     }
-    if (!GetBuyEnabled() && (crItem->ReqArenaPoints > 0 || crItem->ReqItem > 0) && CanBuy)
+    if (!GetBuyEnabled() && CanBuy)
     {
         Item* pItem = Item::CreateItem(pProto->ItemId,1);
         if (pItem)
@@ -18107,16 +18137,10 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     if (!CanBuy)
         return false;
 
-    uint32 price = pProto->BuyPrice * count;
-
-    // reputation discount
-    price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
-
-    if (GetMoney() < price)
-    {
-        SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-        return false;
-    }
+    if (isReqItem1 && crItem->ReqItem > 0)
+        DestroyItemCount(crItem->ReqItem,1,true);
+    if (isReqItem2 && crItem->ReqItem2 > 0)
+        DestroyItemCount(crItem->ReqItem2,1,true);
 
     Item* pItem = NULL;
 

@@ -155,6 +155,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleReqArenaRatingCommand(char* args);
         bool HandleReqArenaPointsCommand(char* args);
         bool HandleReqItemCommand(char* args);
+        bool HandleReqItem2Command(char* args);
         bool HandleReqGoldCommand(char* args);
         bool HandleToggleBuyCommand(char* args);
 
