@@ -18097,7 +18097,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         }
     }
     bool isReqItem1, isReqItem2 = false;
-    if (!HasItemCount(crItem->ReqItem,1,false) && !HasItemCount(crItem->ReqItem2,1,false) || !GetBuyEnabled())
+    if ((!HasItemCount(crItem->ReqItem,1,false) && !HasItemCount(crItem->ReqItem2,1,false)) || !GetBuyEnabled())
     {
         Item* pItem = Item::CreateItem(crItem->ReqItem,1);
         Item* pItem2 = Item::CreateItem(crItem->ReqItem2,1);
