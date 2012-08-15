@@ -527,8 +527,11 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim && damage > 0)
+    Player* pAttacker = GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player* pAttacked = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (pAttacker && pAttacked && pAttacker != pAttacked && damage > 0)
         pVictim->ToPlayer()->Damaged(GetObjectGuid(), damage);
+
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
         pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
