@@ -21211,8 +21211,9 @@ void Player::UpdateKnownTitles()
     uint32 honor_kills = GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
     uint32 old_title = GetUInt32Value(PLAYER_CHOSEN_TITLE);
     RemoveFlag64(PLAYER__FIELD_KNOWN_TITLES,PLAYER_TITLE_MASK_ALL_PVP);
-    if(honor_kills < 0)
+    if(honor_kills == 0)
         return;
+
     bool max_rank = ((honor_kills >= sWorld.pvp_ranks[HKRANKMAX-1]) ? true : false);
     for(int i = HKRANK01; i != HKRANKMAX; ++i)
     {
