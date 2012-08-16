@@ -308,3 +308,28 @@ bool ChatHandler::HandleToggleBuyCommand(char* /*args*/)
 
     return true;
 }
+
+bool ChatHandler::HandleWorldChatCommand(char* args)
+{
+    Player* pPlayer = m_session->GetPlayer();
+    if (!pPlayer)
+        return false;
+    std::string msg;
+    if (!ExtractLiteralArg(&args))
+        return false;
+
+    std::string GlobalString = "";
+    GlobalString.reserve(255);
+    if (m_session->GetSecurity() > SEC_PLAYER)
+        GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff] ";
+
+    if (pPlayer->GetTeam() == HORDE)
+        GlobalString = ""+GlobalString+""+MSG_COLOR_RED+""+pPlayer->GetNameLink()+": ";
+    else if (pPlayer->GetTeam() == ALLIANCE)
+        GlobalString = ""+GlobalString+""+MSG_COLOR_DARKBLUE+""+pPlayer->GetNameLink()+": ";
+
+    GlobalString = ""+GlobalString+""+MSG_COLOR_WHITE+""+msg+"";
+
+    PSendGlobalSysMessage(GlobalString.c_str());
+    return true;
+}

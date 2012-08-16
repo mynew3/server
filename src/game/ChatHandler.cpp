@@ -306,7 +306,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (GetPlayer()->GetTeam() == HORDE)
                 GlobalString = ""+GlobalString+""+MSG_COLOR_RED+""+GetPlayer()->GetNameLink()+": ";
             else if (GetPlayer()->GetTeam() == ALLIANCE)
-                GlobalString = ""+GlobalString+""+MSG_COLOR_BLUE+""+GetPlayer()->GetNameLink()+": ";
+                GlobalString = ""+GlobalString+""+MSG_COLOR_DARKBLUE+""+GetPlayer()->GetNameLink()+": ";
 
             GlobalString = ""+GlobalString+""+MSG_COLOR_WHITE+""+msg+"";
 

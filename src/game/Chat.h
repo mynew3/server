@@ -51,6 +51,7 @@ class Unit;
 #define MSG_COLOR_MAGENTA      "|cffff00ff"
 #define MSG_COLOR_YELLOW       "|cffffff00"
 #define MSG_COLOR_CYAN         "|cff00ffff"
+#define MSG_COLOR_DARKBLUE     "|cff0000ff"
 
 #define MSG_COLOR_GREY         "|cff9d9d9d"
 #define MSG_COLOR_WHITE        "|cffffffff"
@@ -158,6 +159,7 @@ class MANGOS_DLL_SPEC ChatHandler
         bool HandleReqItem2Command(char* args);
         bool HandleReqGoldCommand(char* args);
         bool HandleToggleBuyCommand(char* args);
+        bool HandleWorldChatCommand(char* args);
 
         bool HandleAccountCommand(char* args);
         bool HandleAccountCharactersCommand(char* args);
