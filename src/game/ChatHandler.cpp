@@ -303,11 +303,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff]";
 
             if (GetPlayer()->GetTeam() == HORDE)
-                GlobalString += ""+GlobalString+""+MSG_COLOR_RED+""+GetPlayer()->GetNameLink()+"";
-            else
-                GlobalString += ""+GlobalString+""+MSG_COLOR_BLUE+""+GetPlayer()->GetNameLink()+"";
+                GlobalString = ""+GlobalString+""+MSG_COLOR_RED+""+GetPlayer()->GetNameLink()+"";
+            else if (GetPlayer()->GetTeam() == ALLIANCE)
+                GlobalString = ""+GlobalString+""+MSG_COLOR_BLUE+""+GetPlayer()->GetNameLink()+"";
 
-            GlobalString += ""+GlobalString+""+MSG_COLOR_WHITE+""+msg+"";
+            GlobalString = ""+GlobalString+""+MSG_COLOR_WHITE+""+msg+"";
 
             ChatHandler(this).PSendGlobalSysMessage(GlobalString.c_str());
 
