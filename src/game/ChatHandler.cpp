@@ -298,9 +298,24 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (GetPlayer()->GetGuildId())
+            std::string GlobalString = "";
+            if (GetPlayer()->isGMChat())
+                GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff]";
+
+            if (GetPlayer()->GetTeam() == HORDE)
+                GlobalString += ""+GlobalString+""+MSG_COLOR_RED+""+GetPlayer()->GetNameLink()+"";
+            else
+                GlobalString += ""+GlobalString+""+MSG_COLOR_BLUE+""+GetPlayer()->GetNameLink()+"";
+
+            GlobalString += ""+GlobalString+""+MSG_COLOR_WHITE+""+msg+"";
+
+            ChatHandler(this).PSendGlobalSysMessage(GlobalString.c_str());
+
+
+
+            /*if (GetPlayer()->GetGuildId())
                 if (Guild* guild = sGuildMgr.GetGuildById(GetPlayer()->GetGuildId()))
-                    guild->BroadcastToOfficers(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
+                    guild->BroadcastToOfficers(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);*/
 
             break;
         }
