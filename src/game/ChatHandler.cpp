@@ -299,6 +299,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             std::string GlobalString = "";
+            GlobalString.reserve(255);
             if (GetSecurity() > SEC_PLAYER)
                 GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff] ";
 
