@@ -300,10 +300,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             std::string GlobalString = "";
             if (GetSecurity() > SEC_PLAYER)
-                GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff]";
+                GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff] ";
 
             if (GetPlayer()->GetTeam() == HORDE)
-                GlobalString = ""+GlobalString+""+MSG_COLOR_RED+""+GetPlayer()->GetNameLink()+"";
+                GlobalString = ""+GlobalString+""+MSG_COLOR_RED+""+GetPlayer()->GetNameLink()+": ";
             else if (GetPlayer()->GetTeam() == ALLIANCE)
                 GlobalString = ""+GlobalString+""+MSG_COLOR_BLUE+""+GetPlayer()->GetNameLink()+": ";
 
