@@ -527,10 +527,18 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
-    Player* pAttacker = GetCharmerOrOwnerPlayerOrPlayerItself();
-    Player* pAttacked = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
-    if (pAttacker && pAttacked && pAttacker != pAttacked && damage > 0)
-        pVictim->ToPlayer()->Damaged(GetObjectGuid(), damage);
+    Player* pDamager = GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player* pDamaged = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+    // Remove overkill damage.
+    int32 nooverkilldmg = 0;
+    if (damage > GetHealth())
+        nooverkilldmg = damage-GetHealth();
+    else
+        nooverkilldmg = damage;
+
+    if (pDamager && pDamaged && pDamager != pDamaged && nooverkilldmg > 0)
+        pDamaged->Damaged(pDamager->GetObjectGuid(), nooverkilldmg);
 
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
@@ -5619,8 +5627,11 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
 
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER && this != pVictim && addhealth > 0)
-        pVictim->ToPlayer()->Healed(GetObjectGuid(), gain);
+    Player* pHealer = GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player* pHealed = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+    if (pHealer && pHealed && pHealer != pHealed && gain > 0) // Using gain, since overhealing should not be counted.
+        pHealed->Healed(pHealer->GetObjectGuid(), gain);
 
     Unit* unit = this;
 
