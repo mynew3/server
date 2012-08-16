@@ -315,7 +315,7 @@ bool ChatHandler::HandleWorldChatCommand(char* args)
     if (!pPlayer)
         return false;
     std::string msg;
-    if (!ExtractLiteralArg(&args))
+    if (!ExtractQuotedOrLiteralArg(&args))
         return false;
 
     std::string GlobalString = "";
