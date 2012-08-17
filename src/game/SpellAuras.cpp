@@ -3563,6 +3563,9 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
         target->CastStop(target->GetObjectGuid() == GetCasterGuid() ? GetId() : 0);
 
+        // Remove stealth when stunned
+        target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
         // Creature specific
         if(target->GetTypeId() != TYPEID_PLAYER)
             target->StopMoving();
