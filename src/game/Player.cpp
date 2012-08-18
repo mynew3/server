@@ -20988,6 +20988,7 @@ void Player::HandlePvPKill()
 
     if (Player* pMostDamager = sObjectMgr.GetPlayer(MaxDmgGUID))
     {
+        ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You did most damage to %s%s (%u)",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
         HandleHardcoreKill(pMostDamager);
 
