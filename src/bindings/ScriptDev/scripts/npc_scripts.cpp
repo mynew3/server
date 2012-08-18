@@ -59,9 +59,7 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Open Auction House",GOSSIP_SENDER_MAIN,106,"",0);
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Create a guild    ",GOSSIP_SENDER_MAIN,107,"",0);
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Design your tabard",GOSSIP_SENDER_MAIN,108,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Show ingame GMs   ",GOSSIP_SENDER_MAIN,109,"",0);
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Buy insurance     ",GOSSIP_SENDER_MAIN,110,"",0);
-        //pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Place a bounty    ",GOSSIP_SENDER_MAIN,121,"",0);
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Back to Main Menu ",GOSSIP_SENDER_MAIN,1  ,"",0);
         pPlayer->PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
     }
@@ -110,11 +108,6 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->GetSession()->SendTabardVendorActivate(pCreature->GetObjectGuid());
-    }
-    else if (action == 109) // Show Gamemasters
-    {
-        pPlayer->PlayerTalkClass->CloseGossip();
-        pPlayer->InGamemasterGossip(pCreature);
     }
     else if (action == 110)
     {
@@ -173,11 +166,6 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
             pPlayer->SendChatMessage("%s[Vendor System]%s You must %s.togglebuy%s or you do not have enough money to refresh your insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
     }
 
-    return true;
-}
-
-bool GossipSelectWithCode_telenpc(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction, const char* sCode)
-{
     return true;
 }
 
@@ -447,142 +435,6 @@ char * GetSlotName(uint8 slot)
     }
 }
 
-bool GossipHello_transmog(Player* pPlayer, Creature* pUnit)
-{
-    for (uint8 Slot = EQUIPMENT_SLOT_START; Slot < EQUIPMENT_SLOT_TABARD; Slot++) // EQUIPMENT_SLOT_END
-    {
-        if (Item* pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, Slot))
-            if(pItem->HasGoodFakeQuality())
-                if(const char* SlotName = GetSlotName(Slot))
-                    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TRAINER, SlotName, EQUIPMENT_SLOT_END, Slot);
-    }
-    pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Remove all transmogrifications", EQUIPMENT_SLOT_END+2, 0, "Remove transmogrifications from all equipped items?", 0, false);
-    pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Update Menu", EQUIPMENT_SLOT_END+1, 0);
-    pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pUnit->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_transmog(Player* pPlayer, Creature* pUnit, uint32 sender, uint32 uiAction)
-{
-    pPlayer->PlayerTalkClass->ClearMenus();
-    switch(sender)
-    {
-    case EQUIPMENT_SLOT_END: // Show items you can use
-        {
-            if (Item* OLD = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, uiAction))
-            {
-                uint32 GUID = pPlayer->GetGUIDLow();
-                Items[GUID].clear();
-                uint32 limit = 0;
-                for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-                {
-                    if(limit > 30)
-                        break;
-                    if (Item* pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                    {
-                        uint32 Display = pItem->GetProto()->DisplayInfoID;
-                        if(pPlayer->SuitableForTransmogrification(OLD, pItem) == ERR_FAKE_OK)
-                            if(Items[GUID].find(Display) == Items[GUID].end())
-                            {
-                                limit++;
-                                Items[GUID][Display] = pItem;
-                                pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, pItem->GetProto()->Name1, uiAction, Display, "Using this item for transmogrify will bind it to you and make it non-refundable and non-tradeable.nDo you wish to continue?", 0, false);
-                            }
-                    }
-                }
-
-                for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-                {
-                    if (Bag* pBag = pPlayer->GetBagByPos(i))
-                        for (uint32 j = 0; j < pBag->GetBagSize(); j++)
-                        {
-                            if(limit > 30)
-                                break;
-                            if (Item* pItem = pPlayer->GetItemByPos(i, j))
-                            {
-                                uint32 Display = pItem->GetProto()->DisplayInfoID;
-                                if(pPlayer->SuitableForTransmogrification(OLD, pItem) == ERR_FAKE_OK)
-                                    if(Items[GUID].find(Display) == Items[GUID].end())
-                                    {
-                                        limit++;
-                                        Items[GUID][Display] = pItem;
-                                        pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, pItem->GetProto()->Name1, uiAction, Display, "Using this item for transmogrify will bind it to you and make it non-refundable and non-tradeable.nDo you wish to continue?", 0, false);
-                                    }
-                            }
-                        }
-                }
-
-                pPlayer->ADD_GOSSIP_ITEM_EXTENDED(GOSSIP_ICON_INTERACT_1, "Remove transmogrification", EQUIPMENT_SLOT_END+3, uiAction, "Remove transmogrification from "+(std::string)GetSlotName(uiAction)+"?", 0, false);
-                pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_TALK, "Back..", EQUIPMENT_SLOT_END+1, 0);
-                pPlayer->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, pUnit->GetObjectGuid());
-            }
-            else
-                GossipHello_transmog(pPlayer, pUnit);
-        } break;
-    case EQUIPMENT_SLOT_END+1: // Back
-        {
-            GossipHello_transmog(pPlayer, pUnit);
-        } break;
-    case EQUIPMENT_SLOT_END+2: // Remove Transmogrifications
-        {
-            bool removed = false;
-            for (uint8 Slot = EQUIPMENT_SLOT_START; Slot < EQUIPMENT_SLOT_END; Slot++)
-                if (Item* pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, Slot))
-                    if(pItem->DeleteFakeEntry() && !removed)
-                            removed = true;
-            if(removed)
-            {
-                pPlayer->GetSession()->SendAreaTriggerMessage("Transmogrifications removed from equipped items");
-                pPlayer->PlayDirectSound(3337);
-            }
-            else
-                pPlayer->GetSession()->SendNotification("You have no transmogrified items equipped");
-            GossipHello_transmog(pPlayer, pUnit);
-        } break;
-    case EQUIPMENT_SLOT_END+3: // Remove Transmogrification from single item
-        {
-            if (Item* pItem = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, uiAction))
-            {
-                if(pItem->DeleteFakeEntry())
-                {
-                    pPlayer->GetSession()->SendAreaTriggerMessage("%s transmogrification removed", GetSlotName(uiAction));
-                    pPlayer->PlayDirectSound(3337);
-                }
-                else
-                    pPlayer->GetSession()->SendNotification("No transmogrification on %s slot", GetSlotName(uiAction));
-            }
-            GossipSelect_transmog(pPlayer, pUnit, EQUIPMENT_SLOT_END, uiAction);
-        } break;
-    default: // Transmogrify
-        {
-            uint32 GUID = pPlayer->GetGUIDLow();
-            if(Item* OLD = pPlayer->GetItemByPos(INVENTORY_SLOT_BAG_0, sender))
-            {
-                if(Items[GUID].find(uiAction) != Items[GUID].end() && Items[GUID][uiAction]->IsInWorld())
-                {
-                    Item* pItem = Items[GUID][uiAction];
-                    if(pItem->GetOwnerGuid() == pPlayer->GetObjectGuid() && (pItem->IsInBag() || pItem->GetBagSlot() == INVENTORY_SLOT_BAG_0) && pPlayer->SuitableForTransmogrification(OLD, pItem) == ERR_FAKE_OK)
-                    {
-                        OLD->SetFakeEntry(pItem->GetEntry());
-                        pItem->SetBinding(true);
-                        pPlayer->PlayDirectSound(3337);
-                        pPlayer->GetSession()->SendAreaTriggerMessage("%s transmogrified", GetSlotName(sender));
-                    }
-                    else
-                        pPlayer->GetSession()->SendNotification("Selected items are not suitable");
-                }
-                else
-                    pPlayer->GetSession()->SendNotification("Selected item does not exist");
-            }
-            else
-                pPlayer->GetSession()->SendNotification("Equipment slot is empty");
-            Items[GUID].clear();
-            GossipSelect_transmog(pPlayer, pUnit, EQUIPMENT_SLOT_END, sender);
-        } break;
-    }
-    return true;
-}
-
 typedef UNORDERED_MAP<ObjectGuid, uint32> AttackerMap;
 
 struct MANGOS_DLL_DECL npc_training_dummyAI : public Scripted_NoMovementAI
@@ -649,19 +501,12 @@ void AddSC_npc_scripts()
     pNewScript->Name            = "npc_teleport1";
     pNewScript->pGossipHello    = &GossipHello_telenpc;
     pNewScript->pGossipSelect   = &GossipSelect_telenpc;
-    pNewScript->pGossipSelectWithCode = &GossipSelectWithCode_telenpc;
     pNewScript->RegisterSelf();
 
     pNewScript                  = new Script;
     pNewScript->Name            = "npc_beastmaster";
     pNewScript->pGossipHello    = &GossipHello_beast_master;
     pNewScript->pGossipSelect   = &GossipSelect_beast_master;
-    pNewScript->RegisterSelf();
-
-    pNewScript                  = new Script;
-    pNewScript->Name            = "npc_transmog";
-    pNewScript->pGossipHello    = &GossipHello_transmog;
-    pNewScript->pGossipSelect   = &GossipSelect_transmog;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

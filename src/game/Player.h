@@ -54,20 +54,6 @@ class DungeonPersistentState;
 class Spell;
 class Item;
 
-enum TransmogrificationResult
-{
-    ERR_FAKE_NEW_BAD_QUALITY,
-    ERR_FAKE_OLD_BAD_QUALITY,
-    ERR_FAKE_SAME_DISPLAY,
-    ERR_FAKE_SAME_DISPLAY_FAKE,
-    ERR_FAKE_CANT_USE,
-    ERR_FAKE_NOT_SAME_CLASS,
-    ERR_FAKE_BAD_CLASS,
-    ERR_FAKE_BAD_SUBLCASS,
-    ERR_FAKE_BAD_INVENTORYTYPE,
-    ERR_FAKE_OK
-};
-
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS           127
@@ -1058,8 +1044,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             ChatHandler(this).PSendSysMessage(format);
         }
 
-        void    InGamemasterGossip(Creature *pCreature);
-
         void    CreatePet(uint32 cEntry);
         /* Custom - */
 
@@ -1202,7 +1186,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* GetItemByGuid(ObjectGuid guid) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
-        Bag*  GetBagByPos(uint8 slot) const;
         uint32 GetItemDisplayIdInSlot(uint8 bag, uint8 slot) const;
         Item* GetWeaponForAttack(WeaponAttackType attackType) const { return GetWeaponForAttack(attackType,false,false); }
         Item* GetWeaponForAttack(WeaponAttackType attackType, bool nonbroken, bool useable) const;

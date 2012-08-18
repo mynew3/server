@@ -285,13 +285,6 @@ class MANGOS_DLL_SPEC Item : public Object
             }
             return ""+color+"|Hitem:"+id+":0:0:0:0:0:0:0|h["+name+"]|h";
         }
-        uint32 GetFakeEntry();
-        bool DeleteFakeEntry();
-        static void DeleteFakeFromDB(uint32 GUIDLow);
-        void SetFakeEntry(uint32 Entry);
-        bool HasGoodFakeQuality();
-        Bag* ToBag() { if (IsBag()) return reinterpret_cast<Bag*>(this); else return NULL; }
-        const Bag* ToBag() const { if (IsBag()) return reinterpret_cast<const Bag*>(this); else return NULL; }
 
         static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL, uint32 randomPropertyId = 0);
         Item* CloneItem( uint32 count, Player const* player = NULL ) const;

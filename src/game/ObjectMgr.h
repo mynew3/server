@@ -418,8 +418,6 @@ class ObjectMgr
         ObjectMgr();
         ~ObjectMgr();
 
-        ItemFakeEntryContainer _itemFakeEntryStore;
-
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
         typedef UNORDERED_MAP<uint32, Group*> GroupMap;
