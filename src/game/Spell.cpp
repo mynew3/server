@@ -2786,7 +2786,8 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         TriggerGlobalCooldown();
     }
     // execute without cast time explicitly in call point
-    if (m_timer == 0 && (!IsChanneledSpell(m_spellInfo) || m_IsTriggeredSpell))
+    //if (m_timer == 0 && (!IsChanneledSpell(m_spellInfo) || m_IsTriggeredSpell))
+    if (m_timer == 0 && m_IsTriggeredSpell)
         cast(true);
     // else triggered with cast time will execute execute at next tick or later
     // without adding to cast type slot
