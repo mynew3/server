@@ -1053,6 +1053,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendChatMessage(const char *format, ...)
         {
+            if (!IsInWorld())
+                return;
             ChatHandler(this).PSendSysMessage(format);
         }
 

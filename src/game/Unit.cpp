@@ -781,7 +781,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
                 uint32 rand = urand(1,6);
                 if (pPlayer->isGameMaster())
-                    ChatHandler(pPlayer->GetSession()).PSendSysMessage("You are being teleported to %u",rand);
+                    pPlayer->SendChatMessage("You are being teleported to %u",rand);
 
                 if (rand == 1)
                     pPlayer->TeleportTo(0,-13257.1f, 223.449f,   42.9766f,   0.681904f);
