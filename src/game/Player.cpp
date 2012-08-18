@@ -20956,7 +20956,7 @@ void Player::HandlePvPKill()
             pAttacker->ModifyMoney(+Reward);
             pAttacker->IncreaseKillStreak();
 
-            ChatHandler(pAttacker).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,GetNameLink().c_str());
+            pAttacker->SendChatMessage("%s[PvP System]%s You got awarded %g gold for damaging %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,GetNameLink().c_str());
 
             // Damage Code End | Healing Code Begin
             float TotalHealing = std::accumulate(pAttacker->m_Healers.begin(), pAttacker->m_Healers.end(),0,pair_adder); // Summary of all healing done to attacker
@@ -20980,7 +20980,7 @@ void Player::HandlePvPKill()
                 pHealer->ModifyMoney(+Reward);
                 pHealer->IncreaseKillStreak();
 
-                ChatHandler(pHealer).PSendSysMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,pAttacker->GetNameLink().c_str());
+               pHealer->SendChatMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,pAttacker->GetNameLink().c_str());
             }
             // Healing Code End
         }
@@ -20988,13 +20988,13 @@ void Player::HandlePvPKill()
 
     if (Player* pMostDamager = sObjectMgr.GetPlayer(MaxDmgGUID))
     {
-        ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You did most damage to %s%s (%u)",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
-        ChatHandler(this).PSendSysMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
+        pMostDamager->SendChatMessage("%s[PvP System]%s You did most damage to %s%s (%u)",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
+        SendChatMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
         HandleHardcoreKill(pMostDamager);
 
         if (GetBounty() > 0)
         {
-            ChatHandler(pMostDamager).PSendSysMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(GetBounty())/10000.0f);
+            pMostDamager->SendChatMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(GetBounty())/10000.0f);
             pMostDamager->ModifyMoney(+GetBounty());
         }
     }
@@ -21045,7 +21045,7 @@ void Player::HandleHardcoreKill(Player* attacker)
                         if(attacker->StoreNewItemInBestSlots(pItem->GetProto()->ItemId,1))
                         {
                             attacker->SendNewItem(pItem,1,true,false,true);
-                            ChatHandler(this).PSendSysMessage("%s[PvP System]%s %s took %s%s from you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attacker->GetNameLink().c_str(),pItem->GetNameLink().c_str(),MSG_COLOR_WHITE);
+                            SendChatMessage("%s[PvP System]%s %s took %s%s from you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attacker->GetNameLink().c_str(),pItem->GetNameLink().c_str(),MSG_COLOR_WHITE);
 
                         }
                     }
@@ -21055,7 +21055,7 @@ void Player::HandleHardcoreKill(Player* attacker)
         else
             SetInsuranceCharges(GetInsuranceCharges()-1);
         if (GetInsuranceCharges() > 0 && GetInsuranceCharges() < 10)
-            ChatHandler(this).PSendSysMessage("%s[PvP System]%s You only have %u insurance tickets left.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetInsuranceCharges());
+            SendChatMessage("%s[PvP System]%s You only have %u insurance tickets left.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetInsuranceCharges());
     }
 }
 
@@ -21069,16 +21069,13 @@ bool Player::HandlePvPAntifarm(Player* victim)
         else if (victim->HasAura(2479))
         {
             if (sendInfo)
-                ChatHandler(this).PSendSysMessage("%s[PvP System]%s Hes not worth money or honor yet!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+                SendChatMessage("%s[PvP System]%s Hes not worth money or honor yet!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
             return false;
         }
         else if (GetSession()->GetRemoteAddress() == victim->GetSession()->GetRemoteAddress())
         {
             if (sendInfo)
-            {
-                ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You have same ip as your victim", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
-                ChatHandler(this).PSendSysMessage("%sthis means you are on same network and could farm money together.", MSG_COLOR_WHITE);
-            }
+                SendChatMessage("%s[Anti Farming System]%s You have same ip as your victim", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
             return false;
         }
         else if (victim->GetObjectGuid() == GetLastAttackerGUID())
@@ -21087,7 +21084,7 @@ bool Player::HandlePvPAntifarm(Player* victim)
             if (GetLastAttackerGUIDCount() >= 6)
             {
                 if (sendInfo)
-                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                    SendChatMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
                 return false;
             }
         }
@@ -21097,7 +21094,7 @@ bool Player::HandlePvPAntifarm(Player* victim)
             if (victim->GetLastVictimGUIDCount() >= 6)
             {
                 if (sendInfo)
-                    ChatHandler(this).PSendSysMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+                    SendChatMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
                 return false;
             }
         }

@@ -1051,6 +1051,11 @@ class MANGOS_DLL_SPEC Player : public Unit
             return "|Hplayer:"+name+"|h["+name+"]|h";
         }
 
+        void SendChatMessage(const char *format, ...)
+        {
+            ChatHandler(this).PSendSysMessage(format);
+        }
+
         void    InGamemasterGossip(Creature *pCreature);
 
         void    CreatePet(uint32 cEntry);

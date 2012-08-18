@@ -6,7 +6,7 @@ bool GossipHello_telenpc(Player *pPlayer, Creature *pCreature)
 {
     if (pPlayer->isInCombat())
     {
-        ChatHandler(pPlayer).PSendSysMessage("%s[Teleporter]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Teleporter]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         return true;
     }
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(2,"Teleport To: Shopping Mall  ",GOSSIP_SENDER_MAIN,2  ,"",0);
@@ -20,7 +20,7 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
 {
     if (pPlayer->isInCombat())
     {
-        ChatHandler(pPlayer).PSendSysMessage("%s[Teleporter]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Teleporter]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         return false;
     }
 
@@ -34,20 +34,20 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
         if (pPlayer->GetTeam() == HORDE)
         {
             pPlayer->PlayerTalkClass->CloseGossip();
-            ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Teleporter]%s Welcome to Horde shopping mall",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+            pPlayer->SendChatMessage("%s[Teleporter]%s Welcome to Horde shopping mall",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
             pPlayer->TeleportTo(530,    237.497f,   2696.65f,   90.755f,    3.25544f);
         } 
         else
         {
             pPlayer->PlayerTalkClass->CloseGossip();
-            ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Teleporter]%s Welcome to Alliance shopping mall",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+            pPlayer->SendChatMessage("%s[Teleporter]%s Welcome to Alliance shopping mall",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
             pPlayer->TeleportTo(530,    -796.259f,  2625.9f,    124.095f,   3.70235f);
         }
     }
     else if (action == 3) // Teleport To: Gurubashi Arena
     {
         pPlayer->PlayerTalkClass->CloseGossip();
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Teleporter]%s Welcome to Gurubashi Arena",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Teleporter]%s Welcome to Gurubashi Arena",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         pPlayer->TeleportTo(0,  -13235.7f,  213.741f,   31.2181f,   1.14919f);
     }
     else if (action == 100) // Open Tools
@@ -76,19 +76,19 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
     else if (action == 102) // Talents Reset
     {
         pPlayer->PlayerTalkClass->CloseGossip();
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Teleporter]%s Talents Reset",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Teleporter]%s Talents Reset",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         pPlayer->resetTalents(true);
     }
     else if (action == 103) // Weapon skills maxed
     {
         pPlayer->PlayerTalkClass->CloseGossip();
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Teleporter]%s Weapon skills maxed",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Teleporter]%s Weapon skills maxed",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         pPlayer->UpdateSkillsToMaxSkillsForLevel();
     }
     else if (action == 104) // Cooldowns reset
     {
         pPlayer->PlayerTalkClass->CloseGossip();
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Teleporter]%s Cooldowns reset",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Teleporter]%s Cooldowns reset",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         pPlayer->RemoveArenaSpellCooldowns();
     }
     else if (action == 105) // Show bank
@@ -154,10 +154,10 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
             pPlayer->SetInsuranceLevel(setinsurance);
             pPlayer->SetInsuranceCharges(50);
             pPlayer->ModifyMoney(-setinsurance*1000000);
-            ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s You bought 50 death charges of %u item insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,setinsurance);
+            pPlayer->SendChatMessage("%s[Vendor System]%s You bought 50 death charges of %u item insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,setinsurance);
         }
         else
-            ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s please %s.togglebuy%s to buy insurance. Or you cannot afford buying this insurance.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
+            pPlayer->SendChatMessage("%s[Vendor System]%s please %s.togglebuy%s to buy insurance. Or you cannot afford buying this insurance.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
     }
     else if (action == 120)
     {
@@ -167,10 +167,10 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
         {
             pPlayer->ModifyMoney(-cost);
             pPlayer->SetInsuranceCharges(50);
-            ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s Refreshed your item insurance charges for %u gold.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pPlayer->GetInsurance()*50);
+            pPlayer->SendChatMessage("%s[Vendor System]%s Refreshed your item insurance charges for %u gold.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pPlayer->GetInsurance()*50);
         }
         else
-            ChatHandler(pPlayer).PSendSysMessage("%s[Vendor System]%s You must %s.togglebuy%s or you do not have enough money to refresh your insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
+            pPlayer->SendChatMessage("%s[Vendor System]%s You must %s.togglebuy%s or you do not have enough money to refresh your insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
     }
 
     return true;
@@ -185,12 +185,12 @@ bool GossipHello_beast_master(Player *pPlayer, Creature *pCreature)
 {
     if (pPlayer->isInCombat())
     {
-        ChatHandler(pPlayer).PSendSysMessage("%s[Mr.Zoo]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         return true;
     }
     else if (pPlayer->getClass() != CLASS_HUNTER)
     {
-        ChatHandler(pPlayer).PSendSysMessage("%s[Mr.Zoo]%s You must be a hunter!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You must be a hunter!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         return true;
     }
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Bat         ",GOSSIP_SENDER_MAIN,1 ,"",0); // 16173
@@ -214,12 +214,12 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
 {
     if (pPlayer->isInCombat())
     {
-        ChatHandler(pPlayer).PSendSysMessage("%s[Mr.Zoo]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         return false;
     }
     else if (pPlayer->getClass() != CLASS_HUNTER)
     {
-        ChatHandler(pPlayer).PSendSysMessage("%s[Mr.Zoo]%s You must be a hunter!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You must be a hunter!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         return false;
     }
 
@@ -230,7 +230,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(23148); // Dive
         pPlayer->GetPet()->learnSpell(27051); // Screech
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a bat",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a bat",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 2) // Bear 23584
     {
@@ -238,7 +238,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(23584);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(27049); // Claw
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a bear",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a bear",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 3) // Boar 21878
     {
@@ -248,7 +248,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27685); // Charge
         pPlayer->GetPet()->learnSpell(23110); // Dash
         pPlayer->GetPet()->learnSpell(35298); // Gore
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a boar",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a boar",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 4) // Carrion Bird 18707
     {
@@ -258,7 +258,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27049); // Claw
         pPlayer->GetPet()->learnSpell(23148); // Dive
         pPlayer->GetPet()->learnSpell(27051); // Screech
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a carrion bird",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a carrion bird",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 5) // Cat 20671
     {
@@ -268,21 +268,21 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27049); // Claw
         pPlayer->GetPet()->learnSpell(23110); // Dash
         pPlayer->GetPet()->learnSpell(24453); // Prowl
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a cat",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a cat",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 6) // Crab 18241
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(18241);
         pPlayer->GetPet()->learnSpell(27049); // Claw
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a crab",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a crab",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 7) // Crocolisk 20773
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(20773);
         pPlayer->GetPet()->learnSpell(27050); // Bite
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a crocolisk",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a crocolisk",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 8) // Dragonhawk 18155
     {
@@ -291,7 +291,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(23148); // Dive
         pPlayer->GetPet()->learnSpell(35323); // Fire Breath
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a dragonhawk",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a dragonhawk",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 9) // Gorilla 6585
     {
@@ -299,7 +299,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(6585);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(27063); // Thunderstomp
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a gorilla",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a gorilla",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 10) // Hyena 8300
     {
@@ -307,7 +307,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(8300);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(23110); // Dash
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a hyena",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a hyena",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 11) // Nether Ray 17731
     {
@@ -315,7 +315,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(17731);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(23148); // Dive
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a nether ray",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a nether ray",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 12) // Raptor 20634
     {
@@ -324,7 +324,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(27049); // Claw
         pPlayer->GetPet()->learnSpell(23110); // Dash
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a raptor",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a raptor",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 13)
     {
@@ -347,7 +347,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(23110); // Dash
         pPlayer->GetPet()->learnSpell(35298); // Gore
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a ravager",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a ravager",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 15) // Scorpid 21864
     {
@@ -355,7 +355,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(21864);
         pPlayer->GetPet()->learnSpell(27049); // Claw
         pPlayer->GetPet()->learnSpell(27060); // Scorpid Poision
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a scorpid",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a scorpid",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 16) // Serpent 19784
     {
@@ -363,7 +363,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(19784);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(35392); // Poision Spit
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a serpent",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a serpent",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 17) // Spider 16170
     {
@@ -371,7 +371,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(16170);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(4167);  // Web
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a spider",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a spider",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 18) // Tallstrider 22807
     {
@@ -379,7 +379,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(22807);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(23110); // Dash
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a tallstrider",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a tallstrider",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 19) // Turtle 5431
     {
@@ -387,7 +387,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->CreatePet(5431);
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(26064); // Spell Shield
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a turtle",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a turtle",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 10) // Warp Stalker 23219
     {
@@ -396,7 +396,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(27049); // Claw
         pPlayer->GetPet()->learnSpell(35346); // Warp
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a warp stalker",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a warp stalker",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 11) // Wind Serpent 20673
     {
@@ -405,7 +405,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27050); // Bite
         pPlayer->GetPet()->learnSpell(23148); // Dive
         pPlayer->GetPet()->learnSpell(25012); // Lightning Breath
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a wind serpent",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a wind serpent",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 12) // Wolf 17280
     {
@@ -415,7 +415,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(23110); // Dash
         pPlayer->GetPet()->learnSpell(27685); // Charge
         pPlayer->GetPet()->learnSpell(24604); // Furious Howl
-        ChatHandler(pPlayer->GetSession()).PSendSysMessage("%s[Mr.Zoo]%s You have tamed a wolf",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a wolf",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
     else if (action == 13)
     {
