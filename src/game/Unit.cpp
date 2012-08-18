@@ -532,8 +532,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
     // Remove overkill damage.
     int32 nooverkilldmg = 0;
-    if (damage > GetHealth())
-        nooverkilldmg = damage-GetHealth();
+    if (damage > pDamaged->GetHealth())
+        nooverkilldmg = damage-pDamaged->GetHealth();
     else
         nooverkilldmg = damage;
 
