@@ -320,6 +320,8 @@ bool ChatHandler::HandleWorldChatCommand(char* args)
         return false;
 
     std::string s_msg = c_msg;
+    if (s_msg.empty())
+        return false;
 
     std::string GlobalString = "";
     GlobalString.reserve(255);
