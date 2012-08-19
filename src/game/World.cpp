@@ -864,6 +864,9 @@ void World::LoadConfigSettings(bool reload)
     std::string ignoreMapIds = sConfig.GetStringDefault("mmap.ignoreMapIds", "");
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
     sLog.outString("WORLD: mmap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
+
+    setConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE,"AutoBroadcast.On", false);
+    sLog.outString("WORLD: autobroadcast is %sabled", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE) ? "en" : "dis");
 }
 
 /// Initialize the World
@@ -1291,7 +1294,7 @@ void World::SetInitialWorldSettings()
 
     // for AhBot
     m_timers[WUPDATE_AHBOT].SetInterval(20*IN_MILLISECONDS); // every 20 sec
-
+    m_timers[WUPDATE_AUTOBROADCAST].SetInterval(sConfig.GetIntDefault("AutoBroadcast.Timer", 60000));
 
     extmail_timer.SetInterval(getConfig(CONFIG_UINT32_EXTERNAL_MAIL_INTERVAL) * MINUTE * IN_MILLISECONDS);
 
@@ -1507,6 +1510,15 @@ void World::Update(uint32 diff)
         uint32 nextGameEvent = sGameEventMgr.Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
         m_timers[WUPDATE_EVENTS].Reset();
+    }
+
+    if(getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE))
+    {
+        if (m_timers[WUPDATE_AUTOBROADCAST].Passed())
+        {
+            m_timers[WUPDATE_AUTOBROADCAST].Reset();
+            SendBroadcast();
+        }
     }
 
     /// </ul>
@@ -1918,6 +1930,25 @@ void World::ProcessCliCommands()
 
         delete command;
     }
+}
+
+void World::SendBroadcast()
+{
+    std::string msg;
+    msg.reserve(2048);
+    msg = MSG_COLOR_MAGENTA"[Server]: "MSG_COLOR_WHITE;
+    QueryResult *result = WorldDatabase.PQuery("SELECT text FROM autobroadcast ORDER BY RAND() LIMIT 1");
+    if (result)
+    {
+        msg = ""+msg+""+result->Fetch()[0].GetString()+"";
+        delete result;
+
+        SendServerMessage(SERVER_MSG_CUSTOM,msg.c_str(),NULL);
+
+        sLog.outString("AutoBroadcast: '%s'",msg.c_str());
+    }
+    else
+        sLog.outError("AutoBroadcast enabled, but no broadcast texts was found");
 }
 
 void World::InitResultQueue()

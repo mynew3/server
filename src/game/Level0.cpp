@@ -327,7 +327,8 @@ bool ChatHandler::HandleWorldChatCommand(char* args)
     else if (pPlayer->GetTeam() == ALLIANCE)
         GlobalString = ""+GlobalString+""+MSG_COLOR_DARKBLUE+""+pPlayer->GetNameLink()+": ";
 
-    GlobalString = ""+GlobalString+""+MSG_COLOR_WHITE+""+args+"";
+    std::string msg = args;
+    GlobalString = ""+GlobalString+""+MSG_COLOR_WHITE+""+msg+"";
 
     PSendGlobalSysMessage(GlobalString.c_str());
     return true;
