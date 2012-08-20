@@ -111,3 +111,4 @@ dep/ACE_wrappers/ace/config.h
 
 # recastnavigation directory needs exception
 !dep/recastnavigation/RecastDemo/Build/
+contrib/SpellWorkTBC/dbc/*

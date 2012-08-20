@@ -1783,6 +1783,49 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGr
     BattleGround *bg = GetBattleGround(instanceId, bgTypeId);
     if (bg)
     {
+        if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED))
+        {
+            Team GrpTeam = TEAM_NONE;
+            if (Group *pGroup = pl->GetGroup())
+            {
+                for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player* pGroupGuy = itr->getSource();
+                    if (!pGroupGuy)
+                        continue;
+
+                    if (pGroupGuy->GetBattleGround() && pGroupGuy->GetBattleGround()->GetInstanceID() == instanceId && pGroupGuy->GetBattleGround()->GetTypeID() == bgTypeId)
+                    {
+                        GrpTeam = pGroupGuy->GetBGTeam();
+                        break;
+                    }
+                }
+            }
+            if (GrpTeam != TEAM_NONE && bg->GetPlayersCountByTeam(GrpTeam) < bg->GetMaxPlayersPerTeam())
+            {
+                pl->SetBGTeam(GrpTeam);
+                if (GrpTeam == HORDE)
+                    pl->setFaction(29); // orc, and generic for horde
+                else if (GrpTeam == ALLIANCE)
+                    pl->setFaction(55); // dwarf/gnome, and generic for alliance
+            }
+            else
+            {
+                if (bg->GetPlayersCountByTeam(HORDE) < bg->GetMaxPlayersPerTeam()
+                    && bg->GetPlayersCountByTeam(HORDE) < bg->GetPlayersCountByTeam(ALLIANCE))
+                {
+                    pl->SetBGTeam(HORDE);
+                    pl->setFaction(29); // orc, and generic for horde
+                }
+                else if (bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetMaxPlayersPerTeam()
+                    && bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetPlayersCountByTeam(HORDE))
+                {
+                    pl->SetBGTeam(ALLIANCE);
+                    pl->setFaction(55); // dwarf/gnome, and generic for alliance
+                }
+            }
+        }
+
         uint32 mapid = bg->GetMapId();
         float x, y, z, O;
         Team team = pl->GetBGTeam();
