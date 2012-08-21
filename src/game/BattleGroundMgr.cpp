@@ -677,7 +677,7 @@ bool BattleGroundQueue::CheckNormalMatch(BattleGround* bg_template, BattleGround
         return true;
 
     // If there are enough players in both pools combined and divided by 2 return true
-    if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED && bg_template->isBattleGround()) 
+    if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED) && bg_template->isBattleGround()) 
     {
         uint32 TotalQueuers = m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() + m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount();
         if (TotalQueuers >= minPlayers)
