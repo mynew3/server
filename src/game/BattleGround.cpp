@@ -1161,8 +1161,6 @@ void BattleGround::AddPlayer(Player *plr)
     // Add to list/maps
     m_Players[guid] = bp;
 
-    UpdatePlayersCountByTeam(team, false);                  // +1 player
-
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
     SendPacketToTeam(team, &data, plr, false);

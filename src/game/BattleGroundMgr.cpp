@@ -1816,6 +1816,7 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGr
             }
         }
 
+        bg->UpdatePlayersCountByTeam(pl->GetBGTeam(), false); // Add here instead of in AddPlayer, because AddPlayer is not made until loading screen is finished. Which can cause unbalance in the system.
         uint32 mapid = bg->GetMapId();
         float x, y, z, O;
         Team team = pl->GetBGTeam();
