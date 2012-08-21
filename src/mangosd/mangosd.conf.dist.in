@@ -1389,6 +1389,13 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 #        Default: 0 (disable)
 #                 1 (enable)
 #
+#    Battleground.CrossFaction
+#        Enable crossfaction bg's. Very useful for debugging battlegrounds.
+#        This is not tested with (Battleground.InvitationType = 1)
+#        Default: 0 (Disabled, need minplayercount of both teams)
+#                 1 (Enabled, need a total of minplayercount*2 people in queue,
+#                    Horde can play on Alliance side and vice versa)
+#
 #    Battleground.InvitationType
 #        Set Battleground invitation type
 #        Default: 0 (normal - invite as much players to bg as possible, don't bother with ballance)
@@ -1409,6 +1416,7 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 Battleground.CastDeserter = 1
 Battleground.QueueAnnouncer.Join = 0
 Battleground.QueueAnnouncer.Start = 0
+Battleground.CrossFaction = 0
 Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000

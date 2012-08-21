@@ -543,7 +543,11 @@ void Channel::Say(ObjectGuid p, const char *what, uint32 lang)
     uint32 sec = 0;
     Player *plr = sObjectMgr.GetPlayer(p);
     if(plr)
+    {
         sec = plr->GetSession()->GetSecurity();
+        if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED) && lang != LANG_UNIVERSAL && plr->GetBattleGround())
+            lang = LANG_UNIVERSAL;
+    }
 
     if (!IsOn(p))
     {
