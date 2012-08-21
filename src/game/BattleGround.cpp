@@ -990,6 +990,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
     if (plr)
     {
+        plr->setFaction(plr->getFactionForRace(plr->getRace()));
         // should remove spirit of redemption
         if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
@@ -1161,8 +1162,6 @@ void BattleGround::AddPlayer(Player *plr)
 
     // Add to list/maps
     m_Players[guid] = bp;
-
-    UpdatePlayersCountByTeam(team, false);                  // +1 player
 
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);

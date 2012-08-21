@@ -675,6 +675,12 @@ bool BattleGroundQueue::CheckNormalMatch(BattleGround* bg_template, BattleGround
     //allow 1v0 if debug bg
     if (sBattleGroundMgr.isTesting() && bg_template->isBattleGround() && (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() || m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount()))
         return true;
+
+    // If there are enough players in both pools combined and divided by 2 return true
+    if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED) && bg_template->isBattleGround()) 
+        if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() + m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers*2)
+            return true;
+
     //return true if there are enough players in selection pools - enable to work .debug bg command correctly
     return m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() >= minPlayers && m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers;
 }
@@ -811,24 +817,8 @@ void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketI
         }
         else
         {
-            //this switch can be much shorter
             MaxPlayersPerTeam = arenaType;
             MinPlayersPerTeam = arenaType;
-            /*switch(arenaType)
-            {
-            case ARENA_TYPE_2v2:
-                MaxPlayersPerTeam = 2;
-                MinPlayersPerTeam = 2;
-                break;
-            case ARENA_TYPE_3v3:
-                MaxPlayersPerTeam = 3;
-                MinPlayersPerTeam = 3;
-                break;
-            case ARENA_TYPE_5v5:
-                MaxPlayersPerTeam = 5;
-                MinPlayersPerTeam = 5;
-                break;
-            }*/
         }
     }
 
@@ -1783,6 +1773,50 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGr
     BattleGround *bg = GetBattleGround(instanceId, bgTypeId);
     if (bg)
     {
+        if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED))
+        {
+            Team GrpTeam = TEAM_NONE;
+            if (Group *pGroup = pl->GetGroup())
+            {
+                for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player* pGroupGuy = itr->getSource();
+                    if (!pGroupGuy)
+                        continue;
+
+                    if (pGroupGuy->GetBattleGround() && pGroupGuy->GetBattleGround()->GetInstanceID() == instanceId && pGroupGuy->GetBattleGround()->GetTypeID() == bgTypeId)
+                    {
+                        GrpTeam = pGroupGuy->GetBGTeam();
+                        break;
+                    }
+                }
+            }
+            if (GrpTeam != TEAM_NONE && bg->GetPlayersCountByTeam(GrpTeam) < bg->GetMaxPlayersPerTeam())
+            {
+                pl->SetBGTeam(GrpTeam);
+                if (GrpTeam == HORDE)
+                    pl->setFaction(29); // orc, and generic for horde
+                else if (GrpTeam == ALLIANCE)
+                    pl->setFaction(55); // dwarf/gnome, and generic for alliance
+            }
+            else
+            {
+                if (bg->GetPlayersCountByTeam(HORDE) < bg->GetMaxPlayersPerTeam()
+                    && bg->GetPlayersCountByTeam(HORDE) < bg->GetPlayersCountByTeam(ALLIANCE))
+                {
+                    pl->SetBGTeam(HORDE);
+                    pl->setFaction(29); // orc, and generic for horde
+                }
+                else if (bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetMaxPlayersPerTeam()
+                    && bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetPlayersCountByTeam(HORDE))
+                {
+                    pl->SetBGTeam(ALLIANCE);
+                    pl->setFaction(55); // dwarf/gnome, and generic for alliance
+                }
+            }
+        }
+
+        bg->UpdatePlayersCountByTeam(pl->GetBGTeam(), false); // Add here instead of in AddPlayer, because AddPlayer is not made until loading screen is finished. Which can cause unbalance in the system.
         uint32 mapid = bg->GetMapId();
         float x, y, z, O;
         Team team = pl->GetBGTeam();

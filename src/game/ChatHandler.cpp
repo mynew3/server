@@ -113,6 +113,8 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         // send in universal language if player in .gmon mode (ignore spell effects)
         if (_player->isGameMaster())
             lang = LANG_UNIVERSAL;
+        else if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED) && lang != LANG_UNIVERSAL && GetPlayer()->GetBattleGround())
+            lang = LANG_UNIVERSAL;
         else
         {
             // send in universal language in two side iteration allowed mode
