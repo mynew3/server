@@ -153,7 +153,7 @@ GroupQueueInfo * BattleGroundQueue::AddGroup(Player *leader, Group* grp, BattleG
     ginfo->IsInvitedToBGInstanceGUID = 0;
     ginfo->JoinTime                  = WorldTimer::getMSTime();
     ginfo->RemoveInviteTime          = 0;
-    ginfo->GroupTeam                 = leader->GetTeam();
+    ginfo->GroupTeam                 = leader->GetBGTeam();
     ginfo->ArenaTeamRating           = arenaRating;
     ginfo->OpponentsTeamRating       = 0;
 
@@ -1285,7 +1285,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
             Team team = bg->GetPlayerTeam(itr->first);
             if (!team)
                 if (Player* player = sObjectMgr.GetPlayer(itr->first))
-                    team = player->GetTeam();
+                    team = player->GetBGTeam();
 
             if (bg->GetWinner() == team && team != TEAM_NONE)
                 *data << uint8(1);
@@ -1821,7 +1821,7 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 instanceId, BattleGr
         float x, y, z, O;
         Team team = pl->GetBGTeam();
         if (team==0)
-            team = pl->GetTeam();
+            team = pl->GetBGTeam();
         bg->GetTeamStartLoc(team, x, y, z, O);
 
         DETAIL_LOG("BATTLEGROUND: Sending %s to map %u, X %f, Y %f, Z %f, O %f", pl->GetName(), mapid, x, y, z, O);
