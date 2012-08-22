@@ -764,26 +764,26 @@ bool ArenaTeam::IsFighting() const
     return false;
 }
 
-bool ArenaTeam::HandleArenaAntifarm(ArenaTeam* looser)
+bool ArenaTeam::HandleArenaAntifarm(ArenaTeam* loser)
 {
-    if (looser->GetId() == GetId())
+    if (loser->GetId() == GetId())
     {
         IncreaseWinnerLastIDCount();
         if (GetLastWinnerIDCount() >= 3)
             return false;
     }
-    else if (GetId() == looser->GetLastLooserID())
+    else if (GetId() == loser->GetLastLoserID())
     {
-        IncreaseLooserLastIDCount();
-        if (looser->GetLastLooserIDCount() >= 3)
+        IncreaseLoserLastIDCount();
+        if (loser->GetLastLoserIDCount() >= 3)
             return false;
     }
     else
     {
         ClearWinnerID();
-        looser->ClearLooserID();
+        loser->ClearLoserID();
     }
-    SetWinnerLastID(looser->GetId());
-    looser->SetLooserLastID(GetId());
+    SetWinnerLastID(loser->GetId());
+    loser->SetLoserLastID(GetId());
     return true;
 }
