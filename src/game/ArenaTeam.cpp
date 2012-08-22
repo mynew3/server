@@ -763,3 +763,27 @@ bool ArenaTeam::IsFighting() const
     }
     return false;
 }
+
+bool ArenaTeam::HandleArenaAntifarm(ArenaTeam* looser)
+{
+    if (looser->GetId() == GetId())
+    {
+        IncreaseWinnerLastIDCount();
+        if (GetLastWinnerIDCount() >= 3)
+            return false;
+    }
+    else if (GetId() == looser->GetLastLooserID())
+    {
+        IncreaseLooserLastIDCount();
+        if (looser->GetLastLooserIDCount() >= 3)
+            return false;
+    }
+    else
+    {
+        ClearWinnerID();
+        looser->ClearLooserID();
+    }
+    SetWinnerLastID(looser->GetId());
+    looser->SetLooserLastID(GetId());
+    return true;
+}

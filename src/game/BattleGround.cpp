@@ -720,7 +720,7 @@ void BattleGround::EndBattleGround(Team winner)
             SetArenaTeamRatingChangeForTeam(ALLIANCE, 0);
             SetArenaTeamRatingChangeForTeam(HORDE, 0);
         }
-    }
+    }    
 
     for(BattleGroundPlayerMap::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
@@ -768,11 +768,18 @@ void BattleGround::EndBattleGround(Team winner)
         // per player calculation
         if (isArena() && isRated() && winner_arena_team && loser_arena_team)
         {
-            if (team == winner)
-                winner_arena_team->MemberWon(plr,loser_rating);
-            else
-                loser_arena_team->MemberLost(plr,winner_rating);
+            if (winner_arena_team->HandleArenaAntifarm(loser_arena_team))
+            {
+                if (team == winner)
+                    winner_arena_team->MemberWon(plr,loser_rating);
+                else
+                    loser_arena_team->MemberLost(plr,winner_rating);
+            }
         }
+
+        if (isArena() && !isRated() && team == winner)
+            plr->ModifyArenaPoints(5);
+        
 
         if (team == winner)
         {

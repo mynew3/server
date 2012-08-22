@@ -131,6 +131,20 @@ class ArenaTeam
         void SetStats(uint32 stat_type, uint32 value);
         uint32 GetRating() const          { return m_stats.rating; }
 
+        uint32  GetLastWinnerID() { return WLastId; }
+        uint32  GetLastWinnerIDCount() { return WLastIdCount; }
+        void    SetWinnerLastID(uint64 GUID) { WLastId = GUID; }
+        void    IncreaseWinnerLastIDCount() { ++WLastIdCount; }
+        void    ClearWinnerID() { WLastId = 0; WLastIdCount = 0; }
+
+        uint32  GetLastLooserID() { return LLastId; }
+        uint32  GetLastLooserIDCount() { return LLastIdCount; }
+        void    SetLooserLastID(uint64 GUID) { LLastId = GUID; }
+        void    IncreaseLooserLastIDCount() { ++LLastIdCount; }
+        void    ClearLooserID() { LLastId = 0; LLastIdCount = 0; }
+
+        bool    HandleArenaAntifarm(ArenaTeam* looser);
+
         uint32 GetEmblemStyle() const     { return m_EmblemStyle; }
         uint32 GetEmblemColor() const     { return m_EmblemColor; }
         uint32 GetBorderStyle() const     { return m_BorderStyle; }
@@ -210,6 +224,11 @@ class ArenaTeam
         ArenaType m_Type;
         std::string m_Name;
         ObjectGuid m_CaptainGuid;
+
+        uint32  WLastId;
+        uint32  WLastIdCount;
+        uint32  LLastId;
+        uint32  LLastIdCount;
 
         uint32 m_BackgroundColor; // ARGB format
         uint32 m_EmblemStyle;     // icon id
