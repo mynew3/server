@@ -970,10 +970,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool    BuyEnabled;
         uint32  KillStreak;
 
-        uint32  ALastGuid;
-        uint32  ALastGuidCount;
-        uint32  VLastGuid;
-        uint32  VLastGuidCount;
+        std::string ALastIP;
+        uint32  ALastIPCount;
+
+        std::string VLastIP;
+        uint32  VLastIPCount;
     public:
         void    HandlePvPKill();
         void    HandleHardcoreKill(Player* attacker);
@@ -983,17 +984,17 @@ class MANGOS_DLL_SPEC Player : public Unit
         void    IncreaseKillStreak() { ++KillStreak; }
         void    ClearKillStreak() { KillStreak = 0; }
 
-        uint32  GetLastAttackerGUID() { return ALastGuid; }
-        uint32  GetLastAttackerGUIDCount() { return ALastGuidCount; }
-        void    SetAttackerLastGUID(uint64 GUID) { ALastGuid = GUID; }
-        void    IncreaseAttackerLastGUIDCount() { ++ALastGuidCount; }
-        void    ClearAttackerGUID() { ALastGuid = 0; ALastGuidCount = 0; }
+        std::string GetLastAttackerIP() { return ALastIP; }
+        uint32  GetLastAttackerIPCount() { return ALastIPCount; }
+        void    SetAttackerLastIP(std::string IP) { ALastIP = IP; }
+        void    IncreaseAttackerLastIPCount() { ++ALastIPCount; }
+        void    ClearAttackerIP() { ALastIP = ""; ALastIPCount = 0; }
 
-        uint32  GetLastVictimGUID() { return VLastGuid; }
-        uint32  GetLastVictimGUIDCount() { return VLastGuidCount; }
-        void    SetVictimLastGUID(uint64 GUID) { VLastGuid = GUID; }
-        void    IncreaseVictimLastGUIDCount() { ++VLastGuidCount; }
-        void    ClearVictimGUID() { VLastGuid = 0; VLastGuidCount = 0; }
+        std::string  GetLastVictimIP() { return VLastIP; }
+        uint32  GetLastVictimIPCount() { return VLastIPCount; }
+        void    SetVictimLastIP(std::string IP) { VLastIP = IP; }
+        void    IncreaseVictimLastIPCount() { ++VLastIPCount; }
+        void    ClearVictimIP() { VLastIP = ""; VLastIPCount = 0; }
 
         uint32  GetBounty() { return KillBounty; }
         void    SetBounty(int32 Bounty) { KillBounty = Bounty; }

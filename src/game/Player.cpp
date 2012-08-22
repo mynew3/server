@@ -385,11 +385,11 @@ Player::Player (WorldSession *session): Unit(), m_mover(this), m_camera(this), m
     ItemInsuranceCharges = 0;
     /* PvP System Begin */
     KillStreak        = 0;
-    ALastGuid         = 0;
-    ALastGuidCount    = 0;
-    VLastGuid         = 0;
-    VLastGuidCount    = 0;
-    KillBounty        = 0;
+    ALastIP         = "";
+    ALastIPCount    = 0;
+    VLastIP         = "";
+    VLastIPCount    = 0;
+    KillBounty      = 0;
     /* PvP System End */
 
     m_transport = 0;
@@ -20889,7 +20889,7 @@ void Player::HandlePvPKill()
 {
     const uint32 uStartTime = WorldTimer::getMSTime();
 
-    const int16 RewardGold = sWorld.getConfig(CONFIG_UINT32_PVPGOLD_BASE);
+    const int32 RewardGold = sWorld.getConfig(CONFIG_UINT32_PVPGOLD_BASE);
     uint32 InCombatPlayers = 0;
     uint64 MaxDmgGUID = 0;
     uint64 MaxDmgDmg  = 0;
@@ -20916,6 +20916,8 @@ void Player::HandlePvPKill()
         if (pAttacker->HandlePvPAntifarm(this))
         {
             int32 Reward = (RewardGold * (Damage / TotalHealth)*((pAttacker->GetKillStreak()/10)+1.0f));
+            if (Reward > RewardGold*3)
+                Reward = RewardGold*3;
             pAttacker->ModifyMoney(+Reward);
             pAttacker->IncreaseKillStreak();
 
@@ -20940,12 +20942,19 @@ void Player::HandlePvPKill()
                 if (maxhealingPct > 1) maxhealingPct = 1.0f;
 
                 Reward = (Reward * ((Healing / TotalHealing)*((pHealer->GetKillStreak()/10)+1.0f)*maxhealingPct));
+                if (Reward > RewardGold*3)
+                    Reward = RewardGold*3;
                 pHealer->ModifyMoney(+Reward);
                 pHealer->IncreaseKillStreak();
 
                pHealer->SendChatMessage("%s[PvP System]%s You got awarded %g gold for healing %s",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,Reward/10000.f,pAttacker->GetNameLink().c_str());
             }
             // Healing Code End
+        }
+        else
+        {
+            pAttacker->SendChatMessage("%s[Antifarming System]%s You triggered out antifarming system. This action was logged.");
+            sLog.outError("Player %u %s triggered antifarmsystem with %u %s",pAttacker->GetObjectGuid().GetCounter(),pAttacker->GetName(),GetObjectGuid().GetCounter(),GetName());
         }
     }
 
@@ -21024,51 +21033,34 @@ void Player::HandleHardcoreKill(Player* attacker)
 
 bool Player::HandlePvPAntifarm(Player* victim)
 {
-    bool sendInfo = true;
     if (!isGameMaster() && !victim->isGameMaster())
     {
         if (this == victim)
             return false;
         else if (victim->HasAura(2479))
-        {
-            if (sendInfo)
-                SendChatMessage("%s[PvP System]%s Hes not worth money or honor yet!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
             return false;
-        }
         else if (GetSession()->GetRemoteAddress() == victim->GetSession()->GetRemoteAddress())
-        {
-            if (sendInfo)
-                SendChatMessage("%s[Anti Farming System]%s You have same ip as your victim", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
             return false;
-        }
-        else if (victim->GetObjectGuid() == GetLastAttackerGUID())
+        else if (victim->GetSession()->GetRemoteAddress() == GetLastAttackerIP())
         {
-            IncreaseAttackerLastGUIDCount();
-            if (GetLastAttackerGUIDCount() >= 6)
-            {
-                if (sendInfo)
-                    SendChatMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+            IncreaseAttackerLastIPCount();
+            if (GetLastAttackerIPCount() >= 6)
                 return false;
-            }
         }
-        else if (GetObjectGuid() == victim->GetLastVictimGUID())
+        else if (GetSession()->GetRemoteAddress() == victim->GetLastVictimIP())
         {
-            IncreaseVictimLastGUIDCount();
-            if (victim->GetLastVictimGUIDCount() >= 6)
-            {
-                if (sendInfo)
-                    SendChatMessage("%s[Anti Farming System]%s You don't get awarded for killing a player more than 6 times in a row!.", MSG_COLOR_MAGENTA, MSG_COLOR_WHITE);
+            IncreaseVictimLastIPCount();
+            if (victim->GetLastVictimIPCount() >= 6)
                 return false;
-            }
         }
         else
         {
-            ClearAttackerGUID();
-            victim->ClearVictimGUID();
+            ClearAttackerIP();
+            victim->ClearVictimIP();
         }
     }
-    SetAttackerLastGUID(victim->GetObjectGuid());
-    victim->SetVictimLastGUID(GetObjectGuid());
+    SetAttackerLastIP(GetSession()->GetRemoteAddress());
+    victim->SetVictimLastIP(GetSession()->GetRemoteAddress());
     return true;
 }
 
