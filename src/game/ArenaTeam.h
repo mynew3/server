@@ -137,11 +137,11 @@ class ArenaTeam
         void    IncreaseWinnerLastIDCount() { ++WLastIdCount; }
         void    ClearWinnerID() { WLastId = 0; WLastIdCount = 0; }
 
-        uint32  GetLastLooserID() { return LLastId; }
-        uint32  GetLastLooserIDCount() { return LLastIdCount; }
-        void    SetLooserLastID(uint64 GUID) { LLastId = GUID; }
-        void    IncreaseLooserLastIDCount() { ++LLastIdCount; }
-        void    ClearLooserID() { LLastId = 0; LLastIdCount = 0; }
+        uint32  GetLastLoserID() { return LLastId; }
+        uint32  GetLastLoserIDCount() { return LLastIdCount; }
+        void    SetLoserLastID(uint64 GUID) { LLastId = GUID; }
+        void    IncreaseLoserLastIDCount() { ++LLastIdCount; }
+        void    ClearLoserID() { LLastId = 0; LLastIdCount = 0; }
 
         bool    HandleArenaAntifarm(ArenaTeam* looser);
 
