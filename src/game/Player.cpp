@@ -20889,7 +20889,7 @@ void Player::HandlePvPKill()
 {
     const uint32 uStartTime = WorldTimer::getMSTime();
 
-    const int16 RewardGold = 10000;
+    const int16 RewardGold = sWorld.getConfig(CONFIG_UINT32_PVPGOLD_BASE);
     uint32 InCombatPlayers = 0;
     uint64 MaxDmgGUID = 0;
     uint64 MaxDmgDmg  = 0;

@@ -527,18 +527,21 @@ void Unit::DealDamageMods(Unit *pVictim, uint32 &damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
-    Player* pDamager = GetCharmerOrOwnerPlayerOrPlayerItself();
-    Player* pDamaged = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (sWorld.getConfig(CONFIG_BOOL_PVPGOLD_ENABLE))
+    {
+        Player* pDamager = GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player* pDamaged = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
 
-    // Remove overkill damage.
-    int32 nooverkilldmg = 0;
-    if (damage > pDamaged->GetHealth())
-        nooverkilldmg = pDamaged->GetHealth();
-    else
-        nooverkilldmg = damage;
+        // Remove overkill damage.
+        int32 nooverkilldmg = 0;
+        if (damage > pDamaged->GetHealth())
+            nooverkilldmg = pDamaged->GetHealth();
+        else
+            nooverkilldmg = damage;
 
-    if (pDamager && pDamaged && pDamager != pDamaged && nooverkilldmg > 0)
-        pDamaged->Damaged(pDamager->GetObjectGuid(), nooverkilldmg);
+        if (pDamager && pDamaged && pDamager != pDamaged && nooverkilldmg > 0)
+            pDamaged->Damaged(pDamager->GetObjectGuid(), nooverkilldmg);
+    }
 
     // remove affects from victim (including from 0 damage and DoTs)
     if(pVictim != this)
@@ -670,10 +673,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     if (health <= damage)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE,"DealDamage: victim just died");
-        /***********************************PVP SYSTEM BEGIN***********************************/
-        if (pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
+        if (pVictim->ToPlayer() && sWorld.getConfig(CONFIG_BOOL_PVPGOLD_ENABLE))
             pVictim->ToPlayer()->HandlePvPKill();
-        /***********************************PVP SYSTEM END***********************************/
 
         // find player: owner of controlled `this` or `this` itself maybe
         // for loot will be sued only if group_tap==NULL
@@ -5626,11 +5627,14 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
 
-    Player* pHealer = GetCharmerOrOwnerPlayerOrPlayerItself();
-    Player* pHealed = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (sWorld.getConfig(CONFIG_BOOL_PVPGOLD_ENABLE))
+    {
+        Player* pHealer = GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player* pHealed = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
 
-    if (pHealer && pHealed && pHealer != pHealed && gain > 0) // Using gain, since overhealing should not be counted.
-        pHealed->Healed(pHealer->GetObjectGuid(), gain);
+        if (pHealer && pHealed && pHealer != pHealed && gain > 0) // Using gain, since overhealing should not be counted.
+            pHealed->Healed(pHealer->GetObjectGuid(), gain);
+    }
 
     Unit* unit = this;
 

@@ -866,6 +866,12 @@ void World::LoadConfigSettings(bool reload)
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
     sLog.outString("WORLD: mmap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 
+    setConfig(CONFIG_BOOL_PVPGOLD_ENABLE,"PvPGold.Enable", false);
+    sLog.outString("WORLD: pvpgold is %sabled", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE) ? "en" : "dis");
+
+    setConfig(CONFIG_UINT32_PVPGOLD_BASE,"PvPGold.BaseCopper",10000);
+    sLog.outString("WORLD: pvpgold basecopper is set to %u", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE));
+
     setConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE,"AutoBroadcast.On", false);
     sLog.outString("WORLD: autobroadcast is %sabled", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE) ? "en" : "dis");
 }
