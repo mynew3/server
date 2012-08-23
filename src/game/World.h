@@ -372,7 +372,7 @@ enum RealmType
     REALM_TYPE_RP       = 6,
     REALM_TYPE_RPPVP    = 8,
     REALM_TYPE_FFA_PVP  = 16                                // custom, free for all pvp mode like arena PvP in all zones except rest activated places and sanctuaries
-                                                            // replaced by REALM_PVP in realm list
+    // replaced by REALM_PVP in realm list
 };
 
 /// This is values from first column of Cfg_Categories.dbc (1.12.1 have another numeration)
@@ -428,14 +428,14 @@ struct CliCommandHolder
     uint32 m_cliAccountId;                                  // 0 for console and real account id for RA/soap
     AccountTypes m_cliAccessLevel;
     void* m_callbackArg;
-    char *m_command;
+    char* m_command;
     Print* m_print;
     CommandFinished* m_commandFinished;
 
-    CliCommandHolder(uint32 accountId, AccountTypes cliAccessLevel, void* callbackArg, const char *command, Print* zprint, CommandFinished* commandFinished)
+    CliCommandHolder(uint32 accountId, AccountTypes cliAccessLevel, void* callbackArg, const char* command, Print* zprint, CommandFinished* commandFinished)
         : m_cliAccountId(accountId), m_cliAccessLevel(cliAccessLevel), m_callbackArg(callbackArg), m_print(zprint), m_commandFinished(commandFinished)
     {
-        size_t len = strlen(command)+1;
+        size_t len = strlen(command) + 1;
         m_command = new char[len];
         memcpy(m_command, command, len);
     }
@@ -453,7 +453,7 @@ class World
         ~World();
 
         WorldSession* FindSession(uint32 id) const;
-        void AddSession(WorldSession *s);
+        void AddSession(WorldSession* s);
         bool RemoveSession(uint32 id);
         void SendBroadcast();
         /// Get the number of current active sessions
@@ -477,7 +477,7 @@ class World
         /// Set the active session server limit (or security level limitation)
         void SetPlayerLimit(int32 limit, bool needUpdate = false);
 
-        //player Queue
+        // player Queue
         typedef std::list<WorldSession*> Queue;
         void AddQueuedSession(WorldSession*);
         bool RemoveQueuedSession(WorldSession* session);
@@ -512,7 +512,7 @@ class World
         uint16 GetConfigMaxSkillValue() const
         {
             uint32 lvl = getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL);
-            return lvl > 60 ? 300 + ((lvl - 60) * 75) / 10 : lvl*5;
+            return lvl > 60 ? 300 + ((lvl - 60) * 75) / 10 : lvl * 5;
         }
 
         void SetInitialWorldSettings();
@@ -538,25 +538,25 @@ class World
 
         void Update(uint32 diff);
 
-        void UpdateSessions( uint32 diff );
+        void UpdateSessions(uint32 diff);
 
         /// Get a server configuration element (see #eConfigFloatValues)
-        void setConfig(eConfigFloatValues index,float value) { m_configFloatValues[index]=value; }
+        void setConfig(eConfigFloatValues index, float value) { m_configFloatValues[index] = value; }
         /// Get a server configuration element (see #eConfigFloatValues)
         float getConfig(eConfigFloatValues rate) const { return m_configFloatValues[rate]; }
 
         /// Set a server configuration element (see #eConfigUInt32Values)
-        void setConfig(eConfigUInt32Values index, uint32 value) { m_configUint32Values[index]=value; }
+        void setConfig(eConfigUInt32Values index, uint32 value) { m_configUint32Values[index] = value; }
         /// Get a server configuration element (see #eConfigUInt32Values)
         uint32 getConfig(eConfigUInt32Values index) const { return m_configUint32Values[index]; }
 
         /// Set a server configuration element (see #eConfigInt32Values)
-        void setConfig(eConfigInt32Values index, int32 value) { m_configInt32Values[index]=value; }
+        void setConfig(eConfigInt32Values index, int32 value) { m_configInt32Values[index] = value; }
         /// Get a server configuration element (see #eConfigInt32Values)
         int32 getConfig(eConfigInt32Values index) const { return m_configInt32Values[index]; }
 
         /// Set a server configuration element (see #eConfigBoolValues)
-        void setConfig(eConfigBoolValues index, bool value) { m_configBoolValues[index]=value; }
+        void setConfig(eConfigBoolValues index, bool value) { m_configBoolValues[index] = value; }
         /// Get a server configuration element (see #eConfigBoolValues)
         bool getConfig(eConfigBoolValues index) const { return m_configBoolValues[index]; }
 
@@ -589,9 +589,9 @@ class World
 
         void UpdateRealmCharCount(uint32 accid);
 
-        LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if(m_availableDbcLocaleMask & (1 << locale)) return locale; else return m_defaultDbcLocale; }
+        LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const { if (m_availableDbcLocaleMask & (1 << locale)) return locale; else return m_defaultDbcLocale; }
 
-        //used World DB version
+        // used World DB version
         void LoadDBVersion();
         char const* GetDBVersion() { return m_DBVersion.c_str(); }
         char const* GetCreatureEventAIVersion() { return m_CreatureEventAIVersion.c_str(); }
@@ -599,7 +599,7 @@ class World
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
-        void _UpdateRealmCharCount(QueryResult *resultCharCount, uint32 accountId);
+        void _UpdateRealmCharCount(QueryResult* resultCharCount, uint32 accountId);
 
         void InitDailyQuestResetTime();
         void ResetDailyQuests();
@@ -646,8 +646,8 @@ class World
         bool m_configBoolValues[CONFIG_BOOL_VALUE_COUNT];
 
         int32 m_playerLimit;
-        LocaleConstant m_defaultDbcLocale;                     // from config for one from loaded DBC locales
-        uint32 m_availableDbcLocaleMask;                       // by loaded DBC
+        LocaleConstant m_defaultDbcLocale;                  // from config for one from loaded DBC locales
+        uint32 m_availableDbcLocaleMask;                    // by loaded DBC
         void DetectDBCLang();
         bool m_allowMovement;
         std::string m_motd;
@@ -666,19 +666,19 @@ class World
         static uint32 m_relocation_ai_notify_delay;
 
         // CLI command holder to be thread safe
-        ACE_Based::LockedQueue<CliCommandHolder*,ACE_Thread_Mutex> cliCmdQueue;
+        ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
 
         // next daily quests reset time
         time_t m_NextDailyQuestReset;
 
-        //Player Queue
+        // Player Queue
         Queue m_QueuedSessions;
 
-        //sessions that are added async
+        // sessions that are added async
         void AddSession_(WorldSession* s);
         ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
 
-        //used versions
+        // used versions
         std::string m_DBVersion;
         std::string m_CreatureEventAIVersion;
 };

@@ -257,7 +257,7 @@ struct ItemRequiredTarget
     bool IsFitToRequirements(Unit* pUnitTarget) const;
 };
 
-bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto);
+bool ItemCanGoIntoBag(ItemPrototype const* proto, ItemPrototype const* pBagProto);
 
 class MANGOS_DLL_SPEC Item : public Object
 {
@@ -287,11 +287,11 @@ class MANGOS_DLL_SPEC Item : public Object
         }
 
         static Item* CreateItem(uint32 item, uint32 count, Player const* player = NULL, uint32 randomPropertyId = 0);
-        Item* CloneItem( uint32 count, Player const* player = NULL ) const;
+        Item* CloneItem(uint32 count, Player const* player = NULL) const;
 
         Item();
 
-        virtual bool Create( uint32 guidlow, uint32 itemid, Player const* owner);
+        virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
 
         ItemPrototype const* GetProto() const;
 
@@ -299,7 +299,7 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetOwnerGuid(ObjectGuid guid) { SetGuidValue(ITEM_FIELD_OWNER, guid); }
         Player* GetOwner()const;
 
-        void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_BINDED,val); }
+        void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_BINDED, val); }
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_BINDED); }
         bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
@@ -320,8 +320,8 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsLimitedToAnotherMapOrZone(uint32 cur_mapId, uint32 cur_zoneId) const;
         bool GemsFitSockets() const;
 
-        uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
-        void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
+        uint32 GetCount() const { return GetUInt32Value(ITEM_FIELD_STACK_COUNT); }
+        void SetCount(uint32 value) { SetUInt32Value(ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->GetMaxStackSize(); }
         uint8 GetGemCountWithID(uint32 GemID) const;
         InventoryResult CanBeMergedPartlyWith(ItemPrototype const* proto) const;
@@ -331,7 +331,7 @@ class MANGOS_DLL_SPEC Item : public Object
         uint8 GetBagSlot() const;
         void SetSlot(uint8 slot) {m_slot = slot;}
         uint16 GetPos() const { return uint16(GetBagSlot()) << 8 | GetSlot(); }
-        void SetContainer(Bag *container) { m_container = container; }
+        void SetContainer(Bag* container) { m_container = container; }
 
         bool IsInBag() const { return m_container != NULL; }
         bool IsEquipped() const;
@@ -358,7 +358,7 @@ class MANGOS_DLL_SPEC Item : public Object
 
         // spell charges (signed but stored as unsigned)
         int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
-        void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index,value); }
+        void SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index, value); }
 
         Loot loot;
 
@@ -380,14 +380,14 @@ class MANGOS_DLL_SPEC Item : public Object
             uState = state;
         }
 
-        bool HasQuest(uint32 quest_id) const { return GetProto()->StartQuest == quest_id; }
-        bool HasInvolvedQuest(uint32 /*quest_id*/) const { return false; }
+        bool HasQuest(uint32 quest_id) const override { return GetProto()->StartQuest == quest_id; }
+        bool HasInvolvedQuest(uint32 /*quest_id*/) const override { return false; }
         bool IsPotion() const { return GetProto()->IsPotion(); }
         bool IsConjuredConsumable() const { return GetProto()->IsConjuredConsumable(); }
 
-        void AddToClientUpdateList();
-        void RemoveFromClientUpdateList();
-        void BuildUpdateData(UpdateDataMapType& update_players);
+        void AddToClientUpdateList() override;
+        void RemoveFromClientUpdateList() override;
+        void BuildUpdateData(UpdateDataMapType& update_players) override;
     private:
         uint8 m_slot;
         Bag* m_container;

@@ -39,17 +39,17 @@ class AuthSocket: public BufferedSocket
         AuthSocket();
         ~AuthSocket();
 
-        void OnAccept();
-        void OnRead();
+        void OnAccept() override;
+        void OnRead() override;
         void SendProof(Sha1Hash sha);
-        void LoadRealmlist(ByteBuffer &pkt, uint32 acctid);
+        void LoadRealmlist(ByteBuffer& pkt, uint32 acctid);
 
         bool _HandleLogonChallenge();
         bool _HandleLogonProof();
         bool _HandleReconnectChallenge();
         bool _HandleReconnectProof();
         bool _HandleRealmList();
-        //data transfer handle for patch
+        // data transfer handle for patch
 
         bool _HandleXferResume();
         bool _HandleXferCancel();

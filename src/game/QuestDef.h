@@ -134,7 +134,7 @@ enum QuestFlags
     QUEST_FLAGS_PARTY_ACCEPT   = 0x00000002,                // If player in party, all players that can accept this quest will receive confirmation box to accept quest CMSG_QUEST_CONFIRM_ACCEPT/SMSG_QUEST_CONFIRM_ACCEPT
     QUEST_FLAGS_EXPLORATION    = 0x00000004,                // Not used currently
     QUEST_FLAGS_SHARABLE       = 0x00000008,                // Can be shared: Player::CanShareQuest()
-    //QUEST_FLAGS_NONE2        = 0x00000010,                // Not used currently
+    // QUEST_FLAGS_NONE2        = 0x00000010,               // Not used currently
     QUEST_FLAGS_EPIC           = 0x00000020,                // Not used currently: Unsure of content
     QUEST_FLAGS_RAID           = 0x00000040,                // Not used currently
     QUEST_FLAGS_TBC            = 0x00000080,                // Not used currently: Available if TBC expansion enabled only
@@ -179,10 +179,10 @@ struct QuestLocale
 // xp to give
 class Quest
 {
-    friend class ObjectMgr;
+        friend class ObjectMgr;
     public:
-        Quest(Field * questRecord);
-        uint32 XPValue( Player *pPlayer ) const;
+        Quest(Field* questRecord);
+        uint32 XPValue(Player* pPlayer) const;
 
         uint32 GetQuestFlags() const { return m_QuestFlags; }
         bool HasQuestFlag(QuestFlags flag) const { return (m_QuestFlags & flag) != 0; }
@@ -226,7 +226,7 @@ class Quest
         int32  GetRewOrReqMoney() const;
         uint32 GetRewHonorableKills() const { return RewHonorableKills; }
         uint32 GetRewMoneyMaxLevel() const { return RewMoneyMaxLevel; }
-                                                            // use in XP calculation at client
+        // use in XP calculation at client
         uint32 GetRewSpell() const { return RewSpell; }
         uint32 GetRewSpellCast() const { return RewSpellCast; }
         uint32 GetRewMailTemplateId() const { return RewMailTemplateId; }
@@ -351,8 +351,8 @@ enum QuestUpdateState
 struct QuestStatusData
 {
     QuestStatusData()
-        : m_status(QUEST_STATUS_NONE),m_rewarded(false),
-        m_explored(false), m_timer(0), uState(QUEST_NEW)
+        : m_status(QUEST_STATUS_NONE), m_rewarded(false),
+          m_explored(false), m_timer(0), uState(QUEST_NEW)
     {
         memset(m_itemcount, 0, QUEST_ITEM_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));

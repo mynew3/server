@@ -28,13 +28,13 @@ enum
     FT_NA_BYTE='X',                                         // ignore/ default, 1 byte size, see above
     FT_NA_FLOAT='F',                                        // ignore/ default,  float size, see above
     FT_NA_POINTER='p',                                      // fill default value into dest, pointer size, Use this only with static data (otherwise mem-leak)
-    FT_STRING='s',                                          //char*
-    FT_FLOAT='f',                                           //float
-    FT_INT='i',                                             //uint32
-    FT_BYTE='b',                                            //uint8
-    FT_SORT='d',                                            //sorted by this field, field is not included
-    FT_IND='n',                                             //the same,but parsed to data
-    FT_LOGIC='l'                                            //Logical (boolean)
+    FT_STRING='s',                                          // char*
+    FT_FLOAT='f',                                           // float
+    FT_INT='i',                                             // uint32
+    FT_BYTE='b',                                            // uint8
+    FT_SORT='d',                                            // sorted by this field, field is not included
+    FT_IND='n',                                             // the same,but parsed to data
+    FT_LOGIC='l'                                            // Logical (boolean)
 };
 
 class DBCFileLoader
@@ -43,7 +43,7 @@ class DBCFileLoader
         DBCFileLoader();
         ~DBCFileLoader();
 
-        bool Load(const char *filename, const char *fmt);
+        bool Load(const char* filename, const char* fmt);
 
         class Record
         {
@@ -68,7 +68,7 @@ class DBCFileLoader
                     return *reinterpret_cast<uint8*>(offset+file.GetOffset(field));
                 }
 
-                const char *getString(size_t field) const
+                const char* getString(size_t field) const
                 {
                     assert(field < file.fieldCount);
                     size_t stringOffset = getUInt(field);
@@ -77,9 +77,9 @@ class DBCFileLoader
                 }
 
             private:
-                Record(DBCFileLoader &file_, unsigned char *offset_): offset(offset_), file(file_) {}
-                unsigned char *offset;
-                DBCFileLoader &file;
+                Record(DBCFileLoader& file_, unsigned char* offset_): offset(offset_), file(file_) {}
+                unsigned char* offset;
+                DBCFileLoader& file;
 
                 friend class DBCFileLoader;
 
@@ -95,15 +95,15 @@ class DBCFileLoader
         bool IsLoaded() {return (data!=NULL);}
         char* AutoProduceData(const char* fmt, uint32& count, char**& indexTable);
         char* AutoProduceStrings(const char* fmt, char* dataTable);
-        static uint32 GetFormatRecordSize(const char * format, int32 * index_pos = NULL);
+        static uint32 GetFormatRecordSize(const char* format, int32* index_pos = NULL);
     private:
 
         uint32 recordSize;
         uint32 recordCount;
         uint32 fieldCount;
         uint32 stringSize;
-        uint32 *fieldsOffset;
-        unsigned char *data;
-        unsigned char *stringTable;
+        uint32* fieldsOffset;
+        unsigned char* data;
+        unsigned char* stringTable;
 };
 #endif
