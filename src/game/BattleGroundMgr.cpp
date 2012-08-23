@@ -1779,7 +1779,7 @@ void BattleGroundMgr::SendToBattleGround(Player* pl, uint32 instanceId, BattleGr
             Team GrpTeam = TEAM_NONE;
             if (Group *pGroup = pl->GetGroup())
             {
-                for (GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* pGroupGuy = itr->getSource();
                     if (!pGroupGuy)
@@ -1793,28 +1793,18 @@ void BattleGroundMgr::SendToBattleGround(Player* pl, uint32 instanceId, BattleGr
                 }
             }
             if (GrpTeam != TEAM_NONE && bg->GetPlayersCountByTeam(GrpTeam) < bg->GetMaxPlayersPerTeam())
-            {
                 pl->SetBGTeam(GrpTeam);
-                if (GrpTeam == HORDE)
-                    pl->setFaction(29); // orc, and generic for horde
-                else if (GrpTeam == ALLIANCE)
-                    pl->setFaction(55); // dwarf/gnome, and generic for alliance
-            }
             else
             {
-                if (bg->GetPlayersCountByTeam(HORDE) < bg->GetMaxPlayersPerTeam()
-                    && bg->GetPlayersCountByTeam(HORDE) < bg->GetPlayersCountByTeam(ALLIANCE))
-                {
+                if (bg->GetPlayersCountByTeam(HORDE) < bg->GetMaxPlayersPerTeam() && bg->GetPlayersCountByTeam(HORDE) < bg->GetPlayersCountByTeam(ALLIANCE))
                     pl->SetBGTeam(HORDE);
-                    pl->setFaction(29); // orc, and generic for horde
-                }
-                else if (bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetMaxPlayersPerTeam()
-                    && bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetPlayersCountByTeam(HORDE))
-                {
+                else if (bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetMaxPlayersPerTeam() && bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetPlayersCountByTeam(HORDE))
                     pl->SetBGTeam(ALLIANCE);
-                    pl->setFaction(55); // dwarf/gnome, and generic for alliance
-                }
             }
+            if (pl->GetBGTeam() == HORDE)
+                pl->setFaction(29); // orc, and generic for horde
+            else if (pl->GetBGTeam() == ALLIANCE)
+                pl->setFaction(55); // dwarf/gnome, and generic for alliance
         }
 
         bg->UpdatePlayersCountByTeam(pl->GetBGTeam(), false); // Add here instead of in AddPlayer, because AddPlayer is not made until loading screen is finished. Which can cause unbalance in the system.
