@@ -1031,10 +1031,34 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool    AddAura(uint32 spellID);
 
-        std::string GetNameLink()
+        std::string GetNameLink(bool applycolors = false)
         {
             std::string name = GetName();
-            return "|Hplayer:"+name+"|h["+name+"]|h";
+            if (applycolors)
+            {
+                std::string teamcolor = "";
+                std::string classcolor = "";
+                if (GetTeam() == HORDE)
+                    teamcolor = MSG_COLOR_RED;
+                else
+                    teamcolor = MSG_COLOR_DARKBLUE;
+
+                switch (getClass())
+                {
+                case CLASS_WARRIOR: classcolor = MSG_COLOR_WARRIOR; break;
+                case CLASS_PALADIN: classcolor = MSG_COLOR_PALADIN; break;
+                case CLASS_HUNTER:  classcolor = MSG_COLOR_HUNTER;  break;
+                case CLASS_ROGUE:   classcolor = MSG_COLOR_ROGUE;   break;
+                case CLASS_PRIEST:  classcolor = MSG_COLOR_PRIEST;  break;
+                case CLASS_SHAMAN:  classcolor = MSG_COLOR_SHAMAN;  break;
+                case CLASS_MAGE:    classcolor = MSG_COLOR_MAGE;    break;
+                case CLASS_WARLOCK: classcolor = MSG_COLOR_WARLOCK; break;
+                case CLASS_DRUID:   classcolor = MSG_COLOR_DRUID;   break;
+                }
+                return "|Hplayer:"+name+"|h"+teamcolor+"["+classcolor+""+name+""+teamcolor+"]|h";
+            }
+            else
+                return "|Hplayer:"+name+"|h["+name+"]|h";
         }
 
         void SendChatMessage(const char *format, ...)

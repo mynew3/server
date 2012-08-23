@@ -60,6 +60,16 @@ class Unit;
 #define MSG_COLOR_PURPLE       "|cffb048f8"
 #define MSG_COLOR_ORANGE       "|cffff8000"
 
+#define MSG_COLOR_DRUID        "|cffff7d0a"
+#define MSG_COLOR_HUNTER       "|cffabd473"
+#define MSG_COLOR_MAGE         "|cff69ccf0"
+#define MSG_COLOR_PALADIN      "|cfff58cba"
+#define MSG_COLOR_PRIEST       "|cffffffff"
+#define MSG_COLOR_ROGUE        "|cfffff569"
+#define MSG_COLOR_SHAMAN       "|cff0070de"
+#define MSG_COLOR_WARLOCK      "|cff9482c9"
+#define MSG_COLOR_WARRIOR      "|cffc79c6e"
+
 class ChatCommand
 {
     public:
@@ -114,6 +124,7 @@ class MANGOS_DLL_SPEC ChatHandler
         void PSendSysMessage(const char* format, ...) ATTR_PRINTF(2, 3);
         void PSendSysMessage(int32     entry, ...);
         void PSendGlobalSysMessage(   const char *format, ...) ATTR_PRINTF(2,3);
+        std::string BuildWorldChatMsg(std::string msg);
 
         bool ParseCommands(const char* text);
         ChatCommand const* FindCommand(char const* text);

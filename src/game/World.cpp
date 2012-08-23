@@ -1943,7 +1943,7 @@ void World::SendBroadcast()
 {
     std::string msg;
     msg.reserve(2048);
-    msg = MSG_COLOR_MAGENTA"[Server]: "MSG_COLOR_WHITE;
+    msg = MSG_COLOR_MAGENTA"[Server]"MSG_COLOR_WHITE": ";
     QueryResult *result = WorldDatabase.PQuery("SELECT text FROM autobroadcast ORDER BY RAND() LIMIT 1");
     if (result)
     {

@@ -300,19 +300,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (msg.empty())
                 break;
 
-            std::string GlobalString = "";
-            GlobalString.reserve(255);
-            if (GetSecurity() > SEC_PLAYER)
-                GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff] ";
-
-            if (GetPlayer()->GetTeam() == HORDE)
-                GlobalString = ""+GlobalString+""+MSG_COLOR_RED+""+GetPlayer()->GetNameLink()+": ";
-            else if (GetPlayer()->GetTeam() == ALLIANCE)
-                GlobalString = ""+GlobalString+""+MSG_COLOR_DARKBLUE+""+GetPlayer()->GetNameLink()+": ";
-
-            GlobalString = ""+GlobalString+""+MSG_COLOR_WHITE+""+msg+"";
-
-            ChatHandler(this).PSendGlobalSysMessage(GlobalString.c_str());
+            ChatHandler(this).PSendGlobalSysMessage(ChatHandler(this).BuildWorldChatMsg(msg).c_str());
 
 
             /*if (GetPlayer()->GetGuildId())
@@ -652,4 +640,13 @@ void WorldSession::SendChatRestrictedNotice(ChatRestrictionType restriction)
     WorldPacket data(SMSG_CHAT_RESTRICTED, 1);
     data << uint8(restriction);
     SendPacket(&data);
+}
+
+std::string ChatHandler::BuildWorldChatMsg(std::string msg)
+{
+    std::string StaffString = "";
+    if (m_session->GetSecurity() > SEC_PLAYER)
+        StaffString = ""MSG_COLOR_MAGENTA"[Staff] ";
+
+    return ""+StaffString+""MSG_COLOR_RED""+m_session->GetPlayer()->GetNameLink(true)+""MSG_COLOR_WHITE": "+msg+"";
 }

@@ -323,18 +323,6 @@ bool ChatHandler::HandleWorldChatCommand(char* args)
     if (s_msg.empty())
         return false;
 
-    std::string GlobalString = "";
-    GlobalString.reserve(255);
-    if (m_session->GetSecurity() > SEC_PLAYER)
-        GlobalString = ""+GlobalString+""+MSG_COLOR_MAGENTA+"[Staff] ";
-
-    if (pPlayer->GetTeam() == HORDE)
-        GlobalString = ""+GlobalString+""+MSG_COLOR_RED+""+pPlayer->GetNameLink()+": ";
-    else if (pPlayer->GetTeam() == ALLIANCE)
-        GlobalString = ""+GlobalString+""+MSG_COLOR_DARKBLUE+""+pPlayer->GetNameLink()+": ";
-
-    GlobalString = ""+GlobalString+""+MSG_COLOR_WHITE+""+s_msg+"";
-
-    PSendGlobalSysMessage(GlobalString.c_str());
+    PSendGlobalSysMessage(BuildWorldChatMsg(s_msg).c_str());
     return true;
 }
