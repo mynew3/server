@@ -959,7 +959,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         explicit Player(WorldSession* session);
         ~Player();
 
-        void CleanupsBeforeDelete() override;
         /* - Custom */
     private:
         uint8  ItemInsurance;
@@ -1048,6 +1047,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void    CreatePet(uint32 cEntry);
         /* Custom - */
 
+        void CleanupsBeforeDelete() override;
 
         static UpdateMask updateVisualBits;
         static void InitVisibleBits();
