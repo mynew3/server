@@ -995,6 +995,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
     if (plr)
     {
         plr->setFaction(plr->getFactionForRace(plr->getRace()));
+        plr->InitDisplayIds();
         // should remove spirit of redemption
         if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
@@ -1159,6 +1160,59 @@ void BattleGround::AddPlayer(Player* plr)
 
     ObjectGuid guid = plr->GetObjectGuid();
     Team team = plr->GetBGTeam();
+
+    if (plr->GetTeam() != plr->GetBGTeam())
+    {
+        switch (urand(1,2))
+        {
+        case 1:
+            // Human / Bloodelf
+            if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(19723);
+                plr->SetNativeDisplayId(19723);
+            }
+            else if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(19724);
+                plr->SetNativeDisplayId(19724);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(20578);
+                plr->SetNativeDisplayId(20578);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(20579);
+                plr->SetNativeDisplayId(20579);
+            }
+            break;
+        case 2:
+            // Gnome / Tauren
+            if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(20585);
+                plr->SetNativeDisplayId(20585);
+            }
+            else if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(20584);
+                plr->SetNativeDisplayId(20584);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(20580);
+                plr->SetNativeDisplayId(20580);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(20581);
+                plr->SetNativeDisplayId(20581);
+            }
+            break;
+        }
+    }
 
     BattleGroundPlayer bp;
     bp.OfflineRemoveTime = 0;
