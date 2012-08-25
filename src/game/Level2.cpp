@@ -2269,8 +2269,15 @@ bool ChatHandler::HandleDeMorphCommand(char* /*args*/)
 // morph creature or player
 bool ChatHandler::HandleModifyMorphCommand(char* args)
 {
+    Unit* target = getSelectedUnit();
+    if (!target)
+        target = m_session->GetPlayer();
+
     if (!*args)
+    {
+        PSendSysMessage("Current DisplayID: %u",target->GetDisplayId());
         return false;
+    }
 
     uint32 display_id = (uint32)atoi(args);
 
@@ -2282,15 +2289,12 @@ bool ChatHandler::HandleModifyMorphCommand(char* args)
         return false;
     }
 
-    Unit* target = getSelectedUnit();
-    if (!target)
-        target = m_session->GetPlayer();
-
     // check online security
     else if (target->GetTypeId() == TYPEID_PLAYER && HasLowerSecurity((Player*)target))
         return false;
 
     target->SetDisplayId(display_id);
+    PSendSysMessage("Current DisplayID: %u",display_id);
 
     return true;
 }
