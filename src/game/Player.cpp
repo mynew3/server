@@ -636,8 +636,16 @@ bool Player::Create(uint32 guidlow, const std::string& name, uint8 race, uint8 c
     for (int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
         m_items[i] = NULL;
 
-    SetLocationMapId(info->mapId);
-    Relocate(info->positionX, info->positionY, info->positionZ, info->orientation);
+    if (GetSession()->GetSecurity() == SEC_PLAYER)
+    {
+        SetLocationMapId(info->mapId);
+        Relocate(info->positionX, info->positionY, info->positionZ, info->orientation);
+    }
+    else
+    {
+        SetLocationMapId(1);
+        Relocate(16201.9f, 16204.7f, 0.12856f, 1.26566f);
+    }
 
     SetMap(sMapMgr.CreateMap(info->mapId, this));
 
