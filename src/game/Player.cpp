@@ -380,16 +380,12 @@ UpdateMask Player::updateVisualBits;
 Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_reputationMgr(this)
 {
     BuyEnabled        = false;
-    Hardcore          = false;
-    ItemInsurance     = 0;
-    ItemInsuranceCharges = 0;
     /* PvP System Begin */
     KillStreak        = 0;
     ALastIP         = "";
     ALastIPCount    = 0;
     VLastIP         = "";
     VLastIPCount    = 0;
-    KillBounty      = 0;
     /* PvP System End */
 
     m_transport = 0;
@@ -15083,15 +15079,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
-    QueryResult* c_result = CharacterDatabase.PQuery("SELECT insurance, insurancecount, bounty FROM character_custom WHERE guid = '%u'",GetGUIDLow());
-    if (c_result)
-    {
-        Field* c_fields = c_result->Fetch();
-        ItemInsurance           = c_fields[0].GetUInt32();
-        ItemInsuranceCharges    = c_fields[1].GetUInt32();
-        KillBounty              = c_fields[2].GetUInt32();
-    }
-
     return true;
 }
 
@@ -20976,13 +20963,6 @@ void Player::HandlePvPKill()
     {
         pMostDamager->SendChatMessage("%s[PvP System]%s You did most damage to %s%s (%u)",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
         SendChatMessage("%s[PvP System]%s Your main attacker was %s%s who did %u damage to you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pMostDamager->GetNameLink().c_str(),MSG_COLOR_WHITE,MaxDmgDmg);
-        HandleHardcoreKill(pMostDamager);
-
-        if (GetBounty() > 0)
-        {
-            pMostDamager->SendChatMessage("%s[PvP System]%s You killed %s and got awarded with the bounty on his head, which was %g",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetNameLink(),float(GetBounty())/10000.0f);
-            pMostDamager->ModifyMoney(+GetBounty());
-        }
     }
 
     ClearKillStreak();
@@ -20991,58 +20971,6 @@ void Player::HandlePvPKill()
         ChatHandler(this).PSendSysMessage("%s[PvP System]%s There were %u players involved in the combat to your death.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,InCombatPlayers);
 
     sLog.outDebug("Took %u MS to run PvP System",WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime()));
-}
-
-void Player::HandleHardcoreKill(Player* attacker)
-{
-
-    if (urand(1,3) == 1 && attacker->GetHardcore() && GetHardcore())
-    {
-        if (GetInsuranceCharges() == 0)
-        {
-            std::vector<std::pair<uint32, uint32> > itemV;
-            uint8 equippedItemCount = 0;
-            for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
-            {
-                Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                if (pItem && i != EQUIPMENT_SLOT_TABARD && i != EQUIPMENT_SLOT_BODY)
-                {
-                    itemV.push_back(std::make_pair(i,pItem->GetProto()->ItemLevel));
-                    ++equippedItemCount;
-                }
-
-            }
-            sort(itemV.begin(),itemV.end(),compare_pair_second<std::greater>());
-
-            if (equippedItemCount > GetInsurance())
-            {
-                uint32 removeTime = urand(GetInsurance(),equippedItemCount);
-                uint32 iteration = 0;
-
-                for(std::vector <std::pair <uint32,uint32> >::iterator dx = itemV.begin(); dx != itemV.end(); dx++ )
-                {
-                    std::pair<int, int> result = (*dx);
-                    ++iteration;
-                    if (iteration == removeTime)
-                    {
-                        Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, result.first);
-
-                        DestroyItem(INVENTORY_SLOT_BAG_0,result.first,true);
-                        if(attacker->StoreNewItemInBestSlots(pItem->GetProto()->ItemId,1))
-                        {
-                            attacker->SendNewItem(pItem,1,true,false,true);
-                            SendChatMessage("%s[PvP System]%s %s took %s%s from you.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,attacker->GetNameLink().c_str(),pItem->GetNameLink().c_str(),MSG_COLOR_WHITE);
-
-                        }
-                    }
-                }
-            }
-        }
-        else
-            SetInsuranceCharges(GetInsuranceCharges()-1);
-        if (GetInsuranceCharges() > 0 && GetInsuranceCharges() < 10)
-            SendChatMessage("%s[PvP System]%s You only have %u insurance tickets left.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,GetInsuranceCharges());
-    }
 }
 
 bool Player::HandlePvPAntifarm(Player* victim)

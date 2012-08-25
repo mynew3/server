@@ -648,5 +648,9 @@ std::string ChatHandler::BuildWorldChatMsg(std::string msg)
     if (m_session->GetSecurity() > SEC_PLAYER)
         StaffString = ""MSG_COLOR_MAGENTA"[Staff] ";
 
-    return ""+StaffString+""MSG_COLOR_RED""+m_session->GetPlayer()->GetNameLink(true)+""MSG_COLOR_WHITE": "+msg+"";
+    std::string message = ""+StaffString+""MSG_COLOR_RED""+m_session->GetPlayer()->GetNameLink(true)+""MSG_COLOR_WHITE": "+msg+"";
+    size_t f = message.find("|r");
+    message.replace(f, std::string("|r").length(), MSG_COLOR_WHITE);
+
+    return message;
 }

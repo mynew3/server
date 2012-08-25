@@ -961,11 +961,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         /* - Custom */
     private:
-        uint8  ItemInsurance;
-        uint32  ItemInsuranceCharges;
-        int32   KillBounty;
 
-        bool    Hardcore;
         bool    BuyEnabled;
         uint32  KillStreak;
 
@@ -976,7 +972,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32  VLastIPCount;
     public:
         void    HandlePvPKill();
-        void    HandleHardcoreKill(Player* attacker);
         bool    HandlePvPAntifarm(Player* victim);
 
         float   GetKillStreak() { return KillStreak; }
@@ -995,15 +990,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void    IncreaseVictimLastIPCount() { ++VLastIPCount; }
         void    ClearVictimIP() { VLastIP = ""; VLastIPCount = 0; }
 
-        uint32  GetBounty() { return KillBounty; }
-        void    SetBounty(int32 Bounty) { KillBounty = Bounty; }
-        void    ClearBounty() { KillBounty = 0; }
-
-        uint32  GetInsurance() { return ItemInsurance; }
-        uint32  GetInsuranceCharges() { return ItemInsuranceCharges; }
-        void    SetInsuranceLevel(uint8 Level) { ItemInsurance = Level; }
-        void    SetInsuranceCharges(uint32 Charges) { ItemInsuranceCharges = Charges; }
-
         std::map<uint64, uint32> m_Damagers;
         void    Damaged(uint64 guid, uint32 damage) { m_Damagers[guid] += damage; }
 
@@ -1017,14 +1003,6 @@ class MANGOS_DLL_SPEC Player : public Unit
                 BuyEnabled = false;
             else
                 BuyEnabled = true;
-        }
-        bool    GetHardcore() { return Hardcore; }
-        void    ToggleHardcore()
-        {
-            if(Hardcore)
-                Hardcore = false;
-            else
-                Hardcore = true;
         }
 
         uint32  SuitableForTransmogrification(Item* pOld, Item* pNew);

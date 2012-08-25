@@ -59,7 +59,6 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Open Auction House",GOSSIP_SENDER_MAIN,106,"",0);
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Create a guild    ",GOSSIP_SENDER_MAIN,107,"",0);
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Design your tabard",GOSSIP_SENDER_MAIN,108,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Buy insurance     ",GOSSIP_SENDER_MAIN,110,"",0);
         pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Back to Main Menu ",GOSSIP_SENDER_MAIN,1  ,"",0);
         pPlayer->PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
     }
@@ -108,62 +107,6 @@ bool GossipSelect_telenpc(Player *pPlayer, Creature *pCreature, uint32 sender, u
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->GetSession()->SendTabardVendorActivate(pCreature->GetObjectGuid());
-    }
-    else if (action == 110)
-    {
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"100G/Item 50G/ItemRefresh",GOSSIP_SENDER_MAIN,1  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 2 items.                            ",GOSSIP_SENDER_MAIN,111  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 3 items.                            ",GOSSIP_SENDER_MAIN,112  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 4 items.                            ",GOSSIP_SENDER_MAIN,113  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 5 items.                            ",GOSSIP_SENDER_MAIN,114  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 6 items.                            ",GOSSIP_SENDER_MAIN,115  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 7 items.                            ",GOSSIP_SENDER_MAIN,116  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 8 items.                            ",GOSSIP_SENDER_MAIN,117  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 9 items.                            ",GOSSIP_SENDER_MAIN,118  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Insure 10 items.                           ",GOSSIP_SENDER_MAIN,119  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Refresh insurance charges (50 gold/item)   ",GOSSIP_SENDER_MAIN,120  ,"",0);
-        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Back to Main Menu                          ",GOSSIP_SENDER_MAIN,1  ,"",0);
-        pPlayer->PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
-    }
-    else if (action == 111 || action == 112 || action == 113 || action == 114 || action == 115 || action == 116 || action == 117 || action == 118 || action == 119)
-    {
-        pPlayer->PlayerTalkClass->CloseGossip();
-        int32 setinsurance = 0;
-        switch(action)
-        {
-            case 111: setinsurance = 2; break;
-            case 112: setinsurance = 3; break;
-            case 113: setinsurance = 4; break;
-            case 114: setinsurance = 5; break;
-            case 115: setinsurance = 6; break;
-            case 116: setinsurance = 7; break;
-            case 117: setinsurance = 8; break;
-            case 118: setinsurance = 9; break;
-            case 119: setinsurance = 10; break;
-            default: setinsurance = 0; break;
-        }
-        if (pPlayer->GetBuyEnabled() && (pPlayer->GetMoney() >= uint32(setinsurance*1000000)))
-        {
-            pPlayer->SetInsuranceLevel(setinsurance);
-            pPlayer->SetInsuranceCharges(50);
-            pPlayer->ModifyMoney(-setinsurance*1000000);
-            pPlayer->SendChatMessage("%s[Vendor System]%s You bought 50 death charges of %u item insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,setinsurance);
-        }
-        else
-            pPlayer->SendChatMessage("%s[Vendor System]%s please %s.togglebuy%s to buy insurance. Or you cannot afford buying this insurance.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
-    }
-    else if (action == 120)
-    {
-        pPlayer->PlayerTalkClass->CloseGossip();
-        int32 cost = pPlayer->GetInsurance()*500000;
-        if (pPlayer->GetBuyEnabled() && pPlayer->GetMoney() >= uint32(cost))
-        {
-            pPlayer->ModifyMoney(-cost);
-            pPlayer->SetInsuranceCharges(50);
-            pPlayer->SendChatMessage("%s[Vendor System]%s Refreshed your item insurance charges for %u gold.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,pPlayer->GetInsurance()*50);
-        }
-        else
-            pPlayer->SendChatMessage("%s[Vendor System]%s You must %s.togglebuy%s or you do not have enough money to refresh your insurance",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,MSG_COLOR_RED,MSG_COLOR_WHITE);
     }
 
     return true;
