@@ -20793,7 +20793,11 @@ void Player::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSp
 
 void Player::CreatePet(uint32 cEntry)
 {
-    //--------------------------------------------------
+    if (getClass() != CLASS_HUNTER)
+    {
+        SendChatMessage("%s[Mr.Zoo]%s You are no hunter!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+        return;
+    }
 
     CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(cEntry);
     if (!cinfo)
