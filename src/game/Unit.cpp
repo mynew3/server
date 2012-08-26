@@ -532,15 +532,18 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         Player* pDamager = GetCharmerOrOwnerPlayerOrPlayerItself();
         Player* pDamaged = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
 
-        // Remove overkill damage.
-        int32 nooverkilldmg = 0;
-        if (damage > pDamaged->GetHealth())
-            nooverkilldmg = pDamaged->GetHealth();
-        else
-            nooverkilldmg = damage;
+        if (pDamager && pDamaged && pDamager != pDamaged)
+        {
+            // Remove overkill damage.
+            int32 nooverkilldmg = 0;
+            if (damage > pDamaged->GetHealth())
+                nooverkilldmg = pDamaged->GetHealth();
+            else
+                nooverkilldmg = damage;
 
-        if (pDamager && pDamaged && pDamager != pDamaged && nooverkilldmg > 0)
-            pDamaged->Damaged(pDamager->GetObjectGuid(), nooverkilldmg);
+            if (nooverkilldmg > 0)
+                pDamaged->Damaged(pDamager->GetObjectGuid(), nooverkilldmg);
+        }
     }
 
     // remove affects from victim (including from 0 damage and DoTs)
