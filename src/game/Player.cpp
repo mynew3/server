@@ -18091,7 +18091,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
-            ChatHandler(this).PSendSysMessage("You need %u arena rating to buy this item.",crItem->ReqArenaRating);
+            SendChatMessage("You need %u arena rating to buy this item.",crItem->ReqArenaRating);
             CanBuy = false;
         }
     }
@@ -18100,7 +18100,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         if (crItem->ReqArenaPoints > 0)
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
-            ChatHandler(this).PSendSysMessage("You need %u arena points to buy this item.");
+            SendChatMessage("You need %u arena points to buy this item.");
             CanBuy = false;
         }
     }
@@ -18111,19 +18111,19 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         if (pItem && crItem->ReqItem > 0 && pItem2 && crItem->ReqItem2 > 0)
         {
             SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
-            ChatHandler(this).PSendSysMessage("You need %s%s or %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            SendChatMessage("You need %s%s or %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
             CanBuy = false;
         }
         else if (pItem && crItem->ReqItem > 0)
         {
             SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
-            ChatHandler(this).PSendSysMessage("You need %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            SendChatMessage("You need %s%s to buy this item.",pItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
             CanBuy = false;
         }
         else if (pItem2 && crItem->ReqItem2 > 0)
         {
             SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
-            ChatHandler(this).PSendSysMessage("You need %s%s to buy this item.",pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            SendChatMessage("You need %s%s to buy this item.",pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
             CanBuy = false;
         }
     }
@@ -18131,7 +18131,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     {
         Item* pItem = Item::CreateItem(pProto->ItemId,1);
         if (pItem)
-            ChatHandler(this).PSendSysMessage("You must type %s.togglebuy%s to buy %s",MSG_COLOR_RED,MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+            SendChatMessage("You must type %s.togglebuy%s to buy %s",MSG_COLOR_RED,MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
     }
 
     if (!CanBuy)
@@ -20981,7 +20981,7 @@ void Player::HandlePvPKill()
     ClearKillStreak();
 
     if (InCombatPlayers > 1)
-        ChatHandler(this).PSendSysMessage("%s[PvP System]%s There were %u players involved in the combat to your death.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,InCombatPlayers);
+        SendChatMessage("%s[PvP System]%s There were %u players involved in the combat to your death.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,InCombatPlayers);
 
     sLog.outDebug("Took %u MS to run PvP System",WorldTimer::getMSTimeDiff(uStartTime, WorldTimer::getMSTime()));
 }

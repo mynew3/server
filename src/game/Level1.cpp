@@ -2225,7 +2225,7 @@ bool ChatHandler::HandleWarpCommand(char* args)
 
     if ((dir != 'x' && dir != 'y' && dir != 'z' && dir != 'o') || value == 0.f)
     {
-        ChatHandler(_player).PSendSysMessage("%s[Warp Info]%s Incorrect values, correct direction parameters is: x,y,z and o. Correct range/degree parameter is everything above or under 0.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+        _player->SendChatMessage("%s[Warp Info]%s Incorrect values, correct direction parameters is: x,y,z and o. Correct range/degree parameter is everything above or under 0.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
         return true;
     }
 
@@ -2238,7 +2238,7 @@ bool ChatHandler::HandleWarpCommand(char* args)
 
             _player->NearTeleportTo(x,y,z,o);
 
-            ChatHandler(_player).PSendSysMessage("%s[Warp Info]%s You teleported %g yards in x direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+            _player->SendChatMessage("%s[Warp Info]%s You teleported %g yards in x direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
         }
         break;
     case 'y':
@@ -2248,14 +2248,14 @@ bool ChatHandler::HandleWarpCommand(char* args)
 
             _player->NearTeleportTo(x,y,z,o);
 
-            ChatHandler(_player).PSendSysMessage("%s[Warp Info]%s You teleported %g yards in y direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+            _player->SendChatMessage("%s[Warp Info]%s You teleported %g yards in y direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
         }
         break;
     case 'z':
         {
             _player->NearTeleportTo(x,y,z+value,o);
 
-            ChatHandler(_player).PSendSysMessage("%s[Warp Info]%s You teleported %g yards in z direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+            _player->SendChatMessage("%s[Warp Info]%s You teleported %g yards in z direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
         }
         break;
     case 'o':
@@ -2263,8 +2263,8 @@ bool ChatHandler::HandleWarpCommand(char* args)
             o = MapManager::NormalizeOrientation((value * M_PI_F/180.0f)+o);
 
             _player->NearTeleportTo(x,y,z,o);
-            ChatHandler(_player).PSendSysMessage("%s[Warp Info]%s You rotated %g degrees (%g radians)",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value,value * M_PI / 180.0f);
-            ChatHandler(_player).PSendSysMessage("%sCurrent radian/degree: %g %g",MSG_COLOR_WHITE,o,o*180.0f/M_PI);
+            _player->SendChatMessage("%s[Warp Info]%s You rotated %g degrees (%g radians)",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value,value * M_PI / 180.0f);
+            _player->SendChatMessage("%sCurrent radian/degree: %g %g",MSG_COLOR_WHITE,o,o*180.0f/M_PI);
         }
         break;
     }
