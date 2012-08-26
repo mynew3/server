@@ -119,6 +119,7 @@ bool GossipHello_beast_master(Player *pPlayer, Creature *pCreature)
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You are in combat!",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
         return true;
     }
+
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Bat         ",GOSSIP_SENDER_MAIN,1 ,"",0); // 16173
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Bear        ",GOSSIP_SENDER_MAIN,2 ,"",0); // 23584
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Boar        ",GOSSIP_SENDER_MAIN,3 ,"",0); // 21878
@@ -131,15 +132,7 @@ bool GossipHello_beast_master(Player *pPlayer, Creature *pCreature)
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Hyena       ",GOSSIP_SENDER_MAIN,10,"",0);// 8300
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Nether Ray  ",GOSSIP_SENDER_MAIN,11,"",0);// 17731
     pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Raptor      ",GOSSIP_SENDER_MAIN,12,"",0);// 20634
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Ravager     ",GOSSIP_SENDER_MAIN,13,"",0); // 23326
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Scorpid     ",GOSSIP_SENDER_MAIN,14,"",0); // 21864
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Serpent     ",GOSSIP_SENDER_MAIN,15,"",0); // 19784
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Spider      ",GOSSIP_SENDER_MAIN,16,"",0); // 16170
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Tallstrider ",GOSSIP_SENDER_MAIN,17,"",0); // 22807
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Turtle      ",GOSSIP_SENDER_MAIN,18,"",0); // 5431
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Warp Stalker",GOSSIP_SENDER_MAIN,19,"",0); // 23219
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Wind Serpent",GOSSIP_SENDER_MAIN,20,"",0); // 20673
-    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Wolf        ",GOSSIP_SENDER_MAIN,21,"",0); // 17280
+    pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Go to Next Page          ",GOSSIP_SENDER_MAIN,13,"",0);
     pPlayer->PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
     return true;
 }
@@ -255,7 +248,21 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(23110); // Dash
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a raptor",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 13) // Ravager 23326
+    else if (action == 13)
+    {
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Ravager     ",GOSSIP_SENDER_MAIN,14,"",0); // 23326
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Scorpid     ",GOSSIP_SENDER_MAIN,15,"",0); // 21864
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Serpent     ",GOSSIP_SENDER_MAIN,16,"",0); // 19784
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Spider      ",GOSSIP_SENDER_MAIN,17,"",0); // 16170
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Tallstrider ",GOSSIP_SENDER_MAIN,18,"",0); // 22807
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Turtle      ",GOSSIP_SENDER_MAIN,19,"",0); // 5431
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Warp Stalker",GOSSIP_SENDER_MAIN,20,"",0); // 23219
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Wind Serpent",GOSSIP_SENDER_MAIN,21,"",0); // 20673
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(9,"Summon me a: Wolf        ",GOSSIP_SENDER_MAIN,22,"",0); // 17280
+        pPlayer->PlayerTalkClass->GetGossipMenu().AddMenuItem(5,"Go to Previous Page      ",GOSSIP_SENDER_MAIN,23,"",0);
+        pPlayer->PlayerTalkClass->SendGossipMenu(1,pCreature->GetObjectGuid());
+    }
+    else if (action == 14) // Ravager 23326
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(23326);
@@ -264,7 +271,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(35298); // Gore
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a ravager",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 14) // Scorpid 21864
+    else if (action == 15) // Scorpid 21864
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(21864);
@@ -272,7 +279,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27060); // Scorpid Poision
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a scorpid",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 15) // Serpent 19784
+    else if (action == 16) // Serpent 19784
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(19784);
@@ -280,7 +287,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(35392); // Poision Spit
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a serpent",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 16) // Spider 16170
+    else if (action == 17) // Spider 16170
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(16170);
@@ -288,7 +295,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(4167);  // Web
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a spider",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 17) // Tallstrider 22807
+    else if (action == 18) // Tallstrider 22807
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(22807);
@@ -296,7 +303,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(23110); // Dash
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a tallstrider",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 18) // Turtle 5431
+    else if (action == 19) // Turtle 5431
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(5431);
@@ -304,7 +311,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(26064); // Spell Shield
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a turtle",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 19) // Warp Stalker 23219
+    else if (action == 20) // Warp Stalker 23219
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(23219);
@@ -313,7 +320,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(35346); // Warp
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a warp stalker",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 20) // Wind Serpent 20673
+    else if (action == 21) // Wind Serpent 20673
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(20673);
@@ -322,7 +329,7 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(25012); // Lightning Breath
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a wind serpent",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
     }
-    else if (action == 21) // Wolf 17280
+    else if (action == 22) // Wolf 17280
     {
         pPlayer->PlayerTalkClass->CloseGossip();
         pPlayer->CreatePet(17280);
@@ -331,6 +338,10 @@ bool GossipSelect_beast_master(Player *pPlayer, Creature *pCreature, uint32 send
         pPlayer->GetPet()->learnSpell(27685); // Charge
         pPlayer->GetPet()->learnSpell(24604); // Furious Howl
         pPlayer->SendChatMessage("%s[Mr.Zoo]%s You have tamed a wolf",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE);
+    }
+    else if (action == 23)
+    {
+        GossipHello_beast_master(pPlayer,pCreature);
     }
     return true;
 }
