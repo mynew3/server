@@ -6124,7 +6124,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
         {
             Player* pVictim = (Player*)uVictim;
 
-            if (GetTeam() == pVictim->GetTeam() && !sWorld.IsFFAPvPRealm())
+            if (GetBGTeam() == pVictim->GetBGTeam() && !sWorld.IsFFAPvPRealm() && !sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_REWARD_HONOR_SAMETEAMS))
                 return false;
 
             float f = 1;                                    // need for total kills (?? need more info)

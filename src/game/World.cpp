@@ -563,8 +563,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_UINT32_MAX_HONOR_POINTS, "MaxHonorPoints", 75000);
 
-    setConfig(CONFIG_FLOAT_RATE_PVP_RANK_EXTRA_HONOR,"PvPRank.Rate.ExtraHonor",1);
-    std::string s_pvp_ranks = sConfig.GetStringDefault("PvPRank.HKPerRank", "10,50,100,200,450,750,1300,2000,3500,6000,9500,15000,21000,30000");
+    setConfig(CONFIG_FLOAT_RATE_PVP_RANK_EXTRA_HONOR,"PvPSystem.Rank.Rate.ExtraHonor = 1",1);
+    std::string s_pvp_ranks = sConfig.GetStringDefault("PvPSystem.Rank.HKPerRank", "10,50,100,200,450,750,1300,2000,3500,6000,9500,15000,21000,30000");
     char *c_pvp_ranks = const_cast<char*>(s_pvp_ranks.c_str());
     for (int i = 0; i !=HKRANKMAX; i++)
     {
@@ -718,6 +718,7 @@ void World::LoadConfigSettings(bool reload)
     else
         setConfig(CONFIG_BOOL_DECLINED_NAMES_USED, "DeclinedNames", false);
 
+    setConfig(CONFIG_BOOL_BATTLEGROUND_REWARD_HONOR_SAMETEAMS,         "PvPSysyem.Rank.RewardOnSameFaction", false);
     setConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER,                  "Battleground.CastDeserter", true);
     setConfigMinMax(CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN,   "Battleground.QueueAnnouncer.Join", 0, 0, 2);
     setConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START,          "Battleground.QueueAnnouncer.Start", false);
@@ -866,10 +867,10 @@ void World::LoadConfigSettings(bool reload)
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
     sLog.outString("WORLD: mmap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 
-    setConfig(CONFIG_BOOL_PVPGOLD_ENABLE,"PvPGold.Enable", false);
+    setConfig(CONFIG_BOOL_PVPGOLD_ENABLE,"PvPSystem.Gold.Enable", false);
     sLog.outString("WORLD: pvpgold is %sabled", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE) ? "en" : "dis");
 
-    setConfig(CONFIG_UINT32_PVPGOLD_BASE,"PvPGold.BaseCopper",10000);
+    setConfig(CONFIG_UINT32_PVPGOLD_BASE,"PvPSystem.Gold.BaseCopper",10000);
     sLog.outString("WORLD: pvpgold basecopper is set to %u", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE));
 
     setConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE,"AutoBroadcast.On", false);
