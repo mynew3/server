@@ -1493,6 +1493,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 38794:                                 // Murmur's Touch (h)
                 case 44869:                                 // Spectral Blast
                 case 45976:                                 // Open Portal
+                case 52438:                                 // Summon Skittering Swarmer (Azjol Nerub,  Krik'thir the Gatewatcher)
                     unMaxTargets = 1;
                     break;
                 case 28542:                                 // Life Drain
