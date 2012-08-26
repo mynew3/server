@@ -1043,7 +1043,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             if (!IsInWorld())
                 return;
-            ChatHandler(this).PSendSysMessage(format);
+
+            va_list ap;
+            char str [2048];
+            va_start(ap, format);
+            vsnprintf(str, 2048, format, ap);
+            va_end(ap);
+            ChatHandler(this).SendSysMessage(str);
         }
 
         void    CreatePet(uint32 cEntry);
