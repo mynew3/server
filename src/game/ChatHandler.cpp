@@ -300,7 +300,15 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (msg.empty())
                 break;
 
-            ChatHandler(this).PSendGlobalSysMessage(ChatHandler(this).BuildWorldChatMsg(msg).c_str());
+            std::string message = ChatHandler(this).BuildWorldChatMsg(msg);
+            ChatHandler(this).PSendGlobalSysMessage(message.c_str());
+
+            if (GetSecurity() > SEC_PLAYER)
+            {
+                WorldPacket data(SMSG_NOTIFICATION, (message.size()+1));
+                data << message;
+                sWorld.SendGlobalMessage(&data);
+            }
 
 
             /*if (GetPlayer()->GetGuildId())

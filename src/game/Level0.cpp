@@ -323,6 +323,14 @@ bool ChatHandler::HandleWorldChatCommand(char* args)
     if (s_msg.empty())
         return false;
 
-    PSendGlobalSysMessage(BuildWorldChatMsg(s_msg).c_str());
+    std::string message = BuildWorldChatMsg(s_msg);
+    PSendGlobalSysMessage(message.c_str());
+
+    if (m_session->GetSecurity() > SEC_PLAYER)
+    {
+        WorldPacket data(SMSG_NOTIFICATION, (message.size()+1));
+        data << message;
+        sWorld.SendGlobalMessage(&data);
+    }
     return true;
 }
