@@ -8621,8 +8621,11 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
         if (pl)
             ChatHandler(pl).PSendSysMessage(LANG_EXTENDED_COST_NOT_EXIST, ExtendedCost);
         else
+        {
             sLog.outErrorDb("Table `%s` contain item (Entry: %u) with wrong ExtendedCost (%u) for %s %u, ignoring",
                             tableName, item_id, ExtendedCost, idStr, vendor_entry);
+            WorldDatabase.PExecute("UPDATE npc_vendor SET extendedcost = 0 WHERE extendedcost = %u",ExtendedCost);
+        }
         return false;
     }
 

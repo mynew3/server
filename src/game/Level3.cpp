@@ -6639,6 +6639,10 @@ bool ChatHandler::HandleExtendedCostCommand(char* args)
     Item* pItem = Item::CreateItem(itemid, 1);
     if (!pItem)
         return false;
+    if (!sItemExtendedCostStore.LookupEntry(extendedcost))
+    {
+        PSendSysMessage("Extendedcost id %u do not exist.",extendedcost);
+    }
 
     WorldDatabase.PExecute("UPDATE npc_vendor SET extendedcost = %u WHERE item = %u",extendedcost,itemid);
     PSendSysMessage("Updated extendedcost to %u on %s",extendedcost,pItem->GetNameLink(true).c_str());
