@@ -18119,7 +18119,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             CanBuy = false;
         }
     }
-    if (!GetBuyEnabled() && (crItem->ReqItem > 0 || crItem->ReqItem2 > 0))
+    if (!GetBuyEnabled() && CanBuy && (crItem->ReqItem > 0 || crItem->ReqItem2 > 0))
     {
         Item* pItem = Item::CreateItem(pProto->ItemId,1);
         if (pItem)
