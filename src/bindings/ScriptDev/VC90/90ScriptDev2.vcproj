@@ -368,6 +368,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="worldbosses"
+				>
+				<File
+					RelativePath="..\scripts\worldbosses\boss_doomlord_kazzak.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\scripts\worldbosses\boss_doomwalker.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="include"

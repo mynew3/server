@@ -6,9 +6,13 @@
 
 extern void AddSC_battleground();
 extern void AddSC_npc_scripts();
+extern void AddSC_boss_doomwalker();
+extern void AddSC_boss_doomlordkazzak();
 
 void AddScripts()
 {
     AddSC_battleground();
 	AddSC_npc_scripts();
+    AddSC_boss_doomwalker();
+    AddSC_boss_doomlordkazzak();
 }
