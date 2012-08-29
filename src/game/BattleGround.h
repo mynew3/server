@@ -75,8 +75,7 @@ enum BattleGroundMarks
     SPELL_AB_MARK_WINNER            = 24953,
     SPELL_AV_MARK_LOSER             = 24954,
     SPELL_AV_MARK_WINNER            = 24955,
-    ITEM_EY_MARK_OF_HONOR           = 29024,
-    ITEM_BADGE_OF_JUSTICE           = 29434
+    ITEM_EY_MARK_OF_HONOR           = 29024
 };
 
 enum BattleGroundMarksCount

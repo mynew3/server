@@ -863,10 +863,13 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
         default:
             break;
     }
-    if (count == ITEM_WINNER_COUNT)
-        RewardItem(plr, ITEM_BADGE_OF_JUSTICE, 4);
-    else
-        RewardItem(plr, ITEM_BADGE_OF_JUSTICE, 2);
+    if (sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_REWARD_ITEMID) != 0)
+    {
+        if (count == ITEM_WINNER_COUNT && sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_REWARD_WIN) != 0)
+            RewardItem(plr, sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_REWARD_ITEMID), sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_REWARD_WIN));
+        else if (sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_REWARD_LOSE) != 0)
+            RewardItem(plr, sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_REWARD_ITEMID), sWorld.getConfig(CONFIG_UINT32_BATTLEGROUND_REWARD_LOSE));
+    }
 }
 
 void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
@@ -887,6 +890,9 @@ void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
 
 void BattleGround::RewardItem(Player* plr, uint32 item_id, uint32 count)
 {
+    if (!sObjectMgr.GetItemPrototype(item_id))
+        return;
+
     // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
     if (plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
         return;

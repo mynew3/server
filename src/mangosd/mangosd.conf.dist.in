@@ -1457,6 +1457,18 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 #        Default: 1800000 (30 minutes)
 #                 0 - disable premade group matches (group always added to bg team in normal way)
 #
+#	 BattleGround.ItemReward
+#		 ItemID that should be rewarded on all battlegrounds
+#		 Default: 0 (Disabled)
+#
+#	 BattleGround.ItemReward.Win
+#		 Amount of BattleGround.ItemReward to reward on BattleGround win
+#		 Default: 0 (Disabled)
+#
+#	 BattleGround.ItemReward.Lost
+#		 Amount of BattleGround.ItemReward to reward on BattleGround lose
+#		 Default: 0 (Disabled)
+#
 ###################################################################################################################
 
 Battleground.CastDeserter = 1
@@ -1466,6 +1478,9 @@ Battleground.CrossFaction = 0
 Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
+BattleGround.ItemReward = 0
+BattleGround.ItemReward.Win = 0
+BattleGround.ItemReward.Lost = 0
 
 ###################################################################################################################
 # ARENA CONFIG
