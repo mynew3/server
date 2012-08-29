@@ -863,6 +863,10 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
         default:
             break;
     }
+    if (count == ITEM_WINNER_COUNT)
+        RewardItem(plr, ITEM_BADGE_OF_JUSTICE, 4);
+    else
+        RewardItem(plr, ITEM_BADGE_OF_JUSTICE, 2);
 }
 
 void BattleGround::RewardSpellCast(Player* plr, uint32 spell_id)
