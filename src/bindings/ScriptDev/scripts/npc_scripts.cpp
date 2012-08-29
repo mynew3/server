@@ -483,8 +483,8 @@ void AddSC_npc_scripts()
     pNewScript->pGossipSelect   = &GossipSelect_beast_master;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "training_dummy";
-    pNewScript->GetAI = &GetAI_npc_training_dummy;
+    pNewScript                  = new Script;
+    pNewScript->Name            = "training_dummy";
+    pNewScript->GetAI           = &GetAI_npc_training_dummy;
     pNewScript->RegisterSelf();
 }
