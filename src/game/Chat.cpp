@@ -942,7 +942,7 @@ void ChatHandler::SendSysMessage(const char* str)
         m_session->SendPacket(&data);
     }
 
-    delete [] buf;
+    delete[] buf;
 }
 
 void ChatHandler::SendGlobalSysMessage(const char* str)
@@ -960,7 +960,7 @@ void ChatHandler::SendGlobalSysMessage(const char* str)
         sWorld.SendGlobalMessage(&data);
     }
 
-    delete [] buf;
+    delete[] buf;
 }
 
 void ChatHandler::PSendGlobalSysMessage(const char *format, ...)
