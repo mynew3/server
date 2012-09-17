@@ -547,9 +547,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         }
     }
 
-    // remove affects from victim (including from 0 damage and DoTs)
-    if (pVictim != this)
-        pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    // Remove stealth from attacker and target if damage is dealt.
+    pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     // remove affects from attacker at any non-DoT damage (including 0 damage)
     if (damagetype != DOT)
