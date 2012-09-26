@@ -1841,6 +1841,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 // Do not target current victim
                 switch (m_spellInfo->Id)
                 {
+                    case 5246:                                              // Intimidating Shout
                     case 30843:                                             // Enfeeble
                     case 37676:                                             // Insidious Whisper
                     case 38028:                                             // Watery Grave
@@ -1848,11 +1849,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                             targetUnitMap.remove(pVictim);
                         break;
                 }
-            }
-            else if (m_spellInfo->Id == 5246)               // Intimidating Shout (do not target current victim with AOE fear)
-            {
-                if (Unit* pVictim = m_caster->getVictim())
-                    targetUnitMap.remove(pVictim);
             }
             break;
         case TARGET_AREAEFFECT_INSTANT:
