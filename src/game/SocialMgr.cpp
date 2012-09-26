@@ -198,15 +198,16 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
     // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
     // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
     if (pFriend && pFriend->GetName() &&
-            (security > SEC_PLAYER ||
-             ((pFriend->GetTeam() == team || allowTwoSideWhoList) && (pFriend->GetSession()->GetSecurity() <= gmLevelInWhoList))) &&
-            pFriend->IsVisibleGloballyFor(player))
+        (security > SEC_PLAYER ||
+         ((pFriend->GetTeam() == team || allowTwoSideWhoList) && (pFriend->GetSession()->GetSecurity() <= gmLevelInWhoList))) &&
+        pFriend->IsVisibleGloballyFor(player))
     {
-        friendInfo.Status = FRIEND_STATUS_ONLINE;
-        if (pFriend->isAFK())
-            friendInfo.Status = FRIEND_STATUS_AFK;
-        if (pFriend->isDND())
-            friendInfo.Status = FRIEND_STATUS_DND;
+        friendInfo.Status |= FRIEND_STATUS_ONLINE;
+
+        pFriend->isAFK() ? friendInfo.Status |= FRIEND_STATUS_AFK : friendInfo.Status &= ~FRIEND_STATUS_AFK;
+        pFriend->isDND() ? friendInfo.Status |= FRIEND_STATUS_DND : friendInfo.Status &= ~FRIEND_STATUS_DND;
+        pFriend->IsReferAFriendLinked(player) ? friendInfo.Status |= FRIEND_STATUS_RAF : friendInfo.Status &= ~FRIEND_STATUS_RAF;
+
         friendInfo.Area = pFriend->GetZoneId();
         friendInfo.Level = pFriend->getLevel();
         friendInfo.Class = pFriend->getClass();
@@ -286,9 +287,9 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
             if (pFriend && pFriend->IsInWorld() &&
-                    (pFriend->GetSession()->GetSecurity() > SEC_PLAYER ||
-                     ((pFriend->GetTeam() == team || allowTwoSideWhoList) && security <= gmLevelInWhoList)) &&
-                    player->IsVisibleGloballyFor(pFriend))
+                (pFriend->GetSession()->GetSecurity() > SEC_PLAYER ||
+                 ((pFriend->GetTeam() == team || allowTwoSideWhoList) && security <= gmLevelInWhoList)) &&
+                player->IsVisibleGloballyFor(pFriend))
             {
                 pFriend->GetSession()->SendPacket(packet);
             }

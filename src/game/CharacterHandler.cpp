@@ -50,15 +50,15 @@ enum CinematicsSkipMode
 
 class LoginQueryHolder : public SqlQueryHolder
 {
-    private:
-        uint32 m_accountId;
-        ObjectGuid m_guid;
-    public:
-        LoginQueryHolder(uint32 accountId, ObjectGuid guid)
-            : m_accountId(accountId), m_guid(guid) { }
-        ObjectGuid GetGuid() const { return m_guid; }
-        uint32 GetAccountId() const { return m_accountId; }
-        bool Initialize();
+private:
+    uint32 m_accountId;
+    ObjectGuid m_guid;
+public:
+    LoginQueryHolder(uint32 accountId, ObjectGuid guid)
+        : m_accountId(accountId), m_guid(guid) { }
+    ObjectGuid GetGuid() const { return m_guid; }
+    uint32 GetAccountId() const { return m_accountId; }
+    bool Initialize();
 };
 
 bool LoginQueryHolder::Initialize()
@@ -73,7 +73,7 @@ bool LoginQueryHolder::Initialize()
                      "position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost,"
                      "resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty,"
                      "arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, watchedFaction, drunk,"
-                     "health, power1, power2, power3, power4, power5, exploredZones, equipmentCache, ammoId, knownTitles, actionBars FROM characters WHERE guid = '%u'", m_guid.GetCounter());
+                     "health, power1, power2, power3, power4, power5, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels FROM characters WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT groupId FROM group_member WHERE memberGuid ='%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", m_guid.GetCounter());
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT caster_guid,item_guid,spell,stackcount,remaincharges,basepoints0,basepoints1,basepoints2,periodictime0,periodictime1,periodictime2,maxduration,remaintime,effIndexMask FROM character_aura WHERE guid = '%u'", m_guid.GetCounter());
@@ -105,28 +105,28 @@ bool LoginQueryHolder::Initialize()
 // instead pass an account id to this handler
 class CharacterHandler
 {
-    public:
-        void HandleCharEnumCallback(QueryResult* result, uint32 account)
+public:
+    void HandleCharEnumCallback(QueryResult* result, uint32 account)
+    {
+        WorldSession* session = sWorld.FindSession(account);
+        if (!session)
         {
-            WorldSession* session = sWorld.FindSession(account);
-            if (!session)
-            {
-                delete result;
-                return;
-            }
-            session->HandleCharEnum(result);
+            delete result;
+            return;
         }
-        void HandlePlayerLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder* holder)
+        session->HandleCharEnum(result);
+    }
+    void HandlePlayerLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder* holder)
+    {
+        if (!holder) return;
+        WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
+        if (!session)
         {
-            if (!holder) return;
-            WorldSession* session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
-            if (!session)
-            {
-                delete holder;
-                return;
-            }
-            session->HandlePlayerLogin((LoginQueryHolder*)holder);
+            delete holder;
+            return;
         }
+        session->HandlePlayerLogin((LoginQueryHolder*)holder);
+    }
 } chrHandler;
 
 void WorldSession::HandleCharEnum(QueryResult* result)

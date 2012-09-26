@@ -30,11 +30,11 @@ class WorldPacket;
 
 enum FriendStatus
 {
-    FRIEND_STATUS_OFFLINE   = 0,
-    FRIEND_STATUS_ONLINE    = 1,
-    FRIEND_STATUS_AFK       = 2,
-    FRIEND_STATUS_UNK3      = 3,
-    FRIEND_STATUS_DND       = 4
+    FRIEND_STATUS_OFFLINE   = 0x00,
+    FRIEND_STATUS_ONLINE    = 0x01,
+    FRIEND_STATUS_AFK       = 0x02,
+    FRIEND_STATUS_DND       = 0x04,
+    FRIEND_STATUS_RAF       = 0x08,
 };
 
 enum SocialFlag
@@ -46,7 +46,7 @@ enum SocialFlag
 
 struct FriendInfo
 {
-    FriendStatus Status;
+    uint8  Status;
     uint32 Flags;
     uint32 Area;
     uint32 Level;
@@ -114,43 +114,43 @@ enum FriendsResult
 
 class PlayerSocial
 {
-        friend class SocialMgr;
-    public:
-        PlayerSocial();
-        ~PlayerSocial();
-        // adding/removing
-        bool AddToSocialList(ObjectGuid friend_guid, bool ignore);
-        void RemoveFromSocialList(ObjectGuid friend_guid, bool ignore);
-        void SetFriendNote(ObjectGuid friend_guid, std::string note);
-        // Packet send's
-        void SendSocialList();
-        // Misc
-        bool HasFriend(ObjectGuid friend_guid);
-        bool HasIgnore(ObjectGuid ignore_guid);
-        void SetPlayerGuid(ObjectGuid guid) { m_playerLowGuid = guid.GetCounter(); }
-        uint32 GetNumberOfSocialsWithFlag(SocialFlag flag);
-    private:
-        PlayerSocialMap m_playerSocialMap;
-        uint32 m_playerLowGuid;
+    friend class SocialMgr;
+public:
+    PlayerSocial();
+    ~PlayerSocial();
+    // adding/removing
+    bool AddToSocialList(ObjectGuid friend_guid, bool ignore);
+    void RemoveFromSocialList(ObjectGuid friend_guid, bool ignore);
+    void SetFriendNote(ObjectGuid friend_guid, std::string note);
+    // Packet send's
+    void SendSocialList();
+    // Misc
+    bool HasFriend(ObjectGuid friend_guid);
+    bool HasIgnore(ObjectGuid ignore_guid);
+    void SetPlayerGuid(ObjectGuid guid) { m_playerLowGuid = guid.GetCounter(); }
+    uint32 GetNumberOfSocialsWithFlag(SocialFlag flag);
+private:
+    PlayerSocialMap m_playerSocialMap;
+    uint32 m_playerLowGuid;
 };
 
 class SocialMgr
 {
-    public:
-        SocialMgr();
-        ~SocialMgr();
-        // Misc
-        void RemovePlayerSocial(uint32 guid) { m_socialMap.erase(guid); }
+public:
+    SocialMgr();
+    ~SocialMgr();
+    // Misc
+    void RemovePlayerSocial(uint32 guid) { m_socialMap.erase(guid); }
 
-        void GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo& friendInfo);
-        // Packet management
-        void MakeFriendStatusPacket(FriendsResult result, uint32 friend_guid, WorldPacket* data);
-        void SendFriendStatus(Player* player, FriendsResult result, ObjectGuid friend_guid, bool broadcast);
-        void BroadcastToFriendListers(Player* player, WorldPacket* packet);
-        // Loading
-        PlayerSocial* LoadFromDB(QueryResult* result, ObjectGuid guid);
-    private:
-        SocialMap m_socialMap;
+    void GetFriendInfo(Player* player, uint32 friendGUID, FriendInfo& friendInfo);
+    // Packet management
+    void MakeFriendStatusPacket(FriendsResult result, uint32 friend_guid, WorldPacket* data);
+    void SendFriendStatus(Player* player, FriendsResult result, ObjectGuid friend_guid, bool broadcast);
+    void BroadcastToFriendListers(Player* player, WorldPacket* packet);
+    // Loading
+    PlayerSocial* LoadFromDB(QueryResult* result, ObjectGuid guid);
+private:
+    SocialMap m_socialMap;
 };
 
 #define sSocialMgr MaNGOS::Singleton<SocialMgr>::Instance()

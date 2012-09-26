@@ -17,3 +17,6 @@
 #
 
 add_subdirectory(ScriptDev)
+# into the scripts subdirectory.
+#add_subdirectory(scripts)
+
