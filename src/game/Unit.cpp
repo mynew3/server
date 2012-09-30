@@ -528,6 +528,25 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb)
 
 uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const* spellProto, bool durabilityLoss)
 {
+    if (sWorld.getConfig(CONFIG_BOOL_PVPGOLD_ENABLE))
+    {
+        Player* pDamager = GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player* pDamaged = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+        if (pDamager && pDamaged && pDamager != pDamaged)
+        {
+            // Remove overkill damage.
+            int32 nooverkilldmg = 0;
+            if (damage > pDamaged->GetHealth())
+                nooverkilldmg = pDamaged->GetHealth();
+            else
+                nooverkilldmg = damage;
+
+            if (nooverkilldmg > 0)
+                pDamaged->Damaged(pDamager->GetObjectGuid(), nooverkilldmg);
+        }
+    }
+
     // remove affects from victim (including from 0 damage and DoTs)
     if (pVictim != this)
         pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -659,6 +678,9 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
     if (health <= damage)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamage: victim just died");
+
+        if (((Player*)pVictim) && sWorld.getConfig(CONFIG_BOOL_PVPGOLD_ENABLE))
+            ((Player*)pVictim)->HandlePvPKill();
 
         // find player: owner of controlled `this` or `this` itself maybe
         // for loot will be sued only if group_tap==NULL
@@ -5596,6 +5618,15 @@ void Unit::UnsummonAllTotems()
 int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellProto, bool critical)
 {
     int32 gain = pVictim->ModifyHealth(int32(addhealth));
+
+    if (sWorld.getConfig(CONFIG_BOOL_PVPGOLD_ENABLE))
+    {
+        Player* pHealer = GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player* pHealed = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself();
+
+        if (pHealer && pHealed && pHealer != pHealed && gain > 0)
+            pHealed->Healed(pHealer->GetObjectGuid(), gain);
+    }
 
     Unit* unit = this;
 

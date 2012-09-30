@@ -1233,6 +1233,15 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        Multiplier for the number of days in between global raid/heroic instance resets.
 #        Default: 1
 #
+#    PvPSystem.Gold.Enable
+#    Enable or disable gold rewarding on PvP Kills.
+#    Default: 0 - (Disabled)
+#             1 - (Enabled, give gold to players on PvPKills)
+#
+#    PvPSystem.Gold.BaseCopper
+#    Set the base reward of PvPGold.
+#    Default: 10000 - (1 Gold)
+#
 #    SkillGain.Crafting
 #    SkillGain.Defense
 #    SkillGain.Gathering
@@ -1345,6 +1354,8 @@ Rate.Reputation.Gain = 1
 Rate.Reputation.LowLevel.Kill    = 0.2
 Rate.Reputation.LowLevel.Quest   = 1
 Rate.InstanceResetTime = 1
+PvPSystem.Gold.Enable = 0
+PvPSystem.Gold.BaseCopper = 10000
 SkillGain.Crafting = 1
 SkillGain.Defense = 1
 SkillGain.Gathering = 1

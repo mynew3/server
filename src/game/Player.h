@@ -36,6 +36,7 @@
 #include "ReputationMgr.h"
 #include "BattleGround/BattleGround.h"
 #include "DBCStores.h"
+#include "Chat.h"
 #include "SharedDefines.h"
 
 #include<string>
@@ -946,6 +947,84 @@ class MANGOS_DLL_SPEC Player : public Unit
 public:
     explicit Player(WorldSession* session);
     ~Player();
+private:
+    uint32  KillStreak;
+
+    std::string ALastIP;
+    uint32  ALastIPCount;
+
+    std::string VLastIP;
+    uint32  VLastIPCount;
+public:
+    virtual void HandlePvPKill();
+    virtual bool HandlePvPAntifarm(Player* victim);
+
+    float GetKillStreak() { return KillStreak; }
+    void IncreaseKillStreak() { ++KillStreak; }
+    void ClearKillStreak() { KillStreak = 0; }
+
+    std::string GetLastAttackerIP() { return ALastIP; }
+    uint32 GetLastAttackerIPCount() { return ALastIPCount; }
+    void SetAttackerLastIP(std::string IP) { ALastIP = IP; }
+    void IncreaseAttackerLastIPCount() { ++ALastIPCount; }
+    void ClearAttackerIP() { ALastIP = ""; ALastIPCount = 0; }
+
+    std::string GetLastVictimIP() { return VLastIP; }
+    uint32 GetLastVictimIPCount() { return VLastIPCount; }
+    void SetVictimLastIP(std::string IP) { VLastIP = IP; }
+    void IncreaseVictimLastIPCount() { ++VLastIPCount; }
+    void ClearVictimIP() { VLastIP = ""; VLastIPCount = 0; }
+
+    std::map<uint64, uint32> m_Damagers;
+    virtual void Damaged(uint64 guid, uint32 damage) { m_Damagers[guid] += damage; }
+
+    std::map<uint64, uint32> m_Healers;
+    virtual void Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
+
+    virtual void CreatePet(uint32 entry, bool classcheck = true);
+
+    std::string GetNameLink(bool applycolors = false)
+    {
+        std::string name = GetName();
+        if (applycolors)
+        {
+            std::string teamcolor = "";
+            std::string classcolor = "";
+            if (GetTeam() == HORDE)
+                teamcolor = MSG_COLOR_RED;
+            else
+                teamcolor = MSG_COLOR_DARKBLUE;
+
+            switch (getClass())
+            {
+            case CLASS_WARRIOR: classcolor = MSG_COLOR_WARRIOR; break;
+            case CLASS_PALADIN: classcolor = MSG_COLOR_PALADIN; break;
+            case CLASS_HUNTER:  classcolor = MSG_COLOR_HUNTER;  break;
+            case CLASS_ROGUE:   classcolor = MSG_COLOR_ROGUE;   break;
+            case CLASS_PRIEST:  classcolor = MSG_COLOR_PRIEST;  break;
+            case CLASS_SHAMAN:  classcolor = MSG_COLOR_SHAMAN;  break;
+            case CLASS_MAGE:    classcolor = MSG_COLOR_MAGE;    break;
+            case CLASS_WARLOCK: classcolor = MSG_COLOR_WARLOCK; break;
+            case CLASS_DRUID:   classcolor = MSG_COLOR_DRUID;   break;
+            }
+            return "|Hplayer:"+name+"|h"+teamcolor+"["+classcolor+""+name+""+teamcolor+"]|h";
+        }
+        else
+            return "|Hplayer:"+name+"|h["+name+"]|h";
+    }
+
+    void SendChatMessage(const char *format, ...)
+    {
+        if (!IsInWorld())
+            return;
+
+        va_list ap;
+        char str [2048];
+        va_start(ap, format);
+        vsnprintf(str, 2048, format, ap);
+        va_end(ap);
+        ChatHandler(this).SendSysMessage(str);
+    }
 
     void CleanupsBeforeDelete() override;
 

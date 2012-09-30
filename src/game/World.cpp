@@ -431,6 +431,12 @@ void World::LoadConfigSettings(bool reload)
         }
     }
 
+    setConfig(CONFIG_BOOL_PVPGOLD_ENABLE,"PvPSystem.Gold.Enable", false);
+    sLog.outString("WORLD: pvpgold is %sabled", getConfig(CONFIG_BOOL_PVPGOLD_ENABLE) ? "en" : "dis");
+
+    setConfig(CONFIG_UINT32_PVPGOLD_BASE,"PvPSystem.Gold.BaseCopper",10000);
+    sLog.outString("WORLD: pvpgold basecopper is set to %u", getConfig(CONFIG_UINT32_PVPGOLD_BASE));
+
     ///- Read the player limit and the Message of the day from the config file
     SetPlayerLimit(sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT), true);
     SetMotd(sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server."));

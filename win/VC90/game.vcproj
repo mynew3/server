@@ -1808,6 +1808,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\src\game\Custom.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\game\Custom.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\game\pchdef.cpp"
 			>
 			<FileConfiguration

@@ -575,6 +575,13 @@ public:
     }
 
     // Static wrappers for various accessors
+    static Player* GetPlayer(uint64 guid)
+    {
+        ObjectGuid oGuid;
+        oGuid.Set(guid);
+        return GetPlayer(oGuid);
+    }
+
     static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
     static Player* GetPlayer(const char* name);         ///< Wrapper for ObjectAccessor::FindPlayerByName
     static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for ObjectAccessor::FindPlayer
