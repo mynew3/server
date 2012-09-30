@@ -74,7 +74,8 @@ enum WorldTimers
     WUPDATE_EVENTS      = 4,
     WUPDATE_DELETECHARS = 5,
     WUPDATE_AHBOT       = 6,
-    WUPDATE_COUNT       = 7
+    WUPDATE_AUTOBROADCAST = 7,
+    WUPDATE_COUNT       = 8
 };
 
 /// Configuration elements
@@ -82,6 +83,7 @@ enum eConfigUInt32Values
 {
     CONFIG_UINT32_COMPRESSION = 0,
     CONFIG_UINT32_PVPGOLD_BASE,
+    CONFIG_UINT32_AUTOBROADCAST_TIMER,
     CONFIG_UINT32_INTERVAL_SAVE,
     CONFIG_UINT32_INTERVAL_GRIDCLEAN,
     CONFIG_UINT32_INTERVAL_MAPUPDATE,
@@ -275,6 +277,7 @@ enum eConfigBoolValues
 {
     CONFIG_BOOL_GRID_UNLOAD = 0,
     CONFIG_BOOL_PVPGOLD_ENABLE,
+    CONFIG_BOOL_AUTOBROADCAST_ENABLE,
     CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY,
     CONFIG_BOOL_OFFHAND_CHECK_AT_TALENTS_RESET,
     CONFIG_BOOL_ALLOW_TWO_SIDE_ACCOUNTS,
@@ -439,6 +442,7 @@ public:
 
     void CleanupsBeforeStop();
 
+    virtual void SendBroadcast();
     WorldSession* FindSession(uint32 id) const;
     void AddSession(WorldSession* s);
     bool RemoveSession(uint32 id);

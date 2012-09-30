@@ -437,6 +437,13 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_PVPGOLD_BASE,"PvPSystem.Gold.BaseCopper",10000);
     sLog.outString("WORLD: pvpgold basecopper is set to %u", getConfig(CONFIG_UINT32_PVPGOLD_BASE));
 
+    setConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE,"AutoBroadcast.On", false);
+    sLog.outString("WORLD: autobroadcast is %sabled", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE) ? "en" : "dis");
+
+    setConfig(CONFIG_UINT32_AUTOBROADCAST_TIMER,"AutoBroadcast.Timer", 300000);
+    if (getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE))
+        sLog.outString("WORLD: autobroadcast timer is set to %u", getConfig(CONFIG_UINT32_AUTOBROADCAST_TIMER));
+
     ///- Read the player limit and the Message of the day from the config file
     SetPlayerLimit(sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT), true);
     SetMotd(sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server."));
@@ -1302,6 +1309,7 @@ void World::SetInitialWorldSettings()
 
     // for AhBot
     m_timers[WUPDATE_AHBOT].SetInterval(20 * IN_MILLISECONDS); // every 20 sec
+    m_timers[WUPDATE_AUTOBROADCAST].SetInterval(sWorld.getConfig(CONFIG_UINT32_AUTOBROADCAST_TIMER));
 
     // to set mailtimer to return mails every day between 4 and 5 am
     // mailtimer is increased when updating auctions
@@ -1509,6 +1517,15 @@ void World::Update(uint32 diff)
         uint32 nextGameEvent = sGameEventMgr.Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
         m_timers[WUPDATE_EVENTS].Reset();
+    }
+
+    if(getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE))
+    {
+        if (m_timers[WUPDATE_AUTOBROADCAST].Passed())
+        {
+            m_timers[WUPDATE_AUTOBROADCAST].Reset();
+            SendBroadcast();
+        }
     }
 
     /// </ul>

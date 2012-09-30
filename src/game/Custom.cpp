@@ -239,3 +239,22 @@ bool Player::HandlePvPAntifarm(Player* victim)
     victim->SetVictimLastIP(GetSession()->GetRemoteAddress());
     return true;
 }
+
+void World::SendBroadcast()
+{
+    std::string msg;
+    msg.reserve(2048);
+    msg = MSG_COLOR_MAGENTA"[Server]"MSG_COLOR_WHITE": ";
+    QueryResult *result = WorldDatabase.PQuery("SELECT text FROM autobroadcast ORDER BY RAND() LIMIT 1");
+    if (result)
+    {
+        msg = ""+msg+""+result->Fetch()[0].GetString()+"";
+        delete result;
+
+        SendServerMessage(SERVER_MSG_CUSTOM,msg.c_str(),NULL);
+
+        sLog.outString("AutoBroadcast: '%s'",msg.c_str());
+    }
+    else
+        sLog.outError("AutoBroadcast enabled, but no broadcast texts was found.");
+}
