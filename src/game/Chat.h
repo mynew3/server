@@ -95,6 +95,9 @@ public:
     explicit ChatHandler(Player* player);
     ~ChatHandler();
 
+    void PSendGlobalSysMessage(   const char *format, ...) ATTR_PRINTF(2,3);
+    std::string BuildWorldChatMsg(std::string msg);
+
     static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, const char* channelName, ObjectGuid targetGuid, const char* message, Unit* speaker);
 
     static void FillMessageData(WorldPacket* data, WorldSession* session, uint8 type, uint32 language, ObjectGuid targetGuid, const char* message)
@@ -158,6 +161,18 @@ protected:
 
     void CheckIntegrity(ChatCommand* table, ChatCommand* parentCommand);
     ChatCommand* getCommandTable();
+
+    bool HandleUpdateGoldPriceCommand(char* args);
+    bool HandleExtendedCostCommand(char* args);
+    bool HandleReqTitleCommand(char* args);
+    bool HandleReqArenaRatingCommand(char* args);
+    bool HandleReqArenaPointsCommand(char* args);
+    bool HandleReqItemCommand(char* args);
+    bool HandleReqItem2Command(char* args);
+    bool HandleReqGoldCommand(char* args);
+    bool HandleToggleBuyCommand(char* args);
+    bool HandleWorldChatCommand(char* args);
+    bool HandleWarpCommand(char* args);
 
     bool HandleAccountCommand(char* args);
     bool HandleAccountCharactersCommand(char* args);

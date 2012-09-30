@@ -380,6 +380,14 @@ UpdateMask Player::updateVisualBits;
 
 Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_reputationMgr(this)
 {
+    BuyEnabled = false;
+
+    KillStreak = 0;
+    ALastIP = "";
+    ALastIPCount = 0;
+    VLastIP = "";
+    VLastIPCount = 0;
+
     m_transport = 0;
 
     m_speakTime = 0;
@@ -18043,6 +18051,7 @@ void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
 // Return true is the bought item has a max count to force refresh of window by caller
 bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, uint8 bag, uint8 slot)
 {
+    bool CanBuy = true;
     // cheating attempt
     if (count < 1) count = 1;
 
@@ -18100,14 +18109,14 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         if (pCreature->GetVendorItemCurrentCount(crItem) < totalCount)
         {
             SendBuyError(BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
-            return false;
+            CanBuy = false;
         }
     }
 
     if (uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank)
     {
         SendBuyError(BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
-        return false;
+        CanBuy = false;
     }
 
     if (uint32 extendedCostId = crItem->ExtendedCost)
@@ -18123,14 +18132,14 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         if (GetHonorPoints() < (iece->reqhonorpoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
-            return false;
+            CanBuy = false;
         }
 
         // arena points price
         if (GetArenaPoints() < (iece->reqarenapoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
-            return false;
+            CanBuy = false;
         }
 
         // item base price
@@ -18139,7 +18148,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
             if (iece->reqitem[i] && !HasItemCount(iece->reqitem[i], iece->reqitemcount[i] * count))
             {
                 SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                return false;
+                CanBuy = false;
             }
         }
 
@@ -18148,7 +18157,7 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
-            return false;
+            CanBuy = false;
         }
     }
 
@@ -18160,8 +18169,15 @@ bool Player::BuyItemFromVendor(ObjectGuid vendorGuid, uint32 item, uint8 count, 
     if (GetMoney() < price)
     {
         SendBuyError(BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-        return false;
+        CanBuy = false;
     }
+
+    CheckCustomVendorRequirements(crItem,pProto,CanBuy);
+
+    if (!CanBuy)
+        return false;
+
+    RemoveCustomVendorRequirements(crItem);
 
     Item* pItem = NULL;
 

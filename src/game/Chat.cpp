@@ -728,6 +728,18 @@ ChatCommand* ChatHandler::getCommandTable()
         { "trigger",        SEC_GAMEMASTER,     false, NULL,                                           "", triggerCommandTable  },
         { "wp",             SEC_GAMEMASTER,     false, NULL,                                           "", wpCommandTable       },
 
+        { "setextendedcost",SEC_ADMINISTRATOR,  false, &ChatHandler::HandleExtendedCostCommand,        "", NULL },
+        { "setreqtitle",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqTitleCommand,            "", NULL },
+        { "setreqrating",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqArenaRatingCommand,      "", NULL },
+        { "setreqpoints",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqArenaPointsCommand,      "", NULL },
+        { "setreqitem",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqItemCommand,             "", NULL },
+        { "setreqitem2",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqItem2Command,            "", NULL },
+        { "setgoldprice",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleReqGoldCommand,             "", NULL },
+        { "togglebuy",      SEC_PLAYER,         false, &ChatHandler::HandleToggleBuyCommand,           "", NULL },
+        { "warp",           SEC_PLAYER,         false, &ChatHandler::HandleWarpCommand,                "", NULL },
+        { "chat",           SEC_PLAYER,         false, &ChatHandler::HandleWorldChatCommand,           "", NULL },
+        { "c",              SEC_PLAYER,         false, &ChatHandler::HandleWorldChatCommand,           "", NULL },
+
         { "aura",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleAuraCommand,                "", NULL },
         { "unaura",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleUnAuraCommand,              "", NULL },
         { "announce",       SEC_MODERATOR,      true,  &ChatHandler::HandleAnnounceCommand,            "", NULL },

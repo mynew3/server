@@ -948,6 +948,7 @@ public:
     explicit Player(WorldSession* session);
     ~Player();
 private:
+    bool    BuyEnabled;
     uint32  KillStreak;
 
     std::string ALastIP;
@@ -980,6 +981,17 @@ public:
 
     std::map<uint64, uint32> m_Healers;
     void Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
+
+    virtual void CheckCustomVendorRequirements(VendorItem const* crItem, ItemPrototype const* pProto, bool &CanBuy);
+    virtual void RemoveCustomVendorRequirements(VendorItem const* crItem);
+    bool GetBuyEnabled() { return BuyEnabled; }
+    void ToggleBuyEnabled()
+    {
+        if(BuyEnabled)
+            BuyEnabled = false;
+        else
+            BuyEnabled = true;
+    }
 
     virtual void CreatePet(uint32 entry, bool classcheck = true);
 

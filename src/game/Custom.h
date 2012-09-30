@@ -30,4 +30,14 @@ struct compare_pair_second {
 
 uint32 pair_adder(uint32 n, const std::map<uint64, uint32>::value_type & p) { return n + p.second; }
 
+void stringReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
+{
+    size_t pos = 0;
+    while((pos = str.find(oldStr, pos)) != std::string::npos)
+    {
+        str.replace(pos, oldStr.length(), newStr);
+        pos += newStr.length();
+    }
+}
+
 #endif

@@ -18,6 +18,9 @@
 
 #include "Custom.h"
 #include "World.h"
+#include "Item.h"
+#include "ItemPrototype.h"
+#include "Chat.h"
 
 #include <numeric>
 
@@ -240,6 +243,70 @@ bool Player::HandlePvPAntifarm(Player* victim)
     return true;
 }
 
+void Player::CheckCustomVendorRequirements(VendorItem const* crItem, ItemPrototype const* pProto, bool &CanBuy)
+{
+    if (crItem->ReqArenaRating > GetMaxPersonalArenaRatingRequirement())
+    {
+        if (crItem->ReqArenaRating > 0 )
+        {
+            // probably not the proper equip err
+            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, NULL, NULL);
+            SendChatMessage("You need %u arena rating to buy this item.",crItem->ReqArenaRating);
+            CanBuy = false;
+        }
+    }
+    if (crItem->ReqArenaPoints > GetArenaPoints() || !GetBuyEnabled())
+    {
+        if (crItem->ReqArenaPoints > 0)
+        {
+            SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
+            SendChatMessage("You need %u arena points to buy this item.");
+            CanBuy = false;
+        }
+    }
+    if ((!HasItemCount(crItem->ReqItem1,1,false) && !HasItemCount(crItem->ReqItem2,1,false)) || !GetBuyEnabled())
+    {
+        Item* pItem1 = Item::CreateItem(crItem->ReqItem1,1);
+        Item* pItem2 = Item::CreateItem(crItem->ReqItem2,1);
+        if (pItem1 && crItem->ReqItem1 > 0 && pItem2 && crItem->ReqItem2 > 0)
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
+            SendChatMessage("You need %s%s or %s%s to buy this item.",pItem1->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            CanBuy = false;
+        }
+        else if (pItem1 && crItem->ReqItem1 > 0)
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
+            SendChatMessage("You need %s%s to buy this item.",pItem1->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            CanBuy = false;
+        }
+        else if (pItem2 && crItem->ReqItem2 > 0)
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS,NULL,NULL,NULL);
+            SendChatMessage("You need %s%s to buy this item.",pItem2->GetNameLink(true).c_str(),MSG_COLOR_YELLOW);
+            CanBuy = false;
+        }
+    }
+    if (!GetBuyEnabled())
+    {
+        Item* pItem = Item::CreateItem(pProto->ItemId,1);
+        if (pItem)
+            SendChatMessage("You must type %s.togglebuy%s to buy %s",MSG_COLOR_RED,MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+        else
+            SendChatMessage("You must type %s.togglebuy%s to buy this item",MSG_COLOR_RED,MSG_COLOR_YELLOW);
+    }
+}
+
+void Player::RemoveCustomVendorRequirements(VendorItem const* crItem)
+{
+    if (crItem->ReqItem1 > 0)
+        DestroyItemCount(crItem->ReqItem1,1,true);
+    if (crItem->ReqItem2 > 0)
+        DestroyItemCount(crItem->ReqItem2,1,true);
+    if (crItem->ReqArenaPoints > 0)
+        ModifyArenaPoints(-int32(crItem->ReqArenaPoints));
+}
+
 void World::SendBroadcast()
 {
     std::string msg;
@@ -257,4 +324,284 @@ void World::SendBroadcast()
     }
     else
         sLog.outError("AutoBroadcast enabled, but no broadcast texts was found.");
+}
+
+std::string ChatHandler::BuildWorldChatMsg(std::string msg)
+{
+    std::string StaffString = "";
+    if (m_session->GetSecurity() > SEC_PLAYER)
+        StaffString = ""MSG_COLOR_WHITE"["MSG_COLOR_MAGENTA"Staff"MSG_COLOR_WHITE"] ";
+
+    std::string message = ""+StaffString+""MSG_COLOR_RED""+m_session->GetPlayer()->GetNameLink(true)+""MSG_COLOR_WHITE": "+msg+"";
+    stringReplace(message,"|r",MSG_COLOR_WHITE);
+
+    return message;
+}
+
+void ChatHandler::PSendGlobalSysMessage(const char *format, ...)
+{
+    va_list ap;
+    char str [2048];
+    va_start(ap, format);
+    vsnprintf(str, 2048, format, ap);
+    va_end(ap);
+    SendGlobalSysMessage(str);
+}
+
+bool ChatHandler::HandleExtendedCostCommand(char* args)
+{
+    uint32 extendedcost;
+    if (!ExtractUInt32(&args,extendedcost))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+    if (!sItemExtendedCostStore.LookupEntry(extendedcost))
+    {
+        PSendSysMessage("Extendedcost id %u do not exist.",extendedcost);
+    }
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET extendedcost = %u WHERE item = %u",extendedcost,itemid);
+    PSendSysMessage("Updated extendedcost to %u on %s",extendedcost,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqTitleCommand(char* args)
+{
+    uint32 titleid;
+    if (!ExtractUInt32(&args,titleid))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE item_template SET requiredhonorrank = %u WHERE entry = %u",titleid,itemid);
+    PSendSysMessage("Updated required title to %u on %s",titleid,pItem->GetNameLink(true).c_str());
+    PSendSysMessage("Remember: Rank ranks are differing +4, so rank 14 should be entered as 18, rank one as 5 etc.");
+    return true;
+}
+
+bool ChatHandler::HandleReqArenaRatingCommand(char* args)
+{
+    uint32 rating;
+    if (!ExtractUInt32(&args,rating))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqArenaRating = %u WHERE item = %u",rating,itemid);
+    PSendSysMessage("Updated required arena rating to %u on %s",rating,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqArenaPointsCommand(char* args)
+{
+    uint32 points;
+    if (!ExtractUInt32(&args,points))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqArenaPoints = %u WHERE item = %u",points,itemid);
+    PSendSysMessage("Updated required arena points to %u on %s",points,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqItemCommand(char* args)
+{
+    uint32 reqitem;
+    if (!ExtractUInt32(&args,reqitem))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    Item* pReqItem = Item::CreateItem(reqitem, 1);
+    if (!pReqItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqItem = %u WHERE item = %u",reqitem,itemid);
+    PSendSysMessage("Updated required item to %s%s on %s",pReqItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqItem2Command(char* args)
+{
+    uint32 reqitem;
+    if (!ExtractUInt32(&args,reqitem))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    Item* pReqItem = Item::CreateItem(reqitem, 1);
+    if (!pReqItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE npc_vendor SET ReqItem2 = %u WHERE item = %u",reqitem,itemid);
+    PSendSysMessage("Updated required item to %s%s on %s",pReqItem->GetNameLink(true).c_str(),MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleReqGoldCommand(char* args)
+{
+    uint32 copper;
+    if (!ExtractUInt32(&args,copper))
+        return false;
+
+    uint32 itemid;
+    if (!ExtractUint32KeyFromLink(&args, "Hitem", itemid))
+        return false;
+
+    Item* pItem = Item::CreateItem(itemid, 1);
+    if (!pItem)
+        return false;
+
+    WorldDatabase.PExecute("UPDATE item_template SET BuyPrice = %u, SellPrice = %u WHERE entry = %u",copper,copper/4,itemid);
+
+    PSendSysMessage("Updated required gold to %u on %s",copper,pItem->GetNameLink(true).c_str());
+    return true;
+}
+
+bool ChatHandler::HandleToggleBuyCommand(char* /*args*/)
+{
+    Player* pPlayer = m_session->GetPlayer();
+    if (!pPlayer)
+        return false;
+
+    pPlayer->ToggleBuyEnabled();
+
+    if (pPlayer->GetBuyEnabled())
+        PSendSysMessage("You can now buy customreq items.");
+    else
+        PSendSysMessage("You can no longer buy customreq items.");
+
+    return true;
+}
+
+bool ChatHandler::HandleWorldChatCommand(char* args)
+{
+    Player* pPlayer = m_session->GetPlayer();
+    if (!pPlayer)
+        return false;
+
+    char *c_msg = ExtractQuotedOrLiteralArg(&args);
+    if (!c_msg)
+        return false;
+
+    std::string s_msg = c_msg;
+    if (s_msg.empty())
+        return false;
+
+    std::string message = BuildWorldChatMsg(s_msg);
+    PSendGlobalSysMessage(message.c_str());
+
+    if (m_session->GetSecurity() > SEC_PLAYER)
+    {
+        WorldPacket data(SMSG_NOTIFICATION, (message.size()+1));
+        data << message;
+        sWorld.SendGlobalMessage(&data);
+    }
+    return true;
+}
+
+bool ChatHandler::HandleWarpCommand(char* args)
+{
+    // Based on a concept by Pwntzyou
+    if (!*args)
+        return false;
+
+    Player* _player = m_session->GetPlayer();
+
+    char* arg1 = strtok((char*)args, " ");
+    char* arg2 = strtok(NULL, " ");
+
+    if (!arg1 || !arg2)
+        return false;
+
+    char dir = arg1[0];
+    float value = float(atof(arg2));
+    float x = _player->GetPositionX();
+    float y = _player->GetPositionY();
+    float z = _player->GetPositionZ();
+    float o = _player->GetOrientation();
+
+    if ((dir != 'x' && dir != 'y' && dir != 'z' && dir != 'o') || value == 0.f)
+    {
+        _player->SendChatMessage("%s[Warp Info]%s Incorrect values, correct direction parameters is: x,y,z and o. Correct range/degree parameter is everything above or under 0.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+        return true;
+    }
+
+    switch (dir)
+    {
+    case 'x':
+        {
+            x = x + cos(o-(M_PI/2))*value;
+            y = y + sin(o-(M_PI/2))*value;
+
+            _player->NearTeleportTo(x,y,z,o);
+
+            _player->SendChatMessage("%s[Warp Info]%s You teleported %g yards in x direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+        }
+        break;
+    case 'y':
+        {
+            x = x + cosf(o)*value;
+            y = y + sinf(o)*value;
+
+            _player->NearTeleportTo(x,y,z,o);
+
+            _player->SendChatMessage("%s[Warp Info]%s You teleported %g yards in y direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+        }
+        break;
+    case 'z':
+        {
+            _player->NearTeleportTo(x,y,z+value,o);
+
+            _player->SendChatMessage("%s[Warp Info]%s You teleported %g yards in z direction",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value);
+        }
+        break;
+    case 'o':
+        {
+            o = MapManager::NormalizeOrientation((value * M_PI_F/180.0f)+o);
+
+            _player->NearTeleportTo(x,y,z,o);
+            _player->SendChatMessage("%s[Warp Info]%s You rotated %g degrees (%g radians)",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,value,value * M_PI / 180.0f);
+            _player->SendChatMessage("%sCurrent radian/degree: %g %g",MSG_COLOR_WHITE,o,o*180.0f/M_PI);
+        }
+        break;
+    }
+    return true;
 }
