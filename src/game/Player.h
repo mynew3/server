@@ -976,10 +976,10 @@ public:
     void ClearVictimIP() { VLastIP = ""; VLastIPCount = 0; }
 
     std::map<uint64, uint32> m_Damagers;
-    virtual void Damaged(uint64 guid, uint32 damage) { m_Damagers[guid] += damage; }
+    void Damaged(uint64 guid, uint32 damage) { m_Damagers[guid] += damage; }
 
     std::map<uint64, uint32> m_Healers;
-    virtual void Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
+    void Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
 
     virtual void CreatePet(uint32 entry, bool classcheck = true);
 
