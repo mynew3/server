@@ -713,3 +713,17 @@ void BattleGround::MorphCrossfactionPlayer(Player* plr, bool action)
         plr->InitDisplayIds();
     }
 }
+
+uint8 Player::GetFakeRace()
+{
+    if (GetNativeDisplayId() == 19723 || GetNativeDisplayId() == 19724)
+        return RACE_BLOODELF;
+    else if (GetNativeDisplayId() == 20578 || GetNativeDisplayId() == 20579)
+        return RACE_HUMAN;
+    else if (GetNativeDisplayId() == 20584 || GetNativeDisplayId() == 20585)
+        return RACE_TAUREN;
+    else if (GetNativeDisplayId() == 20580 || GetNativeDisplayId() == 20581)
+        return RACE_GNOME;
+
+    return getRace();
+}

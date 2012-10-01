@@ -959,6 +959,7 @@ private:
 public:
     virtual void HandlePvPKill();
     virtual bool HandlePvPAntifarm(Player* victim);
+    virtual uint8 GetFakeRace();
 
     float GetKillStreak() { return KillStreak; }
     void IncreaseKillStreak() { ++KillStreak; }
