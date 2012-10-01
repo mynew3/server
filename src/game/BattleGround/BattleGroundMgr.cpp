@@ -153,7 +153,7 @@ GroupQueueInfo* BattleGroundQueue::AddGroup(Player* leader, Group* grp, BattleGr
     ginfo->IsInvitedToBGInstanceGUID = 0;
     ginfo->JoinTime                  = WorldTimer::getMSTime();
     ginfo->RemoveInviteTime          = 0;
-    ginfo->GroupTeam                 = leader->GetTeam();
+    ginfo->GroupTeam                 = leader->GetBGTeam();
     ginfo->ArenaTeamRating           = arenaRating;
     ginfo->OpponentsTeamRating       = 0;
 
@@ -648,11 +648,18 @@ bool BattleGroundQueue::CheckNormalMatch(BattleGround* bg_template, BattleGround
             if (!(*(itr_team[i]))->IsInvitedToBGInstanceGUID)
             {
                 m_SelectionPools[i].AddGroup(*(itr_team[i]), maxPlayers);
-                if (m_SelectionPools[i].GetPlayerCount() >= minPlayers)
+                if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() + m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers * 2 
+                    && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED) && bg_template->isBattleGround())
+                    break;
+                else if (m_SelectionPools[i].GetPlayerCount() >= minPlayers && !sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED))
                     break;
             }
         }
     }
+
+    if (m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount() + m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() >= minPlayers * 2 && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED))
+        return true; // This will cause everyone to get invited, since balancing is done on battleground joining.
+
     // try to invite same number of players - this cycle may cause longer wait time even if there are enough players in queue, but we want ballanced bg
     uint32 j = BG_TEAM_ALLIANCE;
     if (m_SelectionPools[BG_TEAM_HORDE].GetPlayerCount() < m_SelectionPools[BG_TEAM_ALLIANCE].GetPlayerCount())
@@ -1295,7 +1302,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket* data, BattleGround* bg)
             Team team = bg->GetPlayerTeam(itr->first);
             if (!team)
                 if (Player* player = sObjectMgr.GetPlayer(itr->first))
-                    team = player->GetTeam();
+                    team = player->GetBGTeam();
 
             if (bg->GetWinner() == team && team != TEAM_NONE)
                 *data << uint8(1);
@@ -1784,11 +1791,13 @@ void BattleGroundMgr::SendToBattleGround(Player* pl, uint32 instanceId, BattleGr
     BattleGround* bg = GetBattleGround(instanceId, bgTypeId);
     if (bg)
     {
+        HandleCrossfactionSendToBattle(pl, bg, instanceId, bgTypeId);
+
         uint32 mapid = bg->GetMapId();
         float x, y, z, O;
         Team team = pl->GetBGTeam();
         if (team == 0)
-            team = pl->GetTeam();
+            team = pl->GetBGTeam();
         bg->GetTeamStartLoc(team, x, y, z, O);
 
         DETAIL_LOG("BATTLEGROUND: Sending %s to map %u, X %f, Y %f, Z %f, O %f", pl->GetName(), mapid, x, y, z, O);

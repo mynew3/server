@@ -541,7 +541,7 @@ void BattleGround::SendPacketToTeam(Team teamId, WorldPacket* packet, Player* se
             continue;
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             plr->GetSession()->SendPacket(packet);
@@ -572,7 +572,7 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (!team) team = plr->GetBGTeam();
 
         if (team == teamId)
         {
@@ -598,7 +598,7 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             plr->CastSpell(plr, SpellID, true);
@@ -621,7 +621,7 @@ void BattleGround::RewardHonorToTeam(uint32 Honor, Team teamId)
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             UpdatePlayerScore(plr, SCORE_BONUS_HONOR, Honor);
@@ -649,7 +649,7 @@ void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, 
         }
 
         Team team = itr->second.PlayerTeam;
-        if (!team) team = plr->GetTeam();
+        if (!team) team = plr->GetBGTeam();
 
         if (team == teamId)
             plr->GetReputationMgr().ModifyReputation(factionEntry, Reputation);
@@ -763,7 +763,7 @@ void BattleGround::EndBattleGround(Team winner)
         }
 
         // this line is obsolete - team is set ALWAYS
-        // if(!team) team = plr->GetTeam();
+        // if(!team) team = plr->GetBGTeam();
 
         // per player calculation
         if (isArena() && isRated() && winner_arena_team && loser_arena_team)
@@ -990,6 +990,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
 
     if (plr)
     {
+        MorphCrossfactionPlayer(plr,false);
         // should remove spirit of redemption
         if (plr->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             plr->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
@@ -1011,7 +1012,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool Sen
         {
             plr->ClearAfkReports();
 
-            if (!team) team = plr->GetTeam();
+            if (!team) team = plr->GetBGTeam();
 
             // if arena, remove the specific arena auras
             if (isArena())
@@ -1144,6 +1145,7 @@ void BattleGround::StartBattleGround()
 
 void BattleGround::AddPlayer(Player* plr)
 {
+    MorphCrossfactionPlayer(plr,true);
     // remove afk from player
     if (plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         plr->ToggleAFK();
@@ -1174,14 +1176,14 @@ void BattleGround::AddPlayer(Player* plr)
         plr->RemoveAllEnchantments(TEMP_ENCHANTMENT_SLOT);
         if (team == ALLIANCE)                               // gold
         {
-            if (plr->GetTeam() == HORDE)
+            if (plr->GetBGTeam() == HORDE)
                 plr->CastSpell(plr, SPELL_HORDE_GOLD_FLAG, true);
             else
                 plr->CastSpell(plr, SPELL_ALLIANCE_GOLD_FLAG, true);
         }
         else                                                // green
         {
-            if (plr->GetTeam() == HORDE)
+            if (plr->GetBGTeam() == HORDE)
                 plr->CastSpell(plr, SPELL_HORDE_GREEN_FLAG, true);
             else
                 plr->CastSpell(plr, SPELL_ALLIANCE_GREEN_FLAG, true);
@@ -1264,8 +1266,8 @@ void BattleGround::EventPlayerLoggedOut(Player* player)
 
         // 1 player is logging out, if it is the last, then end arena!
         if (isArena())
-            if (GetAlivePlayersCountByTeam(player->GetTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam())))
-                EndBattleGround(GetOtherTeam(player->GetTeam()));
+            if (GetAlivePlayersCountByTeam(player->GetBGTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetBGTeam())))
+                EndBattleGround(GetOtherTeam(player->GetBGTeam()));
     }
 }
 
@@ -1703,7 +1705,7 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
             if (!plr || plr == killer)
                 continue;
 
-            if (plr->GetTeam() == killer->GetTeam() && plr->IsAtGroupRewardDistance(player))
+            if (plr->GetBGTeam() == killer->GetBGTeam() && plr->IsAtGroupRewardDistance(player))
                 UpdatePlayerScore(plr, SCORE_HONORABLE_KILLS, 1);
         }
     }
@@ -1786,5 +1788,5 @@ void BattleGround::SetBgRaid(Team team, Group* bg_raid)
 
 WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
 {
-    return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+    return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetBGTeam());
 }

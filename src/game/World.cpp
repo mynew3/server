@@ -437,6 +437,9 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_PVPGOLD_BASE,"PvPSystem.Gold.BaseCopper",10000);
     sLog.outString("WORLD: pvpgold basecopper is set to %u", getConfig(CONFIG_UINT32_PVPGOLD_BASE));
 
+    setConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED, "Battleground.CrossFaction", true);
+    sLog.outString("WORLD: crossfaction battlegrounds are %sabled", getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED) ? "en" : "dis");
+
     setConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE,"AutoBroadcast.On", false);
     sLog.outString("WORLD: autobroadcast is %sabled", getConfig(CONFIG_BOOL_AUTOBROADCAST_ENABLE) ? "en" : "dis");
 

@@ -245,6 +245,9 @@ bool Player::HandlePvPAntifarm(Player* victim)
 
 void Player::CheckCustomVendorRequirements(VendorItem const* crItem, ItemPrototype const* pProto, bool &CanBuy)
 {
+    Item* pItem = Item::CreateItem(pProto->ItemId,1);
+    if (pItem)
+        SendChatMessage("You must type %s.togglebuy%s to buy %s",MSG_COLOR_RED,MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
     if (crItem->ReqArenaRating > GetMaxPersonalArenaRatingRequirement())
     {
         if (crItem->ReqArenaRating > 0 )
@@ -604,4 +607,109 @@ bool ChatHandler::HandleWarpCommand(char* args)
         break;
     }
     return true;
+}
+
+void BattleGroundMgr::HandleCrossfactionSendToBattle(Player* pl, BattleGround* bg, uint32 instanceId, BattleGroundTypeId bgTypeId)
+{
+    if (!pl || !bg)
+        return;
+
+    if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CROSSFACTION_ENABLED))
+    {
+        Team GrpTeam = TEAM_NONE;
+        if (Group *pGroup = pl->GetGroup())
+        {
+            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player* pGroupGuy = itr->getSource();
+                if (!pGroupGuy)
+                    continue;
+
+                if (pGroupGuy->GetBattleGround() && pGroupGuy->GetBattleGround()->GetInstanceID() == instanceId && pGroupGuy->GetBattleGround()->GetTypeID() == bgTypeId)
+                {
+                    GrpTeam = pGroupGuy->GetBGTeam();
+                    break;
+                }
+            }
+        }
+        if (GrpTeam != TEAM_NONE && bg->GetPlayersCountByTeam(GrpTeam) < bg->GetMaxPlayersPerTeam())
+            pl->SetBGTeam(GrpTeam);
+        else
+        {
+            if (bg->GetPlayersCountByTeam(HORDE) < bg->GetMaxPlayersPerTeam() && bg->GetPlayersCountByTeam(HORDE) < bg->GetPlayersCountByTeam(ALLIANCE))
+                pl->SetBGTeam(HORDE);
+            else if (bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetMaxPlayersPerTeam() && bg->GetPlayersCountByTeam(ALLIANCE) < bg->GetPlayersCountByTeam(HORDE))
+                pl->SetBGTeam(ALLIANCE);
+        }
+        if (pl->GetBGTeam() == HORDE)
+            pl->setFaction(2); // orc, and generic for horde
+        else if (pl->GetBGTeam() == ALLIANCE)
+            pl->setFaction(1); // dwarf/gnome, and generic for alliance
+    }
+
+    bg->UpdatePlayersCountByTeam(pl->GetBGTeam(), false); // Add here instead of in AddPlayer, because AddPlayer is not made until loading screen is finished. Which can cause unbalance in the system.
+}
+
+void BattleGround::MorphCrossfactionPlayer(Player* plr, bool action)
+{
+    if (!plr || !plr->IsInWorld())
+        return;
+
+    if (plr->GetTeam() != plr->GetBGTeam() && action)
+    {
+        switch (urand(1,2))
+        {
+        case 1:
+            // Human / Bloodelf
+            if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(19723);
+                plr->SetNativeDisplayId(19723);
+            }
+            else if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(19724);
+                plr->SetNativeDisplayId(19724);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(20578);
+                plr->SetNativeDisplayId(20578);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(20579);
+                plr->SetNativeDisplayId(20579);
+            }
+            break;
+        case 2:
+            // Gnome / Tauren
+            if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(20585);
+                plr->SetNativeDisplayId(20585);
+            }
+            else if (plr->GetBGTeam() == HORDE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(20584);
+                plr->SetNativeDisplayId(20584);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_MALE)
+            {
+                plr->SetDisplayId(20580);
+                plr->SetNativeDisplayId(20580);
+            }
+            else if (plr->GetBGTeam() == ALLIANCE && plr->getGender() == GENDER_FEMALE)
+            {
+                plr->SetDisplayId(20581);
+                plr->SetNativeDisplayId(20581);
+            }
+            break;
+        }
+    }
+    else if (!action)
+    {
+        plr->setFactionForRace(plr->getRace());
+        plr->InitDisplayIds();
+    }
 }

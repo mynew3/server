@@ -275,6 +275,7 @@ public:
     BattleGround();
     /*BattleGround(const BattleGround& bg);*/
     virtual ~BattleGround();
+    virtual void MorphCrossfactionPlayer(Player* plr, bool action);
     virtual void Update(uint32 diff);                   // must be implemented in BG subclass of BG specific update code, but must in begginning call parent version
     virtual bool SetupBattleGround()                    // must be implemented in BG subclass
     {

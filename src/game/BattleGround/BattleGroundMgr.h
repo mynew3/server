@@ -223,6 +223,7 @@ public:
     void DeleteAllBattleGrounds();
 
     void SendToBattleGround(Player* pl, uint32 InstanceID, BattleGroundTypeId bgTypeId);
+    virtual void HandleCrossfactionSendToBattle(Player* pl, BattleGround* bg, uint32 instanceId, BattleGroundTypeId bgTypeId);
 
     /* Battleground queues */
     // these queues are instantiated when creating BattlegroundMrg

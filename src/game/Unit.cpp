@@ -4980,7 +4980,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
 
         //= PvP states
         // Green/Blue (can't attack)
-        if (pTester->GetTeam() == pTarget->GetTeam())
+        if (pTester->GetBGTeam() == pTarget->GetBGTeam())
             return false;
 
         // Red (can attack) if true, Blue/Yellow (can't attack) in another case
@@ -5092,7 +5092,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 
         //= PvP states
         // Green/Blue (non-attackable)
-        if (pTester->GetTeam() == pTarget->GetTeam())
+        if (pTester->GetBGTeam() == pTarget->GetBGTeam())
             return true;
 
         // Blue (friendly/non-attackable) if not PVP, or Yellow/Red in another case (attackable)

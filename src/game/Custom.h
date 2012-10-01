@@ -20,6 +20,8 @@
 #define _CUSTOM_H
 
 #include "Player.h"
+#include "BattleGround/BattleGroundMgr.h"
+#include "BattleGround/BattleGround.h"
 
 template<template <typename> class P = std::less >
 struct compare_pair_second {
