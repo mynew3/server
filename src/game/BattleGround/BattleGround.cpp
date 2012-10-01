@@ -1146,6 +1146,7 @@ void BattleGround::StartBattleGround()
 void BattleGround::AddPlayer(Player* plr)
 {
     MorphCrossfactionPlayer(plr,true);
+    ForgetPlayers(plr);
     // remove afk from player
     if (plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK))
         plr->ToggleAFK();
@@ -1161,8 +1162,6 @@ void BattleGround::AddPlayer(Player* plr)
 
     // Add to list/maps
     m_Players[guid] = bp;
-
-    UpdatePlayersCountByTeam(team, false);                  // +1 player
 
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);

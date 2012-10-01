@@ -714,6 +714,26 @@ void BattleGround::MorphCrossfactionPlayer(Player* plr, bool action)
     }
 }
 
+void BattleGround::ForgetPlayers(Player* plr)
+{
+    for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        Player* pPlayer = sObjectMgr.GetPlayer(itr->first,true);
+        if (!pPlayer)
+            continue;
+
+        if (pPlayer != plr)
+        {
+            WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+            data << plr->GetObjectGuid();
+            pPlayer->GetSession()->SendPacket(&data);
+            WorldPacket data2(SMSG_INVALIDATE_PLAYER, 8);
+            data2 << pPlayer->GetObjectGuid();
+            plr->GetSession()->SendPacket(&data2);
+        }
+    }
+}
+
 uint8 Player::GetFakeRace()
 {
     if (GetNativeDisplayId() == 19723 || GetNativeDisplayId() == 19724)
@@ -725,5 +745,12 @@ uint8 Player::GetFakeRace()
     else if (GetNativeDisplayId() == 20580 || GetNativeDisplayId() == 20581)
         return RACE_GNOME;
 
-    return getRace();
+    return GetByteValue(UNIT_FIELD_BYTES_0, 0);
+}
+
+uint8 Unit::getRace() const
+{
+    if (GetTypeId() == TYPEID_PLAYER)
+        return ((Player*)this)->GetFakeRace();
+    return GetByteValue(UNIT_FIELD_BYTES_0, 0);
 }

@@ -1124,7 +1124,7 @@ public:
     uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
     virtual uint32 GetLevelForTarget(Unit const* /*target*/) const { return getLevel(); }
     void SetLevel(uint32 lvl);
-    uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, 0); }
+    virtual uint8 getRace() const;
     uint32 getRaceMask() const { return 1 << (getRace() - 1); }
     uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, 1); }
     uint32 getClassMask() const { return 1 << (getClass() - 1); }
