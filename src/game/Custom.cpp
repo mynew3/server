@@ -32,7 +32,7 @@ void Player::CreatePet(uint32 entry, bool classcheck)
         return;
     }
 
-    CreatureInfo const *cinfo = ObjectMgr::GetCreatureTemplate(entry);
+    CreatureInfo const *cinfo = sObjectMgr.GetCreatureTemplate(entry);
     if (!cinfo)
     {
         SendChatMessage("%s[Mr.Zoo]%s This pet seems to be removed from the database. Please report that creature %u is missing.",MSG_COLOR_MAGENTA,MSG_COLOR_WHITE,entry);
