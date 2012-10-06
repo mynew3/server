@@ -983,6 +983,13 @@ public:
     std::map<uint64, uint32> m_Healers;
     void Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
 
+    std::vector<uint64> m_FakedPlayers;
+    void AddGuidToFakePlayerList(uint64 guid)
+    {
+        m_FakedPlayers.push_back(guid);
+    }
+    virtual void ClearFakePlayerlist();
+
     virtual void CheckCustomVendorRequirements(VendorItem const* crItem, ItemPrototype const* pProto, bool &CanBuy);
     virtual void RemoveCustomVendorRequirements(VendorItem const* crItem);
     bool GetBuyEnabled() { return BuyEnabled; }

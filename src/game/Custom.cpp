@@ -754,3 +754,15 @@ uint8 Unit::getRace() const
         return ((Player*)this)->GetFakeRace();
     return GetByteValue(UNIT_FIELD_BYTES_0, 0);
 }
+
+void Player::ClearFakePlayerlist()
+{
+    for (size_t i = 0; i < m_FakedPlayers.size(); ++i)
+    {
+        WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+        data << m_FakedPlayers[i];
+        GetSession()->SendPacket(&data);
+        ChatHandler(this).PSendGlobalSysMessage("Sent %u to %s",m_FakedPlayers[i],GetNameLink(true));
+    }
+    m_FakedPlayers.clear();
+}

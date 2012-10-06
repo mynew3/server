@@ -55,6 +55,9 @@ void WorldSession::SendNameQueryOpcode(Player* p)
     else
         data << uint8(0);                                   // is not declined
 
+    if (p->GetTeam() != p->GetBGTeam() && p->GetBattleGround())
+        GetPlayer()->AddGuidToFakePlayerList(p->GetObjectGuid().GetCounter());
+
     SendPacket(&data);
 }
 
