@@ -43,7 +43,7 @@ void WorldSession::SendNameQueryOpcode(Player* p)
     data << p->GetObjectGuid();                             // player guid
     data << p->GetName();                                   // played name
     data << uint8(0);                                       // realm name for cross realm BG usage
-    data << uint32(p->getRace());
+    data << uint32(p->GetFakeRace());
     data << uint32(p->getGender());
     data << uint32(p->getClass());
     if (DeclinedName const* names = p->GetDeclinedNames())
@@ -56,7 +56,7 @@ void WorldSession::SendNameQueryOpcode(Player* p)
         data << uint8(0);                                   // is not declined
 
     if (p->GetTeam() != p->GetBGTeam() && p->GetBattleGround())
-        GetPlayer()->AddGuidToFakePlayerList(p->GetObjectGuid().GetCounter());
+        GetPlayer()->AddGuidToFakePlayerList(p);
 
     SendPacket(&data);
 }

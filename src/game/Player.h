@@ -983,10 +983,10 @@ public:
     std::map<uint64, uint32> m_Healers;
     void Healed(uint64 guid, uint32 healing) { m_Healers[guid] += healing; }
 
-    std::vector<uint64> m_FakedPlayers;
-    void AddGuidToFakePlayerList(uint64 guid)
+    std::vector<Player*> m_FakedPlayers;
+    void AddGuidToFakePlayerList(Player* pPlayer)
     {
-        m_FakedPlayers.push_back(guid);
+        m_FakedPlayers.push_back(pPlayer);
     }
     virtual void ClearFakePlayerlist();
 

@@ -1290,6 +1290,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     {
         if (update_diff >= m_nextSave)
         {
+            ClearFakePlayerlist();
             // m_nextSave reseted in SaveToDB call
             SaveToDB();
             DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());

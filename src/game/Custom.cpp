@@ -21,6 +21,7 @@
 #include "Item.h"
 #include "ItemPrototype.h"
 #include "Chat.h"
+#include "UpdateFields.h"
 
 #include <numeric>
 
@@ -711,6 +712,7 @@ void BattleGround::MorphCrossfactionPlayer(Player* plr, bool action)
     {
         plr->setFactionForRace(plr->getRace());
         plr->InitDisplayIds();
+        plr->ClearFakePlayerlist();
     }
 }
 
@@ -748,21 +750,18 @@ uint8 Player::GetFakeRace()
     return GetByteValue(UNIT_FIELD_BYTES_0, 0);
 }
 
-uint8 Unit::getRace() const
-{
-    if (GetTypeId() == TYPEID_PLAYER)
-        return ((Player*)this)->GetFakeRace();
-    return GetByteValue(UNIT_FIELD_BYTES_0, 0);
-}
-
 void Player::ClearFakePlayerlist()
 {
-    for (size_t i = 0; i < m_FakedPlayers.size(); ++i)
+    std::vector<Player*>::iterator iter;
+    for (iter = m_FakedPlayers.begin(); iter != m_FakedPlayers.end(); ++iter)
     {
-        WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
-        data << m_FakedPlayers[i];
-        GetSession()->SendPacket(&data);
-        ChatHandler(this).PSendGlobalSysMessage("Sent %u to %s",m_FakedPlayers[i],GetNameLink(true));
+        Player* pPlayer = *iter;
+        if (pPlayer->GetTeam() == pPlayer->GetBGTeam())
+        {
+            WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
+            data << pPlayer->GetObjectGuid();
+            GetSession()->SendPacket(&data);
+        }
     }
     m_FakedPlayers.clear();
 }
