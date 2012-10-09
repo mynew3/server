@@ -22,6 +22,7 @@
 #include "ItemPrototype.h"
 #include "Chat.h"
 #include "UpdateFields.h"
+#include "ObjectMgr.h"
 
 #include <numeric>
 
