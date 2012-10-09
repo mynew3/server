@@ -23,6 +23,7 @@
 #include "Chat.h"
 #include "UpdateFields.h"
 #include "ObjectMgr.h"
+#include "MapManager.h"
 
 #include <numeric>
 
