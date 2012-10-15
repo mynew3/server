@@ -76,6 +76,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\ScriptDev2__$(Platform)_$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mangosscript</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">mangosscript</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -119,7 +120,7 @@
     <Link>
       <AdditionalDependencies>mangosd.lib;ACE.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)mangosscript.dll</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\..\win\VC90\mangosd__Win32_Release;..\..\..\..\dep\lib\win32_release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\win\VC100\mangosd__Win32_Release;..\..\..\..\dep\lib\win32_release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
