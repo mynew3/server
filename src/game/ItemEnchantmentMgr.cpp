@@ -83,7 +83,7 @@ void LoadRandomEnchantmentsTable()
     else
     {
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
+        //sLog.outErrorDb(">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
     }
 }
 

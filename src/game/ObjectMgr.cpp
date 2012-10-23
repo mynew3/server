@@ -1010,7 +1010,7 @@ void ObjectMgr::LoadCreatureModelRace()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded creature_model_race, table is empty!");
+        //sLog.outErrorDb(">> Loaded creature_model_race, table is empty!");
         return;
     }
 
@@ -1139,7 +1139,7 @@ void ObjectMgr::LoadCreatures()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 creature. DB table `creature` is empty.");
+        //sLog.outErrorDb(">> Loaded 0 creature. DB table `creature` is empty.");
         return;
     }
 
@@ -1344,7 +1344,7 @@ void ObjectMgr::LoadGameObjects()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 gameobjects. DB table `gameobject` is empty.");
+        //sLog.outErrorDb(">> Loaded 0 gameobjects. DB table `gameobject` is empty.");
         return;
     }
 
@@ -1716,7 +1716,7 @@ void ObjectMgr::LoadItemPrototypes()
         }
         else
         {
-            sLog.outErrorDb("Item (Entry: %u) not correct (not listed in list of existing items).", i);
+            //sLog.outErrorDb("Item (Entry: %u) not correct (not listed in list of existing items).", i);
         }
 
         if (proto->Class >= MAX_ITEM_CLASS)
@@ -2174,7 +2174,7 @@ void ObjectMgr::LoadItemRequiredTarget()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 ItemRequiredTarget. DB table `item_required_target` is empty.");
+        //sLog.outErrorDb(">> Loaded 0 ItemRequiredTarget. DB table `item_required_target` is empty.");
         return;
     }
 
@@ -3345,7 +3345,7 @@ void ObjectMgr::LoadQuests()
 
         sLog.outString();
         sLog.outString(">> Loaded 0 quests definitions");
-        sLog.outErrorDb("`quest_template` table is empty!");
+        //sLog.outErrorDb("`quest_template` table is empty!");
         return;
     }
 
@@ -6087,7 +6087,7 @@ void ObjectMgr::LoadReputationRewardRate()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded `reputation_reward_rate`, table is empty!");
+        //sLog.outErrorDb(">> Loaded `reputation_reward_rate`, table is empty!");
         return;
     }
 
@@ -6161,7 +6161,7 @@ void ObjectMgr::LoadReputationOnKill()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 creature award reputation definitions. DB table `creature_onkill_reputation` is empty.");
+        //sLog.outErrorDb(">> Loaded 0 creature award reputation definitions. DB table `creature_onkill_reputation` is empty.");
         return;
     }
 
@@ -6359,7 +6359,7 @@ void ObjectMgr::LoadPointsOfInterest()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
+        //sLog.outErrorDb(">> Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
         return;
     }
 
@@ -6465,7 +6465,7 @@ void ObjectMgr::LoadWeatherZoneChances()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
+        //sLog.outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
         return;
     }
 
@@ -6564,7 +6564,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelationsMap& map, char const* tab
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded 0 quest relations from %s. DB table `%s` is empty.", table, table);
+        //sLog.outErrorDb(">> Loaded 0 quest relations from %s. DB table `%s` is empty.", table, table);
         return;
     }
 
@@ -7115,7 +7115,7 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded `skill_fishing_base_level`, table is empty!");
+        //sLog.outErrorDb(">> Loaded `skill_fishing_base_level`, table is empty!");
         return;
     }
 
@@ -7745,7 +7745,7 @@ void ObjectMgr::LoadGameTele()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded `game_tele`, table is empty!");
+        //sLog.outErrorDb(">> Loaded `game_tele`, table is empty!");
         return;
     }
 
@@ -7878,7 +7878,7 @@ void ObjectMgr::LoadMailLevelRewards()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded `mail_level_reward`, table is empty!");
+        //sLog.outErrorDb(">> Loaded `mail_level_reward`, table is empty!");
         return;
     }
 
@@ -8180,7 +8180,7 @@ void ObjectMgr::LoadNpcGossips()
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded `npc_gossip`, table is empty!");
+        //sLog.outErrorDb(">> Loaded `npc_gossip`, table is empty!");
         return;
     }
 
@@ -8234,7 +8234,7 @@ void ObjectMgr::LoadGossipMenu(std::set<uint32>& gossipScriptSet)
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded gossip_menu, table is empty!");
+        //sLog.outErrorDb(">> Loaded gossip_menu, table is empty!");
         return;
     }
 
@@ -8351,7 +8351,7 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
         bar.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded gossip_menu_option, table is empty!");
+        //sLog.outErrorDb(">> Loaded gossip_menu_option, table is empty!");
         return;
     }
 
