@@ -248,9 +248,6 @@ bool Player::HandlePvPAntifarm(Player* victim)
 
 void Player::CheckCustomVendorRequirements(VendorItem const* crItem, ItemPrototype const* pProto, bool &CanBuy)
 {
-    Item* pItem = Item::CreateItem(pProto->ItemId,1);
-    if (pItem)
-        SendChatMessage("You must type %s.togglebuy%s to buy %s",MSG_COLOR_RED,MSG_COLOR_YELLOW,pItem->GetNameLink(true).c_str());
     if (crItem->ReqArenaRating > GetMaxPersonalArenaRatingRequirement())
     {
         if (crItem->ReqArenaRating > 0 )
@@ -293,7 +290,7 @@ void Player::CheckCustomVendorRequirements(VendorItem const* crItem, ItemPrototy
             CanBuy = false;
         }
     }
-    if (!GetBuyEnabled())
+    if (!GetBuyEnabled() && CanBuy)
     {
         Item* pItem = Item::CreateItem(pProto->ItemId,1);
         if (pItem)
